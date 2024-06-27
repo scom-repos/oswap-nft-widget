@@ -25,7 +25,8 @@
         "@scom/scom-tx-status-modal": "^0.1.0",
         "@scom/scom-storage": "^0.1.2",
         "@scom/oswap-chainlink-contract": "^0.1.1",
-        "@scom/oswap-openswap-contract": "^0.1.2"
+        "@scom/oswap-openswap-contract": "^0.1.2",
+        "@scom/oswap-troll-nft-contract": "0.1.0"
     },
     "devDependencies": {
         "@ijstech/cli": "^0.1.33",
