@@ -1,0 +1,20 @@
+{
+    "name": "@scom/oswap-nft-widget",
+    "type": "widget",
+    "version": "0.1.0",
+    "dependencies": [
+        "@ijstech/components",
+        "@ijstech/eth-wallet",
+        "@scom/scom-token-list",
+        "@scom/scom-network-list",
+        "@scom/scom-network-picker",
+        "@scom/scom-commission-fee-setup",
+        "@scom/scom-tx-status-modal",
+        "@scom/scom-multicall",
+        "@scom/scom-dapp-container",
+        "@scom/scom-wallet-modal",
+        "@scom/oswap-troll-nft-contract",
+        "@scom/oswap-drip-contract",
+        "@scom/scom-commission-proxy-contract"
+    ]
+}
