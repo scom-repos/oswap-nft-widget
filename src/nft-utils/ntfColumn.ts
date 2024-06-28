@@ -1,17 +1,18 @@
 import { Control } from '@ijstech/components';
 import { assets as tokenAssets } from '@scom/scom-token-list';
-import { Wallet } from '@ijstech/eth-wallet';
 import { ITokenObject } from '@scom/scom-token-list';
+import { State } from '../store/index';
 
-export const nftMyRewardsColumns = [
-  {
-    title: 'Token',
-    fieldName: 'token',
-    key: 'token',
-    onRenderCell: (source: Control, token: ITokenObject, rowData: any) => {
-      if (!token) return '';
-      let tokenPath = tokenAssets.tokenPath(token, Wallet.getClientInstance().chainId);
-      return `
+export const nftMyRewardsColumns = (state: State) => {
+  return [
+    {
+      title: 'Token',
+      fieldName: 'token',
+      key: 'token',
+      onRenderCell: (source: Control, token: ITokenObject, rowData: any) => {
+        if (!token) return '';
+        let tokenPath = tokenAssets.tokenPath(token, state.getChainId());
+        return `
         <i-hstack gap="4px" verticalAlignment="center">
           <i-image height="25" width="25" url="${tokenPath}"></i-image>
           <i-label caption="${token.symbol}"></i-label>
@@ -27,41 +28,42 @@ export const nftMyRewardsColumns = [
           </i-hstack>
         </i-vstack>
       `;
+      }
+    },
+    {
+      title: 'Vesting Start Date',
+      fieldName: 'startDate',
+      key: 'startDate',
+      textAlign: 'center' as any
+    },
+    {
+      title: 'Vesting End Date',
+      fieldName: 'endDate',
+      key: 'endDate',
+      textAlign: 'center'
+    },
+    {
+      title: 'Locked Amount',
+      fieldName: 'lockedAmount',
+      key: 'lockedAmount',
+      textAlign: 'right'
+    },
+    {
+      title: 'Claimable Amount',
+      fieldName: 'claimableAmount',
+      key: 'claimableAmount',
+      textAlign: 'right'
+    },
+    {
+      title: '',
+      fieldName: 'claim',
+      key: 'claim',
+      onRenderCell: (source: Control, token: ITokenObject, rowData: any) => {
+        return {} as any
+      }
     }
-  },
-  {
-    title: 'Vesting Start Date',
-    fieldName: 'startDate',
-    key: 'startDate',
-    textAlign: 'center' as any
-  },
-  {
-    title: 'Vesting End Date',
-    fieldName: 'endDate',
-    key: 'endDate',
-    textAlign: 'center'
-  },
-  {
-    title: 'Locked Amount',
-    fieldName: 'lockedAmount',
-    key: 'lockedAmount',
-    textAlign: 'right'
-  },
-  {
-    title: 'Claimable Amount',
-    fieldName: 'claimableAmount',
-    key: 'claimableAmount',
-    textAlign: 'right'
-  },
-  {
-    title: '',
-    fieldName: 'claim',
-    key: 'claim',
-    onRenderCell: (source: Control, token: ITokenObject, rowData: any) => {
-      return {} as any
-    }
-  }
-];
+  ]
+};
 
 export default {
   nftMyRewardsColumns,
