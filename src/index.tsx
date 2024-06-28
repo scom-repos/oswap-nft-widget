@@ -98,6 +98,7 @@ export default class ScomOswapNftWidget extends Module {
   private mdWallet: ScomWalletModal;
   private state: State;
   private chainId: number;
+  private targetChainId: number;
   private approvalModelAction: IERC20ApprovalAction;
 
   private cardRow: Panel;
@@ -511,7 +512,7 @@ export default class ScomOswapNftWidget extends Module {
   }
 
   private myRewardsCols() {
-    let cols = nftMyRewardsColumns;
+    let cols = nftMyRewardsColumns(this.state);
     const self = this;
     cols[cols.length - 1] = {
       title: '',
@@ -520,7 +521,7 @@ export default class ScomOswapNftWidget extends Module {
       onRenderCell: async function (source: Control, data: any, row: any) {
         const panel = await Panel.create();
         const button = await Button.create();
-        button.caption = 'Claim';
+        button.caption = !self.state.isRpcWalletConnected() ? 'Switch Network' : 'Claim';
         button.classList.add('btn-claim', 'btn-os');
         button.onClick = () => self.claimAllRewards(button, row.tokenId);
         panel.appendChild(button);
@@ -565,7 +566,6 @@ export default class ScomOswapNftWidget extends Module {
       const campaignId = this.getAttribute('campaignId', true);
       const commissions = this.getAttribute('commissions', true, []);
       const defaultChainId = this.getAttribute('defaultChainId', true);
-      const defaultInputToken = this.getAttribute('defaultInputToken', true);
       const networks = this.getAttribute('networks', true);
       const wallets = this.getAttribute('wallets', true);
       const showHeader = this.getAttribute('showHeader', true);
@@ -573,7 +573,6 @@ export default class ScomOswapNftWidget extends Module {
         campaignId,
         commissions,
         defaultChainId,
-        defaultInputToken,
         networks,
         wallets,
         showHeader
@@ -776,6 +775,7 @@ export default class ScomOswapNftWidget extends Module {
   }
 
   private renderData() {
+    this.updateButtons();
     switch (this.currentTab) {
       case KEY_TAB.NEW_NFT:
         this.renderCards();
@@ -802,7 +802,7 @@ export default class ScomOswapNftWidget extends Module {
     }
     if (this.myRewardLoading)
       this.myRewardLoading.visible = true;
-    let info = await getOwnRewards(NFT_TYPE.OSWAP);
+    let info = await getOwnRewards(this.state, NFT_TYPE.OSWAP);
     myRewardData = [];
     if (!info || !info.length) {
       this.emptyRewardsMsg.caption = 'No Data';
@@ -826,6 +826,7 @@ export default class ScomOswapNftWidget extends Module {
         claimableAmount: formatNumber(item.unclaimedAmount, 4)
       })
     }
+    this.myRewardTable.columns = this.myRewardsCols();
     this.myRewardTable.data = myRewardData;
     if (this.myRewardTable.pagination)
       this.myRewardTable.pagination.totalPages = Math.ceil(myRewardData.length / 10);
@@ -947,10 +948,15 @@ export default class ScomOswapNftWidget extends Module {
     if (!isWalletConnected()) {
       this.switchNetworkByWallet();
       return;
-    } else if (!this.state.isRpcWalletConnected()) {
-      const chainId = this.state.getChainId();
-      const clientWallet = Wallet.getClientInstance();
-      await clientWallet.switchNetwork(chainId);
+    } else if (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
+      const rpcWallet = this.state.getRpcWallet();
+      if (rpcWallet.chainId != this.targetChainId) {
+        await rpcWallet.switchNetwork(this.targetChainId);
+      }
+      if (!this.state.isRpcWalletConnected()) {
+        const clientWallet = Wallet.getClientInstance();
+        await clientWallet.switchNetwork(this.targetChainId);
+      }
       return;
     }
     if (isMint) {
@@ -960,7 +966,22 @@ export default class ScomOswapNftWidget extends Module {
     }
   }
 
+  private updateButtons() {
+    this.btnClaimAll.caption = !this.state.isRpcWalletConnected() ? 'Switch Network' : 'Claim All';
+    if (this.targetChainId && this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
+      this.btnApprove.caption = 'Switch Network';
+      this.btnBurn.caption = 'Switch Network';
+      this.btnMint.caption = 'Switch Network';
+    } else {
+      this.btnApprove.caption = 'Approve';
+      this.btnBurn.caption = 'Burn';
+      this.btnMint.caption = 'Stake';
+    }
+  }
+
   private async onStake(item: IDataCard) {
+    this.targetChainId = Number(this.state.getChainId());
+    this.updateButtons();
     this.mint.visible = false;
     this.minting.visible = true;
     this.currentDataCard = item;
@@ -977,7 +998,7 @@ export default class ScomOswapNftWidget extends Module {
     let tokenBalances = tokenStore.getTokenBalancesByChainId(this.chainId) || {};
     let tokenBalance = tokenBalances[item.stakeToken.address.toLowerCase()];
     this.lbTokenBalance.caption = formatNumber(tokenBalance, 4);
-    this.ImageMintStakeToken.url = tokenAssets.tokenPath(item.stakeToken, Wallet.getClientInstance().chainId);
+    this.ImageMintStakeToken.url = tokenAssets.tokenPath(item.stakeToken, this.chainId);
     this.lbMintStakeToken.caption = stakeTokenSymbol;
     this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${item.stakeAmount} of ${stakeTokenSymbol}.`;
     this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
@@ -986,6 +1007,12 @@ export default class ScomOswapNftWidget extends Module {
   }
 
   private async claimAllRewards(btn: Button, tokenId?: string) {
+    if (!this.state.isRpcWalletConnected()) {
+      const chainId = this.state.getChainId();
+      const clientWallet = Wallet.getClientInstance();
+      await clientWallet.switchNetwork(chainId);
+      return;
+    }
     showResultMessage(this.txStatusModal, 'warning', 'Claiming');
     const txHashCallback = (err: Error, receipt?: string) => {
       if (err) {
@@ -1027,7 +1054,21 @@ export default class ScomOswapNftWidget extends Module {
     await this.approvalModelAction.doPayAction();
   }
 
-  private clickApprove() {
+  private async clickApprove() {
+    if (!isWalletConnected()) {
+      this.switchNetworkByWallet();
+      return;
+    } else if (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
+      const rpcWallet = this.state.getRpcWallet();
+      if (rpcWallet.chainId != this.targetChainId) {
+        await rpcWallet.switchNetwork(this.targetChainId);
+      }
+      if (!this.state.isRpcWalletConnected()) {
+        const clientWallet = Wallet.getClientInstance();
+        await clientWallet.switchNetwork(this.targetChainId);
+      }
+      return;
+    }
     this.approvalModelAction.doApproveAction(this.currentDataCard.stakeToken, new BigNumber(this.currentDataCard.totalPayAmount).toFixed());
   }
 
@@ -1042,6 +1083,7 @@ export default class ScomOswapNftWidget extends Module {
   }
 
   private handleBurn(item: IDataMyCard) {
+    this.targetChainId = Number(this.state.getChainId());
     this.currentDataMyCard = item;
     this.lbBurnMessage.caption = `By confirmimg the transaction, you will burn NFT and receive ${item.stakeAmountText}`;
     this.ImageBurn.url = item.image;

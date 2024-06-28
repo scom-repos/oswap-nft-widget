@@ -1,4 +1,4 @@
-import { Wallet, BigNumber, Utils, TransactionReceipt } from "@ijstech/eth-wallet";
+import { Wallet, BigNumber, Utils, TransactionReceipt, IWallet } from "@ijstech/eth-wallet";
 import { Contracts as TrollNFTContracts } from '@scom/oswap-troll-nft-contract';
 import { Contracts as DripContracts } from '@scom/oswap-drip-contract';
 import {
@@ -308,8 +308,7 @@ interface IOwnRewards {
   tokenId?: string;
 }
 
-const getRewardInfo = async (address: string, i: number): Promise<IOwnRewards> => {
-  let wallet = Wallet.getClientInstance();
+const getRewardInfo = async (wallet: IWallet, address: string, i: number): Promise<IOwnRewards> => {
   let drip = new DripContracts.Drip(wallet, address);
   let info = await drip.getInfo(i);
   const tokenAddress = (info._token || '').toLocaleLowerCase();
@@ -326,7 +325,7 @@ const getRewardInfo = async (address: string, i: number): Promise<IOwnRewards> =
   }
 }
 
-const getOwnRewards = async (nft: string):
+const getOwnRewards = async (state: State, nft: string):
   Promise<IOwnRewards[]> => {
   switch (nft) {
     case NFT_TYPE.OSWAP:
@@ -334,14 +333,14 @@ const getOwnRewards = async (nft: string):
     default:
       return [];
   }
-  let wallet = Wallet.getClientInstance();
+  let wallet = state.getRpcWallet();
   let chainId = wallet.chainId;
   let address = rewardAddress[chainId];
   if (!address) return [];
-  let ids = await ownRewardIds(address);
+  let ids = await ownRewardIds(wallet, address);
   let infoTasks: Promise<IOwnRewards>[] = [];
   for (let i = 0; i < ids.length; i++) {
-    infoTasks.push(getRewardInfo(address, ids[i].toNumber()));
+    infoTasks.push(getRewardInfo(wallet, address, ids[i].toNumber()));
   }
   let infos = await Promise.all(infoTasks);
   let out: IOwnRewards[] = [];
@@ -371,10 +370,10 @@ const claimMultiple = async () => {
   let chainId = wallet.chainId;
   let address = rewardAddress[chainId];
   if (!address) return null;
-  let ids = await ownRewardIds(address);
+  let ids = await ownRewardIds(wallet, address);
   let task: Promise<IOwnRewards>[] = [];
   for (let i = 0; i < ids.length; i++) {
-    task.push(getRewardInfo(address, ids[i].toNumber()));
+    task.push(getRewardInfo(wallet, address, ids[i].toNumber()));
   }
   let allRewards = await Promise.all(task);
   ids = ids.filter((id, i) => new BigNumber(allRewards[i].unclaimedAmount).gt(0));
@@ -384,8 +383,7 @@ const claimMultiple = async () => {
   return receipt;
 }
 
-async function ownRewardIds(dripAddress: string) {
-  let wallet = Wallet.getClientInstance();
+async function ownRewardIds(wallet: IWallet, dripAddress: string) {
   let drip = new DripContracts.Drip(wallet, dripAddress);
   let rewardCount = (await drip.balanceOf(wallet.address)).toNumber();
   let tasks: Promise<BigNumber>[] = [];
@@ -398,6 +396,7 @@ async function ownRewardIds(dripAddress: string) {
   }
   return await Promise.all(tasks);
 }
+
 
 export {
   getCommissionRate,
