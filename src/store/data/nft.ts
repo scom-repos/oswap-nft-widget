@@ -15,7 +15,7 @@ export interface UserNftInfo {
   image: string;
 }
 
-export interface UserNFTsInfo extends nftInfoStore {
+export interface UserNFTsInfo extends NftInfoStore {
   stakeToken: TokenConstant;
   userNfts: UserNftInfo[];
 }
@@ -93,7 +93,7 @@ export const attributeDistribution: AttributeDistribution = {
   ],
   rarityIndex: 6
 }
-export interface nftInfoStore {
+export interface NftInfoStore {
   chainId: SupportedNetworkId,
   name: OswapNfts,
   address: string,
@@ -108,11 +108,6 @@ export enum SupportedNetworkId {
   bscMain=56,
   bscTest=97,
 }
-export function isSu(n:number){
-  if (n in SupportedNetworkId) {
-    n as SupportedNetworkId
-  }
-}
 
 export const defaultChainId = SupportedNetworkId.bscMain;
 export enum OswapNfts { 
@@ -125,7 +120,7 @@ export const stakeTokenMap: Record<SupportedNetworkId, TokenConstant> = {
   56: {address:"0xb32aC3C79A94aC1eb258f3C830bBDbc676483c93",decimals:18,name:"OpenSwap",symbol:"OSWAP"},
   97: {address:"0x45eee762aaeA4e5ce317471BDa8782724972Ee19",decimals:18,name:"OpenSwap",symbol:"OSWAP"},
 }
-export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, nftInfoStore>> = {
+export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInfoStore>> = {
   56: {
     [OswapNfts.tier1]:{
       chainId: 56,

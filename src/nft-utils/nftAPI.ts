@@ -4,7 +4,7 @@ import { Contracts, Contracts as TrollNFTContracts } from '@scom/oswap-troll-nft
 import {
   trollAPIUrl,
   State,
-  nftInfoStore,
+  NftInfoStore,
   nftInfoStoreMap,
   OswapNfts,
   SupportedNetworkId,
@@ -18,7 +18,7 @@ import { tokenStore } from '@scom/scom-token-list';
 import { ITokenObject } from "@scom/scom-token-list";
 import { ContractUtils as ProxyContractUtils } from '@scom/scom-commission-proxy-contract';
 
-interface nftInfo extends nftInfoStore {
+interface NftInfo extends NftInfoStore {
   minimumStake: BigNumber, // fetch once 
   cap: BigNumber, // fetch once
   totalSupply: BigNumber, // alwasys fetch
@@ -27,6 +27,7 @@ interface nftInfo extends nftInfoStore {
 }
 
 function convToken(t: ITokenObject): TokenConstant {
+  if (!t.address) console.log(`${t.name}`)
   return {
     address: t.address,
     decimals: t.decimals,
@@ -34,20 +35,11 @@ function convToken(t: ITokenObject): TokenConstant {
     symbol: t.symbol,
   }
 }
-function findNftInfoStore(chainId: SupportedNetworkId, nftName: OswapNfts) {
-  let nftInfos = nftInfoStoreMap[chainId];
-  return nftInfos[nftName];
-}
-
-function findNftInfo(chainId: SupportedNetworkId, nftName: OswapNfts) {
-  let nftInfos = nftInfoMap[chainId];
-  return nftInfos[nftName];
-}
 
 function initNftInfo() {
-  let out: Record<SupportedNetworkId, Record<OswapNfts, nftInfo>>;
+  let out: Record<SupportedNetworkId, Record<OswapNfts, NftInfo>>;
   out = mapRecordNumber(nftInfoStoreMap, (nfts, chainId, o1) => {
-    return mapRecord(nfts, (nft, tier, o2): nftInfo => {
+    return mapRecord(nfts, (nft, tier, o2): NftInfo => {
       return {
         ...nft,
         minimumStake: new BigNumber("0"),
@@ -61,13 +53,7 @@ function initNftInfo() {
   return out;
 }
 
-let nftInfoMap: Record<SupportedNetworkId, Record<OswapNfts, nftInfo>> = initNftInfo();
-interface nftInfo extends nftInfoStore {
-  minimumStake: BigNumber, // fetch once 
-  cap: BigNumber, // fetch once
-  totalSupply: BigNumber, // alwasys fetch
-  protocolFee: BigNumber // fetch once
-}
+let nftInfoMap: Record<SupportedNetworkId, Record<OswapNfts, NftInfo>> = initNftInfo();
 
 const getCommissionRate = async (state: State, campaignId: number) => {
   const rpcWallet = state.getRpcWallet();
@@ -126,19 +112,6 @@ const distributeByProbability = (index: BigNumber, base: number, power: number, 
   return output;
 }
 
-const getRarityByMatrix = async (attributes: any, info: any) => {
-  let cumulativeProbability = new BigNumber(1)
-  for (let i = 0; i < attributes.length; i++) {
-    cumulativeProbability = new BigNumber(cumulativeProbability).times(info.attributes.probability[i][attributes[i].minus(1).toFixed()])
-  }
-  for (let j = 0; j < info.attributes.rarityMatrix.length; j++) {
-    if (cumulativeProbability.lte(info.attributes.rarityMatrix[j])) {
-      return info.attributes.rarityMatrix.length - j
-    }
-  }
-  return 0
-}
-
 async function fetchAllNftInfo(state: State){
   const chainId = state.getChainId();
   if (!(chainId in SupportedNetworkId)) throw new Error(`chain id ${chainId} is not suppported`);
@@ -150,7 +123,7 @@ async function fetchAllNftInfo(state: State){
   return nftInfoMap[chainId as SupportedNetworkId];
 }
 
-async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: nftInfo | nftInfoStore): Promise<nftInfo> {
+async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: NftInfo | NftInfoStore): Promise<NftInfo> {
   try {
     if (wallet.chainId !== nftInfo.chainId) throw new Error("chain id do not match");
     let trollNFT = new TrollNFTContracts.TrollNFT(wallet, nftInfo.address);
@@ -161,7 +134,7 @@ async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: nftInfo |
     let protocolFee = await trollNFT.protocolFee();
     //let token = tokenMap[tokenAddress.toLowerCase()];
     let userNfts = await fetchUserNft(state,nftInfo) || [];
-    let out: nftInfo = {
+    let out: NftInfo = {
       ...nftInfo,
       minimumStake,
       cap,
@@ -176,10 +149,10 @@ async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: nftInfo |
   }
 }
 
-async function fetchUserNft(state: State, nftInfo: nftInfo | nftInfoStore):Promise<UserNftInfo[]>  { //only get user nft on current chain
+async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore):Promise<UserNftInfo[]>  { //only get user nft on current chain
   let wallet = state.getRpcWallet();
   let chainId = wallet.chainId;
-  console.log("getUserNFTs", chainId, wallet.address, nftInfo.name);
+  console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
 
   let userNfts: UserNftInfo[] = [];
   const trollAPI = trollAPIUrl[chainId];
@@ -188,7 +161,7 @@ async function fetchUserNft(state: State, nftInfo: nftInfo | nftInfoStore):Promi
   let tier = nftInfo.name;
   let token = nftInfo.token;
 
-  const fetchInfoByDapp = async (info: nftInfo|nftInfoStore, contractAddress: string, token: TokenConstant, i: number) => {
+  const fetchInfoByDapp = async (info: NftInfo|NftInfoStore, contractAddress: string, token: TokenConstant, i: number) => {
     let trollNFT = new Contracts.TrollNFT(wallet, contractAddress);
     let tokenId = (await trollNFT.tokenOfOwnerByIndex({
       owner: wallet.address,
@@ -215,7 +188,7 @@ async function fetchUserNft(state: State, nftInfo: nftInfo | nftInfoStore):Promi
     });
   }
 
-  const fetchInfoByAPI = async (info: nftInfoStore, obj: any, token: TokenConstant) => {
+  const fetchInfoByAPI = async (info: NftInfoStore, obj: any, token: TokenConstant) => {
     let rarity = 0;
     if (obj.attributes) {
       rarity = new BigNumber(obj.attributes[info.attributes.rarityIndex].value).toNumber()
@@ -285,6 +258,7 @@ interface IOwnRewards {
 }
 
 export {
+  NftInfo,
   nftInfoMap,
   getCommissionRate,
   fetchAllNftInfo,
