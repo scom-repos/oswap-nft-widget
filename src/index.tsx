@@ -20,7 +20,6 @@ import { BigNumber, Constants, IERC20ApprovalAction, Wallet } from '@ijstech/eth
 import {
   isWalletConnected,
   State,
-  NFT_TYPE,
   IDataCard,
   IDataMyCard,
 } from './store/index';
@@ -38,7 +37,7 @@ import ScomTxStatusModal from '@scom/scom-tx-status-modal';
 import ScomDappContainer from '@scom/scom-dapp-container'
 import { tokenStore, assets as tokenAssets, ITokenObject } from '@scom/scom-token-list';
 import ScomWalletModal, { IWalletPlugin } from '@scom/scom-wallet-modal';
-import { nftMyRewardsColumns, NftCard, NftMyCard, getTrollCampInfo, getUserNFTs, mintNFT, burnNFT, getOwnRewards, claimMultiple, claimReward, getCommissionRate } from './nft-utils/index';
+import { nftMyRewardsColumns, NftCard, NftMyCard, fetchAllNftInfo, getUserNFTs, mintNFT, burnNFT, getCommissionRate } from './nft-utils/index';
 import { getBuilderSchema, getProjectOwnerSchema } from './formSchema';
 import { nftStyle, listMediaStyles, tabStyle, nftDefaultStyle } from './index.css';
 import configData from './data.json';
@@ -802,7 +801,7 @@ export default class ScomOswapNftWidget extends Module {
     }
     if (this.myRewardLoading)
       this.myRewardLoading.visible = true;
-    let info = await getOwnRewards(this.state, NFT_TYPE.OSWAP);
+    let info = await getOwnRewards(this.state);
     myRewardData = [];
     if (!info || !info.length) {
       this.emptyRewardsMsg.caption = 'No Data';
@@ -835,7 +834,7 @@ export default class ScomOswapNftWidget extends Module {
   }
 
   private async renderCards() {
-    let info = await getTrollCampInfo(this.state, NFT_TYPE.OSWAP);
+    let info = await fetchAllNftInfo(this.state);
     this.dataCards = [];
     if (!info || !info.length) {
       this.renderEmpty(this.cardRow, 'Your very own NFT is getting ready!');
@@ -881,7 +880,7 @@ export default class ScomOswapNftWidget extends Module {
       this.myCardRow.clearInnerHTML();
       this.myNFTsLoading.visible = true;
     }
-    let userNFTs = await getUserNFTs(this.state, NFT_TYPE.OSWAP, Wallet.getClientInstance().address);
+    let userNFTs = await getUserNFTs(this.state, Wallet.getClientInstance().address);
     this.dataMyCards = [];
     this.myCardRow.clearInnerHTML();
     if (userNFTs.length == 0 || userNFTs.every((f: any) => !f.listNFT.length)) {
