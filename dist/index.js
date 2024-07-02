@@ -359,7 +359,7 @@ define("@scom/oswap-nft-widget/data.json.ts", ["require", "exports"], function (
     exports.default = {
         "infuraId": InfuraId,
         "defaultBuilderData": {
-            "defaultChainId": 43113,
+            "defaultChainId": 97,
             "networks": [
                 {
                     "chainId": 43113
@@ -386,13 +386,13 @@ define("@scom/oswap-nft-widget/data.json.ts", ["require", "exports"], function (
                 "isMainChain": true,
                 "isTestnet": true
             },
-            {
-                "chainId": 43113,
-                "isTestnet": true
-            },
-            {
-                "chainId": 43114
-            }
+            // {
+            //   "chainId": 43113,
+            //   "isTestnet": true
+            // },
+            // {
+            //   "chainId": 43114
+            // }
         ]
     };
 });
@@ -409,7 +409,7 @@ define("@scom/oswap-nft-widget/store/data/core.ts", ["require", "exports"], func
 define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/scom-network-list", "@scom/oswap-nft-widget/data.json.ts", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/scom-token-list"], function (require, exports, components_2, eth_wallet_3, scom_network_list_1, data_json_1, core_1, scom_token_list_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getChainNativeToken = exports.truncateAddress = exports.isWalletConnected = exports.getWalletProvider = exports.getTokensDataList = exports.State = exports.getNetworksByType = exports.getNetworkType = exports.NetworkType = exports.WalletPlugin = void 0;
+    exports.mapRecordNumberAwait = exports.mapRecordNumber = exports.mapRecordAwait = exports.mapRecord = exports.forEachRecordIndex = exports.mapRecordIndex = exports.mapIndexNumber = exports.forEachNumberIndex = exports.forEachNumberIndexAwait = exports.getChainNativeToken = exports.truncateAddress = exports.isClientWalletConnected = exports.getWalletProvider = exports.getTokensDataList = exports.State = exports.getNetworksByType = exports.getNetworkType = exports.NetworkType = exports.WalletPlugin = void 0;
     var WalletPlugin;
     (function (WalletPlugin) {
         WalletPlugin["MetaMask"] = "metamask";
@@ -634,11 +634,11 @@ define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech
         return localStorage.getItem('walletProvider') || '';
     }
     exports.getWalletProvider = getWalletProvider;
-    function isWalletConnected() {
+    function isClientWalletConnected() {
         const wallet = eth_wallet_3.Wallet.getClientInstance();
         return wallet.isConnected;
     }
-    exports.isWalletConnected = isWalletConnected;
+    exports.isClientWalletConnected = isClientWalletConnected;
     const truncateAddress = (address) => {
         if (address === undefined || address === null)
             return '';
@@ -649,191 +649,196 @@ define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech
         return scom_token_list_1.ChainNativeTokenByChainId[chainId];
     };
     exports.getChainNativeToken = getChainNativeToken;
+    //custom loop
+    async function forEachNumberIndexAwait(list, callbackFn) {
+        for (const chainId in list) {
+            if (Object.prototype.hasOwnProperty.call(list, chainId)
+                && new eth_wallet_3.BigNumber(chainId).isInteger())
+                await callbackFn(list[chainId], Number(chainId));
+        }
+    }
+    exports.forEachNumberIndexAwait = forEachNumberIndexAwait;
+    function forEachNumberIndex(list, callbackFn) {
+        for (const chainId in list) {
+            if (Object.prototype.hasOwnProperty.call(list, chainId)
+                && new eth_wallet_3.BigNumber(chainId).isInteger())
+                callbackFn(list[chainId], Number(chainId));
+        }
+    }
+    exports.forEachNumberIndex = forEachNumberIndex;
+    function mapIndexNumber(list, callbackFn) {
+        let out = [];
+        for (const chainId in list) {
+            if (Object.prototype.hasOwnProperty.call(list, chainId)
+                && new eth_wallet_3.BigNumber(chainId).isInteger())
+                out.push(callbackFn(list[chainId], Number(chainId)));
+        }
+        return out;
+    }
+    exports.mapIndexNumber = mapIndexNumber;
+    function mapRecordIndex(list, callbackFn) {
+        let out = [];
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                out.push(callbackFn(list[index], index, list));
+        }
+        return out;
+    }
+    exports.mapRecordIndex = mapRecordIndex;
+    function forEachRecordIndex(list, callbackFn) {
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                callbackFn(list[index], index, list);
+        }
+    }
+    exports.forEachRecordIndex = forEachRecordIndex;
+    function mapRecord(list, callbackFn) {
+        let out = {};
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                out[index] = callbackFn(list[index], index, list);
+        }
+        return out;
+    }
+    exports.mapRecord = mapRecord;
+    async function mapRecordAwait(list, callbackFn) {
+        let out = {};
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                out[index] = await callbackFn(list[index], index, list);
+        }
+        return out;
+    }
+    exports.mapRecordAwait = mapRecordAwait;
+    function mapRecordNumber(list, callbackFn) {
+        let out = {};
+        for (const key in list) {
+            if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
+                out[+key] = callbackFn(list[key], +key, list);
+            }
+        }
+        return out;
+    }
+    exports.mapRecordNumber = mapRecordNumber;
+    async function mapRecordNumberAwait(list, callbackFn) {
+        let out = {};
+        for (const key in list) {
+            if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
+                out[+key] = await callbackFn(list[key], +key, list);
+            }
+        }
+        return out;
+    }
+    exports.mapRecordNumberAwait = mapRecordNumberAwait;
 });
 define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.oaxNFTInfo = exports.trollCampInfoMap = exports.attributesDistribution = exports.rewardAddress = exports.trollAPIUrl = exports.NFT_TYPE = void 0;
-    var NFT_TYPE;
-    (function (NFT_TYPE) {
-        NFT_TYPE["OSWAP"] = "oswap";
-        NFT_TYPE["OAX"] = "oax";
-    })(NFT_TYPE || (NFT_TYPE = {}));
-    exports.NFT_TYPE = NFT_TYPE;
-    const trollAPIUrl = {
+    exports.nftInfoStoreMap = exports.stakeTokenMap = exports.OswapNfts = exports.defaultChainId = exports.SupportedNetworkId = exports.attributeDistribution = exports.rewardAddress = exports.trollAPIUrl = void 0;
+    exports.trollAPIUrl = {
         56: 'https://data.openswap.xyz/nft/v1',
         97: 'https://bsc-test-data.openswap.xyz/nft/v1',
-        31337: 'https://amino.openswap.xyz/nft/v1',
-        43113: 'https://bsc-test-data.openswap.xyz/nft/v1' //FIXME
     };
-    exports.trollAPIUrl = trollAPIUrl;
-    const rewardAddress = {
+    exports.rewardAddress = {
         56: '0x37c8207975D5B04cc6c2C2570d91425985cF61Df',
         97: '0x265F91CdFC308275504120E32B6A2B09B066df1a',
     };
-    exports.rewardAddress = rewardAddress;
-    const attributesDistribution = {
-        generalTroll: {
-            base: 10,
-            digits: [3, 3, 3, 3, 3, 3, 3],
-            probability: [
-                [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-                [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-                [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-                [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-                [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-                [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-                [0.5, 0.25, 0.15, 0.09, 0.01]
-            ],
-            rarityIndex: 6
+    exports.attributeDistribution = {
+        base: 10,
+        digits: [3, 3, 3, 3, 3, 3, 3],
+        probability: [
+            [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+            [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+            [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+            [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+            [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+            [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+            [0.5, 0.25, 0.15, 0.09, 0.01]
+        ],
+        rarityIndex: 6
+    };
+    var SupportedNetworkId;
+    (function (SupportedNetworkId) {
+        SupportedNetworkId[SupportedNetworkId["bscMain"] = 56] = "bscMain";
+        SupportedNetworkId[SupportedNetworkId["bscTest"] = 97] = "bscTest";
+    })(SupportedNetworkId = exports.SupportedNetworkId || (exports.SupportedNetworkId = {}));
+    exports.defaultChainId = SupportedNetworkId.bscMain;
+    var OswapNfts;
+    (function (OswapNfts) {
+        OswapNfts["tier1"] = "hungry";
+        OswapNfts["tier2"] = "happy";
+        OswapNfts["tier3"] = "hunny";
+    })(OswapNfts = exports.OswapNfts || (exports.OswapNfts = {}));
+    exports.stakeTokenMap = {
+        56: { address: "0xb32aC3C79A94aC1eb258f3C830bBDbc676483c93", decimals: 18, name: "OpenSwap", symbol: "OSWAP" },
+        97: { address: "0x45eee762aaeA4e5ce317471BDa8782724972Ee19", decimals: 18, name: "OpenSwap", symbol: "OSWAP" },
+    };
+    exports.nftInfoStoreMap = {
+        56: {
+            [OswapNfts.tier1]: {
+                chainId: 56,
+                name: OswapNfts.tier1,
+                address: '0x1254132567549292388cd699Cb78B47d3101c8A9',
+                token: exports.stakeTokenMap[56],
+                rewards: 5,
+                apr: 2,
+                flashSales: 'Periodic',
+                attributes: exports.attributeDistribution
+            },
+            [OswapNfts.tier2]: {
+                chainId: 56,
+                name: OswapNfts.tier2,
+                address: '0x2d74990f55faeA086A83B9fE176FD36a34bA617b',
+                token: exports.stakeTokenMap[56],
+                rewards: 15,
+                apr: 4,
+                flashSales: 'Priority',
+                attributes: exports.attributeDistribution
+            },
+            [OswapNfts.tier3]: {
+                chainId: 56,
+                name: OswapNfts.tier3,
+                address: '0x3E8fb94D9dD7A8f9b2ccF0B4CCdC768628890eeB',
+                token: exports.stakeTokenMap[56],
+                rewards: 40,
+                apr: 6,
+                flashSales: 'Guaranteed',
+                attributes: exports.attributeDistribution
+            },
         },
-        oax: {
-            base: 8,
-            digits: [3, 3, 3, 3, 3],
-            probability: [
-                [0.6, 0.4],
-                [0.7, 0.3],
-                [0.7, 0.2, 0.1],
-                [0.8, 0.2],
-                [0.4, 0.4, 0.2]
-            ],
-            rarityIndex: null,
-            rarityMatrix: [0.002, 0.0051, 0.01, 0.03, 0.1]
-        }
+        97: {
+            [OswapNfts.tier1]: {
+                chainId: 97,
+                name: OswapNfts.tier1,
+                address: '0x946985e7C43Ed2fc7985e89a49A251D52d824122',
+                token: exports.stakeTokenMap[97],
+                rewards: 5,
+                apr: 2,
+                flashSales: 'Periodic',
+                attributes: exports.attributeDistribution
+            },
+            [OswapNfts.tier2]: {
+                chainId: 97,
+                name: OswapNfts.tier2,
+                address: '0x157538c2d508CDb1A6cf48B8336E4e56350A97C8',
+                token: exports.stakeTokenMap[97],
+                rewards: 15,
+                apr: 4,
+                flashSales: 'Priority',
+                attributes: exports.attributeDistribution
+            },
+            [OswapNfts.tier3]: {
+                chainId: 97,
+                name: OswapNfts.tier3,
+                address: '0xB9425ddFB534CA87B73613283F4fB0073B63F31D',
+                token: exports.stakeTokenMap[97],
+                rewards: 40,
+                apr: 6,
+                flashSales: 'Guaranteed',
+                attributes: exports.attributeDistribution
+            },
+        },
     };
-    exports.attributesDistribution = attributesDistribution;
-    const trollCampInfoMap = {
-        // Binance Mainnet
-        56: [
-            {
-                tier: 'hungry',
-                contract: '0x1254132567549292388cd699Cb78B47d3101c8A9',
-                rewards: 5,
-                apr: 2,
-                flashSales: 'Periodic',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'happy',
-                contract: '0x2d74990f55faeA086A83B9fE176FD36a34bA617b',
-                rewards: 15,
-                apr: 4,
-                flashSales: 'Priority',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'hunny',
-                contract: '0x3E8fb94D9dD7A8f9b2ccF0B4CCdC768628890eeB',
-                rewards: 40,
-                apr: 6,
-                flashSales: 'Guaranteed',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'mean',
-                contract: '0x4c934C39a766c8DbcB3F40bD597201d07851ccAa',
-                rewards: 0,
-                apr: 0,
-                flashSales: 'Guaranteed',
-                attributes: attributesDistribution.generalTroll,
-                hide: true
-            }
-        ],
-        // Binance Test Chain
-        97: [
-            {
-                tier: 'hungry',
-                contract: '0x946985e7C43Ed2fc7985e89a49A251D52d824122',
-                rewards: 5,
-                apr: 2,
-                flashSales: 'Periodic',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'happy',
-                contract: '0x157538c2d508CDb1A6cf48B8336E4e56350A97C8',
-                rewards: 15,
-                apr: 4,
-                flashSales: 'Priority',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'hunny',
-                contract: '0xB9425ddFB534CA87B73613283F4fB0073B63F31D',
-                rewards: 40,
-                apr: 6,
-                flashSales: 'Guaranteed',
-                attributes: attributesDistribution.generalTroll
-            },
-        ],
-        31337: [
-            {
-                tier: 'hungry',
-                contract: '0xA887958C66bec5da6a884936c050FeB32D67F4d3',
-                rewards: 5,
-                apr: 2,
-                flashSales: 'Periodic',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'happy',
-                contract: '0x26c5B9cE4ca0792f98ef4B6D9b7a71Af11aA033b',
-                rewards: 15,
-                apr: 4,
-                flashSales: 'Priority',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'hunny',
-                contract: '0x8882aF970E7856127E4f1afa88CF401A22F4d1D1',
-                rewards: 40,
-                apr: 6,
-                flashSales: 'Guaranteed',
-                attributes: attributesDistribution.generalTroll
-            }
-        ],
-        // Contracts without vrf
-        43113: [
-            {
-                tier: 'hungry',
-                contract: '0x390118aa8bde8c63f159a0d032dbdc8bed83ef42',
-                rewards: 5,
-                apr: 2,
-                flashSales: 'Periodic',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'happy',
-                contract: '0x4e616ae82324b519c7d338450e7048024390be32',
-                rewards: 15,
-                apr: 4,
-                flashSales: 'Priority',
-                attributes: attributesDistribution.generalTroll
-            },
-            {
-                tier: 'hunny',
-                contract: '0xc11c7b25e97b85657be6c8c9f057214cf793b536',
-                rewards: 40,
-                apr: 6,
-                flashSales: 'Guaranteed',
-                attributes: attributesDistribution.generalTroll
-            }
-        ]
-    };
-    exports.trollCampInfoMap = trollCampInfoMap;
-    const oaxNFTInfo = {
-        // Binance Mainnet
-        56: [],
-        // Binance Test Chain
-        97: [
-            {
-                contract: '0x47Ee972499dD103fa2Fb101b49a385d8024C1BA9',
-                apr: 10,
-                attributes: attributesDistribution.oax
-            },
-        ],
-    };
-    exports.oaxNFTInfo = oaxNFTInfo;
 });
 define("@scom/oswap-nft-widget/store/data/index.ts", ["require", "exports", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/oswap-nft-widget/store/data/nft.ts"], function (require, exports, core_2, nft_1) {
     "use strict";
@@ -854,7 +859,7 @@ define("@scom/oswap-nft-widget/store/index.ts", ["require", "exports", "@scom/sc
         const tokenMap = scom_token_list_2.tokenStore.getTokenMapByChainId(chainId);
         let ChainNativeToken;
         let tokenObject;
-        if ((0, utils_1.isWalletConnected)()) {
+        if ((0, utils_1.isClientWalletConnected)()) {
             ChainNativeToken = (0, utils_1.getChainNativeToken)(chainId);
             tokenObject = address == ChainNativeToken.symbol ? ChainNativeToken : tokenMap[address.toLowerCase()];
         }
@@ -991,6 +996,27 @@ define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@
                     },
                 },
             },
+            '.os-slider': {
+                position: 'relative',
+                margin: '25px auto',
+                width: '230px',
+                height: '300px',
+                $nest: {
+                    '.wrapper-slider': {
+                        $nest: {
+                            '.slider-arrow:first-child': {
+                                left: '-30px'
+                            },
+                            '.slider-arrow:last-child': {
+                                right: '-30px'
+                            }
+                        }
+                    },
+                    '.slider-arrow': {
+                        position: 'absolute'
+                    }
+                }
+            },
             '.troll-img': {
                 position: 'relative',
                 margin: '25px auto',
@@ -1033,7 +1059,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@
                         textTransform: 'uppercase',
                     },
                     'i-label *': {
-                        color: ' #6f1018',
+                        color: '#6f1018',
                     },
                     '.background img': {
                         padding: '20px 12px 0',
@@ -1080,150 +1106,11 @@ define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@
         },
     });
 });
-define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts"], function (require, exports, components_5, eth_wallet_4, assets_2, index_2, card_css_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.NftCard = void 0;
-    let NftCard = class NftCard extends components_5.Module {
-        constructor(state, parent, options) {
-            super(parent, options);
-            this.clientEvents = [];
-            this.state = state;
-            this.$eventBus = components_5.application.EventBus;
-            this.registerEvent();
-        }
-        onHide() {
-            for (let event of this.clientEvents) {
-                event.unregister();
-            }
-            this.clientEvents = [];
-        }
-        get onStake() {
-            return this._onStake;
-        }
-        set onStake(callback) {
-            this._onStake = callback;
-        }
-        get cardData() {
-            return this._cardData;
-        }
-        set cardData(value) {
-            this._cardData = value;
-            this.pnlSlots.clearInnerHTML();
-            this.pnlSlots.append(this.$render("i-label", { caption: "Available Slots", class: "label" }));
-            let slotText = new eth_wallet_4.BigNumber(value.slot).lt(10) ? ('0' + value.slot) : value.slot;
-            let slotArr = slotText.split('');
-            for (let text of slotArr) {
-                this.pnlSlots.append(this.$render("i-label", { caption: text, class: "box box-left" }));
-            }
-            if (this.stakeAmountText)
-                this.stakeAmountText.caption = value.stakeAmountText;
-            if (this.reward)
-                this.reward.caption = value.rewardsBoost;
-            if (this.monthlyReward)
-                this.monthlyReward.caption = value.monthlyReward;
-            if (this.flashSales)
-                this.flashSales.caption = value.flashSales;
-            function capitalizeFirstLetter(str) {
-                return str.charAt(0).toUpperCase() + str.slice(1);
-            }
-            if (this.trollImage) {
-                const img1 = new components_5.Image();
-                const img2 = new components_5.Image();
-                const img3 = new components_5.Image();
-                const img4 = new components_5.Image();
-                const img5 = new components_5.Image();
-                const trollText = new components_5.Label();
-                const trollType = capitalizeFirstLetter(value.tier);
-                img1.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Skin.svg`);
-                img2.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Horn.svg`);
-                img3.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Mouth.svg`);
-                img4.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Shirt.svg`);
-                img5.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Eyes.svg`);
-                this.trollImage.appendChild(img1);
-                this.trollImage.appendChild(img2);
-                this.trollImage.appendChild(img3);
-                this.trollImage.appendChild(img4);
-                this.trollImage.appendChild(img5);
-                this.trollImage.appendChild(trollText);
-                trollText.caption = `${trollType} BABY TROLL`;
-            }
-            this.updateBtn();
-        }
-        updateBtn() {
-            if (!(0, index_2.isWalletConnected)()) {
-                this.btnHandleStake.caption = 'No Wallet';
-                this.btnHandleStake.enabled = false;
-            }
-            else {
-                const isSoldedOut = this.cardData?.slot == 0;
-                this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
-                this.btnHandleStake.enabled = !isSoldedOut;
-            }
-        }
-        registerEvent() {
-            this.clientEvents.push(this.$eventBus.register(this, "isWalletConnected" /* EventId.IsWalletConnected */, this.updateBtn));
-            this.clientEvents.push(this.$eventBus.register(this, "IsWalletDisconnected" /* EventId.IsWalletDisconnected */, this.updateBtn));
-        }
-        handleStake() {
-            this.onStake();
-        }
-        openLink() {
-            const chainId = this.state.getChainId();
-            this.state.viewOnExplorerByAddress(chainId, this._cardData.address);
-        }
-        async init() {
-            this.classList.add(card_css_1.cardStyle);
-            super.init();
-        }
-        render() {
-            return (this.$render("i-panel", { class: "card-widget" },
-                this.$render("i-panel", { class: "bg-img" },
-                    this.$render("i-panel", { id: "pnlSlots", class: "available-box" },
-                        this.$render("i-label", { caption: "Available Slots", class: "label" }),
-                        this.$render("i-label", { id: "caption1", caption: "0", class: "box box-left" }),
-                        this.$render("i-label", { id: "caption2", caption: "0", class: "box box-right" })),
-                    this.$render("i-panel", { id: "trollImage", class: "troll-img" },
-                        this.$render("i-image", { url: assets_2.default.fullPath('img/nft/Background.svg'), class: "background" }),
-                        this.$render("i-image", { url: assets_2.default.fullPath('img/nft/Frame.svg'), class: "frame" })),
-                    this.$render("i-panel", { class: "section" },
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Stake Amount" })),
-                            this.$render("i-label", { id: "stakeAmountText", caption: "50,000 OSWAP", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Rewards Boost" }),
-                                this.$render("i-icon", { name: "question-circle", fill: "#fff", tooltip: {
-                                        content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
-                                        placement: 'right'
-                                    } })),
-                            this.$render("i-label", { id: "reward", caption: "5%", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Monthly Reward" }),
-                                this.$render("i-icon", { name: "question-circle", fill: "#fff", tooltip: { content: 'The Monthly Reward will be distributed at the end of each month.', placement: 'right' } })),
-                            this.$render("i-label", { id: "monthlyReward", caption: "5%", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Flash Sales Inclusion" })),
-                            this.$render("i-label", { id: "flashSales", caption: "Periodic", class: "value" })),
-                        this.$render("i-button", { id: "btnHandleStake", height: "auto", class: "btn-stake btn-os", caption: "Stake", onClick: this.handleStake }),
-                        this.$render("i-hstack", { horizontalAlignment: "start", verticalAlignment: "center", margin: { top: '0.25rem', bottom: '0.25rem' } },
-                            this.$render("i-label", { caption: "View contract", onClick: this.openLink, margin: { right: '0.5rem' }, class: "text-yellow pointer" }),
-                            this.$render("i-icon", { name: "external-link-alt", onClick: this.openLink, fill: "#f7d063", width: 15, height: 15, class: "text-yellow pointer" }))))));
-        }
-    };
-    NftCard = __decorate([
-        (0, components_5.customElements)('nft-card')
-    ], NftCard);
-    exports.NftCard = NftCard;
-});
-define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_6) {
+define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.myCardStyle = void 0;
-    exports.myCardStyle = components_6.Styles.style({
+    exports.myCardStyle = components_5.Styles.style({
         $nest: {
             '.bg-flip': {
                 backgroundColor: 'transparent',
@@ -1298,7 +1185,7 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
                     'i-label': {
                         $nest: {
                             '*': {
-                                fontSize: '14px',
+                                fontSize: '0.75rem',
                             },
                         },
                     },
@@ -1319,11 +1206,11 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
         },
     });
 });
-define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts"], function (require, exports, components_7, myCard_css_1) {
+define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts"], function (require, exports, components_6, myCard_css_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NftMyCard = void 0;
-    let NftMyCard = class NftMyCard extends components_7.Module {
+    let NftMyCard = class NftMyCard extends components_6.Module {
         constructor(parent, options) {
             super(parent, options);
         }
@@ -1332,45 +1219,48 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
         }
         set cardData(value) {
             this._cardData = value;
-            if (this.stakeAmount)
-                this.stakeAmount.caption = value.stakeAmountText;
-            if (this.reward)
-                this.reward.caption = value.rewardsBoost;
-            if (this.monthlyReward)
-                this.monthlyReward.caption = value.monthlyRewardText;
-            if (this.flashSales)
-                this.flashSales.caption = value.flashSales;
-            if (this.birthday)
-                this.birthday.caption = value.birthday;
-            if (this.rarity) {
-                for (let i = 0; i < value.rarity; i++) {
-                    this.renderStar();
-                }
-            }
-            if (this.trollImage) {
-                const img1 = new components_7.Image();
-                img1.url = value.image;
-                this.trollImage.appendChild(img1);
-            }
+            this.renderCard();
         }
         async renderStar() {
-            let icon = await components_7.Icon.create();
+            let icon = await components_6.Icon.create();
             icon.name = 'star';
             icon.fill = '#fff';
             icon.width = 20;
             icon.height = 20;
             this.rarity.appendChild(icon);
         }
-        get onBurn() {
-            return this._onBurn;
-        }
-        set onBurn(callback) {
-            this._onBurn = callback;
+        async renderCard() {
+            const value = this.cardData;
+            if (!this.stakeAmount.isConnected)
+                await this.stakeAmount.ready();
+            this.stakeAmount.caption = value.stakeAmountText;
+            if (this.reward)
+                await this.reward.ready();
+            this.reward.caption = value.rewardsBoost;
+            if (this.monthlyReward)
+                await this.monthlyReward.ready();
+            this.monthlyReward.caption = value.monthlyRewardText;
+            if (this.flashSales)
+                await this.flashSales.ready();
+            this.flashSales.caption = value.flashSales;
+            if (this.birthday)
+                await this.birthday.ready();
+            this.birthday.caption = value.birthday;
+            if (this.rarity) {
+                for (let i = 0; i < value.rarity; i++) {
+                    this.renderStar();
+                }
+            }
+            if (this.trollImage) {
+                const img1 = new components_6.Image();
+                img1.url = value.image;
+                this.trollImage.appendChild(img1);
+            }
         }
         handleFlipCard(sender, event) {
             const target = event.target;
             if (target.classList.contains('btn-burn') || target.closest('.btn-burn')) {
-                this._onBurn();
+                this.onBurn();
             }
             else {
                 sender.classList.toggle('active');
@@ -1429,112 +1319,235 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
         }
     };
     NftMyCard = __decorate([
-        (0, components_7.customElements)('nft-my-card')
+        (0, components_6.customElements)('nft-my-card')
     ], NftMyCard);
     exports.NftMyCard = NftMyCard;
 });
-define("@scom/oswap-nft-widget/nft-utils/ntfColumn.ts", ["require", "exports", "@scom/scom-token-list", "@ijstech/eth-wallet"], function (require, exports, scom_token_list_3, eth_wallet_5) {
+define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts", "@scom/oswap-nft-widget/nft-utils/myCard.tsx"], function (require, exports, components_7, assets_2, index_2, card_css_1, myCard_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.nftMyRewardsColumns = void 0;
-    exports.nftMyRewardsColumns = [
-        {
-            title: 'Token',
-            fieldName: 'token',
-            key: 'token',
-            onRenderCell: (source, token, rowData) => {
-                if (!token)
-                    return '';
-                let tokenPath = scom_token_list_3.assets.tokenPath(token, eth_wallet_5.Wallet.getClientInstance().chainId);
-                return `
-        <i-hstack gap="4px" verticalAlignment="center">
-          <i-image height="25" width="25" url="${tokenPath}"></i-image>
-          <i-label caption="${token.symbol}"></i-label>
-        </i-hstack>
-        <i-vstack class="render-mobile--item" gap="8px">
-          <i-hstack gap="4px" verticalAlignment="center">
-            <i-label caption="Vesting Start Date:"></i-label>
-            <i-label caption="${rowData.startDate}"></i-label>
-          </i-hstack>
-          <i-hstack gap="4px" verticalAlignment="center" class="custom-min--h">
-            <i-label caption="Locked Amount:"></i-label>
-            <i-label caption="${rowData.lockedAmount}"></i-label>
-          </i-hstack>
-        </i-vstack>
-      `;
+    exports.NftCard = void 0;
+    let NftCard = class NftCard extends components_7.Module {
+        constructor(state, parent, options) {
+            super(parent, options);
+            this.clientEvents = [];
+            this.state = state;
+            this.$eventBus = components_7.application.EventBus;
+            this.registerEvent();
+        }
+        onHide() {
+            for (let event of this.clientEvents) {
+                event.unregister();
             }
-        },
-        {
-            title: 'Vesting Start Date',
-            fieldName: 'startDate',
-            key: 'startDate',
-            textAlign: 'center'
-        },
-        {
-            title: 'Vesting End Date',
-            fieldName: 'endDate',
-            key: 'endDate',
-            textAlign: 'center'
-        },
-        {
-            title: 'Locked Amount',
-            fieldName: 'lockedAmount',
-            key: 'lockedAmount',
-            textAlign: 'right'
-        },
-        {
-            title: 'Claimable Amount',
-            fieldName: 'claimableAmount',
-            key: 'claimableAmount',
-            textAlign: 'right'
-        },
-        {
-            title: '',
-            fieldName: 'claim',
-            key: 'claim',
-            onRenderCell: (source, token, rowData) => {
-                return {};
+            this.clientEvents = [];
+        }
+        get state() {
+            return this._state;
+        }
+        set state(value) {
+            this._state = value;
+        }
+        get cardData() {
+            return this._cardData;
+        }
+        set cardData(value) {
+            this._cardData = value;
+            this.renderCard();
+        }
+        capitalizeFirstLetter(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        async renderCard() {
+            const value = this.cardData;
+            this.trollImage.clearInnerHTML();
+            // this.pnlSlots.clearInnerHTML();
+            // this.pnlSlots.append(<i-label caption="Available Slots" class="label"></i-label>);
+            // let slotText: string = new BigNumber(value.slot).lt(10) ? ('0' + value.slot) : value.slot;
+            // let slotArr = slotText.split('');
+            // for (let text of slotArr) {
+            //   this.pnlSlots.append(<i-label caption={text} class="box box-left"></i-label>);
+            // }
+            const count = value.userNFTs?.length || 0;
+            if (this.stakeAmountText)
+                this.stakeAmountText.caption = value.stakeAmountText;
+            if (this.reward)
+                this.reward.caption = value.rewardsBoost;
+            if (this.monthlyReward)
+                this.monthlyReward.caption = value.monthlyReward;
+            if (this.flashSales)
+                this.flashSales.caption = value.flashSales;
+            if (this.lbCount)
+                this.lbCount.caption = `${count} ${count === 1 ? 'NFT' : 'NFTs'}`;
+            if (count) {
+                if (!this.carouselSlider) {
+                    this.carouselSlider = await components_7.CarouselSlider.create({
+                        width: '100%',
+                        height: '100%',
+                        overflow: 'inherit',
+                        minHeight: 200,
+                        slidesToShow: 1,
+                        transitionSpeed: 600,
+                        items: [],
+                        type: 'arrow'
+                    });
+                }
+                this.trollImage.classList.remove('troll-img');
+                this.trollImage.classList.add('os-slider');
+                this.trollImage.appendChild(this.carouselSlider);
+                const items = [];
+                for (const nft of value.userNFTs) {
+                    const pnl = await components_7.Panel.create({ padding: { left: 5, right: 5 }, margin: { bottom: 0 } });
+                    pnl.classList.add('nft-card-column');
+                    const card = await myCard_1.NftMyCard.create();
+                    pnl.appendChild(card);
+                    card.onBurn = () => this.onBurn(nft);
+                    card.cardData = nft;
+                    items.push(pnl);
+                }
+                this.carouselSlider.items = items.map((item, idx) => {
+                    return {
+                        name: `NFT ${value.tier} ${idx}`,
+                        controls: [item]
+                    };
+                });
+            }
+            else {
+                this.trollImage.classList.add('troll-img');
+                this.trollImage.classList.remove('os-slider');
+                const img1 = new components_7.Image();
+                const img2 = new components_7.Image();
+                const img3 = new components_7.Image();
+                const img4 = new components_7.Image();
+                const img5 = new components_7.Image();
+                const trollText = new components_7.Label();
+                const trollType = this.capitalizeFirstLetter(value.tier);
+                img1.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Skin.svg`);
+                img2.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Horn.svg`);
+                img3.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Mouth.svg`);
+                img4.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Shirt.svg`);
+                img5.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Eyes.svg`);
+                this.trollImage.appendChild(this.$render("i-image", { url: assets_2.default.fullPath('img/nft/Background.svg'), class: "background" }));
+                this.trollImage.appendChild(this.$render("i-image", { url: assets_2.default.fullPath('img/nft/Frame.svg'), class: "frame" }));
+                this.trollImage.appendChild(img1);
+                this.trollImage.appendChild(img2);
+                this.trollImage.appendChild(img3);
+                this.trollImage.appendChild(img4);
+                this.trollImage.appendChild(img5);
+                this.trollImage.appendChild(trollText);
+                trollText.caption = `${trollType} BABY TROLL`;
+            }
+            this.updateBtn();
+        }
+        updateBtn() {
+            if (!(0, index_2.isClientWalletConnected)()) {
+                this.btnHandleStake.caption = 'No Wallet';
+                this.btnHandleStake.enabled = false;
+            }
+            else {
+                const isSoldedOut = this.cardData?.slot == '0';
+                this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
+                this.btnHandleStake.enabled = !isSoldedOut;
             }
         }
-    ];
-    exports.default = {
-        nftMyRewardsColumns: exports.nftMyRewardsColumns,
+        registerEvent() {
+            this.clientEvents.push(this.$eventBus.register(this, "isWalletConnected" /* EventId.IsWalletConnected */, this.updateBtn));
+            this.clientEvents.push(this.$eventBus.register(this, "IsWalletDisconnected" /* EventId.IsWalletDisconnected */, this.updateBtn));
+        }
+        handleStake() {
+            this.onStake();
+        }
+        openLink() {
+            const chainId = this.state.getChainId();
+            this.state.viewOnExplorerByAddress(chainId, this._cardData.address);
+        }
+        async init() {
+            this.classList.add(card_css_1.cardStyle);
+            super.init();
+        }
+        render() {
+            return (this.$render("i-panel", { class: "card-widget" },
+                this.$render("i-panel", { class: "bg-img" },
+                    this.$render("i-panel", { id: "trollImage" }),
+                    this.$render("i-panel", { class: "section" },
+                        this.$render("i-panel", { class: "row-item" },
+                            this.$render("i-panel", { class: "title-icon" },
+                                this.$render("i-label", { caption: "Stake Amount" })),
+                            this.$render("i-label", { id: "stakeAmountText", caption: "50,000 OSWAP", class: "value" })),
+                        this.$render("i-panel", { class: "row-item" },
+                            this.$render("i-panel", { class: "title-icon" },
+                                this.$render("i-label", { caption: "Rewards Boost" }),
+                                this.$render("i-icon", { name: "question-circle", fill: "#fff", tooltip: {
+                                        content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
+                                        placement: 'right'
+                                    } })),
+                            this.$render("i-label", { id: "reward", caption: "5%", class: "value" })),
+                        this.$render("i-panel", { class: "row-item" },
+                            this.$render("i-panel", { class: "title-icon" },
+                                this.$render("i-label", { caption: "Monthly Reward" }),
+                                this.$render("i-icon", { name: "question-circle", fill: "#fff", tooltip: { content: 'The Monthly Reward will be distributed at the end of each month.', placement: 'right' } })),
+                            this.$render("i-label", { id: "monthlyReward", caption: "5%", class: "value" })),
+                        this.$render("i-panel", { class: "row-item" },
+                            this.$render("i-panel", { class: "title-icon" },
+                                this.$render("i-label", { caption: "Flash Sales Inclusion" })),
+                            this.$render("i-label", { id: "flashSales", caption: "Periodic", class: "value" })),
+                        this.$render("i-panel", { class: "row-item" },
+                            this.$render("i-panel", { class: "title-icon" },
+                                this.$render("i-label", { caption: "Owned" })),
+                            this.$render("i-label", { id: "lbCount", caption: "0", class: "value" })),
+                        this.$render("i-button", { id: "btnHandleStake", height: "auto", class: "btn-stake btn-os", caption: "Stake", onClick: this.handleStake }),
+                        this.$render("i-hstack", { horizontalAlignment: "start", verticalAlignment: "center", margin: { top: '0.25rem', bottom: '0.25rem' } },
+                            this.$render("i-label", { caption: "View contract", onClick: this.openLink, margin: { right: '0.5rem' }, class: "text-yellow pointer" }),
+                            this.$render("i-icon", { name: "external-link-alt", onClick: this.openLink, fill: "#f7d063", width: 15, height: 15, class: "text-yellow pointer" }))))));
+        }
     };
+    NftCard = __decorate([
+        (0, components_7.customElements)('nft-card')
+    ], NftCard);
+    exports.NftCard = NftCard;
 });
-define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ijstech/eth-wallet", "@scom/oswap-troll-nft-contract", "@scom/oswap-drip-contract", "@scom/oswap-nft-widget/store/index.ts", "@scom/scom-token-list", "@scom/scom-commission-proxy-contract"], function (require, exports, eth_wallet_6, oswap_troll_nft_contract_1, oswap_drip_contract_1, index_3, scom_token_list_4, scom_commission_proxy_contract_1) {
+define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ijstech/eth-wallet", "@scom/oswap-troll-nft-contract", "@scom/oswap-nft-widget/store/index.ts", "@scom/scom-commission-proxy-contract"], function (require, exports, eth_wallet_4, oswap_troll_nft_contract_1, index_3, scom_commission_proxy_contract_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getNFTObject = exports.claimMultiple = exports.claimReward = exports.getOwnRewards = exports.getUserNFTs = exports.burnNFT = exports.mintNFT = exports.getTrollCampInfo = exports.getCommissionRate = void 0;
+    exports.getNFTObject = exports.burnNFT = exports.mintNFT = exports.fetchAllNftInfo = exports.getCommissionRate = exports.nftInfoMap = void 0;
+    function convToken(t) {
+        if (!t.address)
+            console.log(`${t.name}`);
+        return {
+            address: t.address,
+            decimals: t.decimals,
+            name: t.name,
+            symbol: t.symbol,
+        };
+    }
+    function initNftInfo() {
+        let out;
+        out = (0, index_3.mapRecordNumber)(index_3.nftInfoStoreMap, (nfts, chainId, o1) => {
+            return (0, index_3.mapRecord)(nfts, (nft, tier, o2) => {
+                return {
+                    ...nft,
+                    minimumStake: new eth_wallet_4.BigNumber("0"),
+                    cap: new eth_wallet_4.BigNumber("0"),
+                    totalSupply: new eth_wallet_4.BigNumber("0"),
+                    protocolFee: new eth_wallet_4.BigNumber("0"),
+                    userNfts: [],
+                };
+            });
+        });
+        return out;
+    }
+    let nftInfoMap = initNftInfo();
+    exports.nftInfoMap = nftInfoMap;
     const getCommissionRate = async (state, campaignId) => {
         const rpcWallet = state.getRpcWallet();
         const proxyAddress = state.getProxyAddress();
         await rpcWallet.init();
         let commissionRate = await scom_commission_proxy_contract_1.ContractUtils.getCommissionRate(rpcWallet, proxyAddress, campaignId);
-        return eth_wallet_6.Utils.fromDecimals(commissionRate, 6).toFixed();
+        return eth_wallet_4.Utils.fromDecimals(commissionRate, 6).toFixed();
     };
     exports.getCommissionRate = getCommissionRate;
-    const getCampaign = async (chainId, nftCampaign) => {
-        let trollCampList;
-        let creationABI;
-        let contract;
-        switch (nftCampaign) {
-            case index_3.NFT_TYPE.OSWAP:
-                trollCampList = index_3.trollCampInfoMap[chainId].filter(v => v.hide !== true);
-                creationABI = 'creationTime';
-                contract = oswap_troll_nft_contract_1.Contracts.TrollNFT;
-                return { trollCampList, creationABI, contract };
-            case index_3.NFT_TYPE.OAX:
-                trollCampList = index_3.oaxNFTInfo[chainId];
-                creationABI = 'creationDate';
-                contract = oswap_troll_nft_contract_1.Contracts.TrollNFTV2;
-                return { trollCampList, creationABI, contract };
-            default:
-                throw 'Invalid Campaign';
-        }
-    };
     const getNFTObject = async (trollAPI, nft, tokenId, owner) => {
         try {
-            const wallet = eth_wallet_6.Wallet.getClientInstance();
+            const wallet = eth_wallet_4.Wallet.getClientInstance();
             let param = '';
             if (tokenId) {
                 param = '/' + tokenId;
@@ -1569,207 +1582,134 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     };
     const distributeByProbability = (index, base, power, probability) => {
         let output = '0';
-        let max = new eth_wallet_6.BigNumber(base).pow(power);
+        let max = new eth_wallet_4.BigNumber(base).pow(power);
         let indexRatio = index.div(max);
         let counter = 0;
         for (let i = 0; i < probability.length; i++) {
             counter = counter + probability[i];
-            if (new eth_wallet_6.BigNumber(indexRatio).lt(counter)) {
-                output = new eth_wallet_6.BigNumber(i).plus(1).toFixed();
+            if (new eth_wallet_4.BigNumber(indexRatio).lt(counter)) {
+                output = new eth_wallet_4.BigNumber(i).plus(1).toFixed();
                 break;
             }
         }
         ;
         return output;
     };
-    const getRarityByMatrix = async (attributes, info) => {
-        let cumulativeProbability = new eth_wallet_6.BigNumber(1);
-        for (let i = 0; i < attributes.length; i++) {
-            cumulativeProbability = new eth_wallet_6.BigNumber(cumulativeProbability).times(info.attributes.probability[i][attributes[i].minus(1).toFixed()]);
-        }
-        for (let j = 0; j < info.attributes.rarityMatrix.length; j++) {
-            if (cumulativeProbability.lte(info.attributes.rarityMatrix[j])) {
-                return info.attributes.rarityMatrix.length - j;
-            }
-        }
-        return 0;
-    };
-    const getTrollCampInfo = async (state, nftCampaign) => {
+    async function fetchAllNftInfo(state) {
         const chainId = state.getChainId();
-        let campaignInfo = await getCampaign(chainId, nftCampaign);
-        if (!campaignInfo.trollCampList || campaignInfo.trollCampList.length == 0)
-            return [];
+        if (!(chainId in index_3.SupportedNetworkId))
+            throw new Error(`chain id ${chainId} is not suppported`);
         let wallet = state.getRpcWallet();
-        let trollCamp = [];
-        const tokenMap = scom_token_list_4.tokenStore.getTokenMapByChainId(chainId) || {};
-        const getInfo = async (info, resolve) => {
-            try {
-                let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, info.contract);
-                let minimumStake = await trollNFT.minimumStake();
-                let cap = await trollNFT.cap();
-                let totalSupply = await trollNFT.totalSupply();
-                let tokenAddress = await trollNFT.stakeToken();
-                let protocolFee = await trollNFT.protocolFee();
-                let token = tokenMap[tokenAddress.toLowerCase()];
-                trollCamp.push({
-                    ...info,
-                    token,
-                    minimumStake: minimumStake.shiftedBy(-18).toFixed(),
-                    cap: cap.toFixed(),
-                    available: cap.minus(totalSupply).toFixed(),
-                    protocolFee: protocolFee.shiftedBy(-18).toFixed(),
-                });
-                resolve();
-            }
-            catch (e) {
-                console.log(e);
-            }
-        };
-        let promises = campaignInfo.trollCampList.map((info, index) => {
-            return new Promise(async (resolve, reject) => {
-                getInfo(info, resolve);
-            });
-        });
-        await Promise.all(promises);
-        return trollCamp.sort((a, b) => a.apr - b.apr);
-    };
-    exports.getTrollCampInfo = getTrollCampInfo;
-    const getUserNFTs = async (state, nftCampaign, address) => {
+        nftInfoMap[chainId] = await (0, index_3.mapRecordAwait)(nftInfoMap[chainId], info => fetchNftInfo(state, wallet, info));
+        return nftInfoMap[chainId];
+    }
+    exports.fetchAllNftInfo = fetchAllNftInfo;
+    async function fetchNftInfo(state, wallet, nftInfo) {
+        try {
+            if (wallet.chainId !== nftInfo.chainId)
+                throw new Error("chain id do not match");
+            let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
+            let minimumStake = await trollNFT.minimumStake();
+            let cap = await trollNFT.cap();
+            let totalSupply = await trollNFT.totalSupply();
+            //let tokenAddress = await trollNFT.stakeToken();
+            let protocolFee = await trollNFT.protocolFee();
+            //let token = tokenMap[tokenAddress.toLowerCase()];
+            let userNfts = await fetchUserNft(state, nftInfo) || [];
+            let out = {
+                ...nftInfo,
+                minimumStake,
+                cap,
+                totalSupply,
+                protocolFee,
+                userNfts,
+            };
+            nftInfoMap[nftInfo.chainId][out.name] = out;
+            return out;
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+    async function fetchUserNft(state, nftInfo) {
+        if (!(0, index_3.isClientWalletConnected)())
+            return [];
         let wallet = state.getRpcWallet();
         let chainId = wallet.chainId;
-        let campaignInfo = await getCampaign(chainId, nftCampaign);
-        if (!campaignInfo.trollCampList || campaignInfo.trollCampList.length == 0)
-            return [];
-        let trollNFTContract = campaignInfo.contract;
-        let userNFT = [];
-        const tokenMap = scom_token_list_4.tokenStore.getTokenMapByChainId(chainId) || {};
-        const getInfo = async (info, resolve) => {
-            try {
-                let contractAddress = info.contract;
-                let trollNFT = new trollNFTContract(wallet, contractAddress);
-                let tier = info.tier;
-                let allObj = {};
-                let tokenAddress = await trollNFT.stakeToken();
-                let token = tokenMap[tokenAddress.toLowerCase()];
-                let promises = [];
-                let listNFT = [];
-                switch (nftCampaign) {
-                    case index_3.NFT_TYPE.OSWAP:
-                        allObj = await getNFTObject(trollAPI, `${tier}-troll`, undefined, address);
-                        break;
-                    case index_3.NFT_TYPE.OAX:
-                        allObj = await getNFTObject(trollAPI, 'oax', undefined, address);
-                        break;
-                }
-                let balance = (await trollNFT.balanceOf(address)).toNumber();
-                if (!allObj.length || allObj.length != balance) { //API Fail: The count is difference right after mint/burn
-                    if (balance > 0) {
-                        for (let i = 0; i < balance; i++) {
-                            promises.push(getInfoByDapp(info, contractAddress, token, listNFT, i));
-                        }
-                    }
-                }
-                else { //API success
-                    if (allObj.length > 0) {
-                        for (let i = 0; i < allObj.length; i++) {
-                            promises.push(getInfoByAPI(info, allObj[i], token, listNFT));
-                        }
-                    }
-                }
-                await Promise.all(promises);
-                userNFT.push({
-                    ...info,
-                    stakeToken: token,
-                    listNFT
-                });
-                resolve();
-            }
-            catch {
-            }
-        };
-        const getInfoByDapp = async (info, contractAddress, token, listNFT, i) => {
-            let trollNFT = new trollNFTContract(wallet, contractAddress);
-            let tokenID = (await trollNFT.tokenOfOwnerByIndex({
-                owner: address,
+        console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
+        let userNfts = [];
+        const trollAPI = index_3.trollAPIUrl[chainId];
+        let nftContract = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
+        let tier = nftInfo.name;
+        let token = nftInfo.token;
+        const fetchInfoByDapp = async (info, contractAddress, token, i) => {
+            let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, contractAddress);
+            let tokenId = (await trollNFT.tokenOfOwnerByIndex({
+                owner: wallet.address,
                 index: i
             })).toNumber();
-            let stakingBalance = (await trollNFT.stakingBalance(tokenID)).toFixed();
+            let stakingBalance = (await trollNFT.stakingBalance(tokenId)).toFixed();
             let birthday;
-            if (trollNFT instanceof oswap_troll_nft_contract_1.Contracts.TrollNFTV2) {
-                birthday = (await trollNFT.creationDate(tokenID)).toNumber();
-            }
-            else {
-                birthday = (await trollNFT.creationTime(tokenID)).toNumber();
-            }
-            let attributes = await getAttributes2(trollNFT, tokenID, info.attributes.base, info.attributes.digits, info.attributes.probability);
+            birthday = (await trollNFT.creationTime(tokenId)).toNumber();
+            let attributes = await getAttributes2(trollNFT, tokenId, info.attributes.base, info.attributes.digits, info.attributes.probability);
             let rarity = 0;
             if (!rarity && attributes) {
-                if (info.attributes.rarityIndex) {
-                    rarity = new eth_wallet_6.BigNumber(attributes[info.attributes.rarityIndex]).toNumber();
-                }
-                else if (info.attributes.rarityMatrix) {
-                    rarity = await getRarityByMatrix(attributes, info);
-                }
+                rarity = new eth_wallet_4.BigNumber(attributes[info.attributes.rarityIndex]).toNumber();
             }
-            let obj;
-            switch (nftCampaign) {
-                case index_3.NFT_TYPE.OSWAP:
-                    obj = await getNFTObject(trollAPI, `${info.tier}-troll`, tokenID);
-                    break;
-                case index_3.NFT_TYPE.OAX:
-                    obj = await getNFTObject(trollAPI, 'oax', tokenID);
-                    break;
-            }
-            listNFT.push({
-                token,
-                tokenID,
-                stakingBalance: eth_wallet_6.Utils.fromDecimals(stakingBalance, token.decimals).toFixed(),
+            let obj = await getNFTObject(trollAPI, `${info.name}-troll`, tokenId);
+            userNfts.push({
+                tokenId,
+                stakeBalance: eth_wallet_4.Utils.fromDecimals(stakingBalance, token.decimals).toFixed(),
                 attributes,
                 rarity,
                 birthday,
                 image: obj.image ? obj.image : undefined,
             });
         };
-        const getInfoByAPI = async (info, obj, token, listNFT) => {
+        const fetchInfoByAPI = async (info, obj, token) => {
             let rarity = 0;
-            if (nftCampaign == index_3.NFT_TYPE.OSWAP) {
-                if (obj.attributes) {
-                    rarity = new eth_wallet_6.BigNumber(obj.attributes[info.attributes.rarityIndex].value).toNumber();
-                }
-                else if (obj.attritubes) { //handle the spelling problem on api temporarily
-                    rarity = new eth_wallet_6.BigNumber(obj.attritubes[info.attributes.rarityIndex].value).toNumber();
-                }
+            if (obj.attributes) {
+                rarity = new eth_wallet_4.BigNumber(obj.attributes[info.attributes.rarityIndex].value).toNumber();
             }
-            else {
-                rarity = obj.rarity;
+            else if (obj.attritubes) { //handle the spelling problem on api temporarily
+                rarity = new eth_wallet_4.BigNumber(obj.attritubes[info.attributes.rarityIndex].value).toNumber();
             }
-            let stakingBalance = obj.staking_balance ? eth_wallet_6.Utils.fromDecimals(obj.staking_balance, token.decimals).toFixed() : '0';
-            listNFT.push({
-                token,
-                tokenID: obj.id,
-                stakingBalance,
+            let stakeBalance = obj.staking_balance ? eth_wallet_4.Utils.fromDecimals(obj.staking_balance, token.decimals).toFixed() : '0';
+            userNfts.push({
+                tokenId: obj.id,
+                stakeBalance,
                 attributes: obj.attritubes,
                 rarity,
                 birthday: obj.creation_time,
                 image: obj.image,
             });
         };
-        const trollAPI = index_3.trollAPIUrl[chainId];
-        let promises = campaignInfo.trollCampList.map((info, index) => {
-            return new Promise(async (resolve, reject) => {
-                await getInfo(info, resolve);
-            });
-        });
+        let promises = [];
+        let AllUserNftByApi = await getNFTObject(trollAPI, `${tier}-troll`, undefined, wallet.address);
+        let userOwnNftCount = (await nftContract.balanceOf(wallet.address)).toNumber();
+        if (!AllUserNftByApi.length || AllUserNftByApi.length != userOwnNftCount) { //API Fail: The count is difference right after mint/burn
+            if (userOwnNftCount > 0) {
+                for (let i = 0; i < userOwnNftCount; i++) {
+                    promises.push(fetchInfoByDapp(nftInfo, nftInfo.address, token, i));
+                }
+            }
+        }
+        else { //API success
+            if (AllUserNftByApi.length > 0) {
+                for (let i = 0; i < AllUserNftByApi.length; i++) {
+                    promises.push(fetchInfoByAPI(nftInfo, AllUserNftByApi[i], token));
+                }
+            }
+        }
         await Promise.all(promises);
-        return userNFT;
-    };
-    exports.getUserNFTs = getUserNFTs;
+        return userNfts;
+    }
     const mintNFT = async (contractAddress, token, amount) => {
         let receipt;
         try {
-            let wallet = eth_wallet_6.Wallet.getClientInstance();
+            let wallet = eth_wallet_4.Wallet.getClientInstance();
             let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, contractAddress);
-            let tokenAmount = eth_wallet_6.Utils.toDecimals(amount, token.decimals);
+            let tokenAmount = eth_wallet_4.Utils.toDecimals(amount, token.decimals);
             receipt = await trollNFT.stake(tokenAmount);
         }
         catch { }
@@ -1777,119 +1717,23 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     };
     exports.mintNFT = mintNFT;
     const burnNFT = async (contractAddress, tokenID) => {
-        let wallet = eth_wallet_6.Wallet.getClientInstance();
+        let wallet = eth_wallet_4.Wallet.getClientInstance();
         let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, contractAddress);
         let receipt = await trollNFT.unstake(tokenID);
         return receipt;
     };
     exports.burnNFT = burnNFT;
-    const getRewardInfo = async (address, i) => {
-        let wallet = eth_wallet_6.Wallet.getClientInstance();
-        let drip = new oswap_drip_contract_1.Contracts.Drip(wallet, address);
-        let info = await drip.getInfo(i);
-        const tokenAddress = (info._token || '').toLocaleLowerCase();
-        let tokenMap = scom_token_list_4.tokenStore.getTokenMapByChainId(wallet.chainId) || {};
-        const tokenObj = tokenMap[tokenAddress];
-        const tokenDecimals = tokenObj.decimals || 18;
-        return {
-            token: tokenObj,
-            startDate: new eth_wallet_6.BigNumber(info._startDate).shiftedBy(3).toNumber(),
-            endDate: new eth_wallet_6.BigNumber(info._endDate).shiftedBy(3).toNumber(),
-            claimedAmount: new eth_wallet_6.BigNumber(info._claimedAmount).shiftedBy(-tokenDecimals).toFixed(),
-            unclaimedAmount: new eth_wallet_6.BigNumber(info._unclaimedFunds).shiftedBy(-tokenDecimals).toFixed(),
-            totalAmount: new eth_wallet_6.BigNumber(info._totalAmount).shiftedBy(-tokenDecimals).toFixed(),
-        };
-    };
-    const getOwnRewards = async (nft) => {
-        switch (nft) {
-            case index_3.NFT_TYPE.OSWAP:
-                break;
-            default:
-                return [];
-        }
-        let wallet = eth_wallet_6.Wallet.getClientInstance();
-        let chainId = wallet.chainId;
-        let address = index_3.rewardAddress[chainId];
-        if (!address)
-            return [];
-        let ids = await ownRewardIds(address);
-        let infoTasks = [];
-        for (let i = 0; i < ids.length; i++) {
-            infoTasks.push(getRewardInfo(address, ids[i].toNumber()));
-        }
-        let infos = await Promise.all(infoTasks);
-        let out = [];
-        infos.forEach((info, index) => {
-            out.push({
-                tokenId: ids[index].toString(),
-                ...info
-            });
-        });
-        return out;
-    };
-    exports.getOwnRewards = getOwnRewards;
-    const claimReward = async (tokenId) => {
-        let wallet = eth_wallet_6.Wallet.getClientInstance();
-        let chainId = wallet.chainId;
-        let address = index_3.rewardAddress[chainId];
-        let receipt;
-        if (tokenId && address) {
-            let drip = new oswap_drip_contract_1.Contracts.Drip(wallet, address);
-            receipt = await drip.claim(new eth_wallet_6.BigNumber(tokenId));
-        }
-        return receipt;
-    };
-    exports.claimReward = claimReward;
-    const claimMultiple = async () => {
-        let wallet = eth_wallet_6.Wallet.getClientInstance();
-        let chainId = wallet.chainId;
-        let address = index_3.rewardAddress[chainId];
-        if (!address)
-            return null;
-        let ids = await ownRewardIds(address);
-        let task = [];
-        for (let i = 0; i < ids.length; i++) {
-            task.push(getRewardInfo(address, ids[i].toNumber()));
-        }
-        let allRewards = await Promise.all(task);
-        ids = ids.filter((id, i) => new eth_wallet_6.BigNumber(allRewards[i].unclaimedAmount).gt(0));
-        if (ids.length <= 0)
-            return null;
-        let drip = new oswap_drip_contract_1.Contracts.Drip(wallet, address);
-        let receipt = await drip.claimMultiple(ids);
-        return receipt;
-    };
-    exports.claimMultiple = claimMultiple;
-    async function ownRewardIds(dripAddress) {
-        let wallet = eth_wallet_6.Wallet.getClientInstance();
-        let drip = new oswap_drip_contract_1.Contracts.Drip(wallet, dripAddress);
-        let rewardCount = (await drip.balanceOf(wallet.address)).toNumber();
-        let tasks = [];
-        for (let i = 0; i < rewardCount; i++) {
-            let task = drip.tokenOfOwnerByIndex({
-                owner: wallet.address,
-                index: i
-            });
-            tasks.push(task);
-        }
-        return await Promise.all(tasks);
-    }
 });
-define("@scom/oswap-nft-widget/nft-utils/index.ts", ["require", "exports", "@scom/oswap-nft-widget/nft-utils/card.tsx", "@scom/oswap-nft-widget/nft-utils/myCard.tsx", "@scom/oswap-nft-widget/nft-utils/ntfColumn.ts", "@scom/oswap-nft-widget/nft-utils/nftAPI.ts"], function (require, exports, card_1, myCard_1, ntfColumn_1, nftAPI_1) {
+define("@scom/oswap-nft-widget/nft-utils/index.ts", ["require", "exports", "@scom/oswap-nft-widget/nft-utils/card.tsx", "@scom/oswap-nft-widget/nft-utils/myCard.tsx", "@scom/oswap-nft-widget/nft-utils/nftAPI.ts"], function (require, exports, card_1, myCard_2, nftAPI_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getNFTObject = exports.claimMultiple = exports.claimReward = exports.getOwnRewards = exports.getUserNFTs = exports.burnNFT = exports.mintNFT = exports.getTrollCampInfo = exports.getCommissionRate = exports.nftMyRewardsColumns = exports.NftMyCard = exports.NftCard = void 0;
+    exports.getNFTObject = exports.burnNFT = exports.mintNFT = exports.fetchAllNftInfo = exports.getCommissionRate = exports.NftMyCard = exports.NftCard = void 0;
     Object.defineProperty(exports, "NftCard", { enumerable: true, get: function () { return card_1.NftCard; } });
-    Object.defineProperty(exports, "NftMyCard", { enumerable: true, get: function () { return myCard_1.NftMyCard; } });
-    Object.defineProperty(exports, "nftMyRewardsColumns", { enumerable: true, get: function () { return ntfColumn_1.nftMyRewardsColumns; } });
+    Object.defineProperty(exports, "NftMyCard", { enumerable: true, get: function () { return myCard_2.NftMyCard; } });
     Object.defineProperty(exports, "getCommissionRate", { enumerable: true, get: function () { return nftAPI_1.getCommissionRate; } });
-    Object.defineProperty(exports, "getTrollCampInfo", { enumerable: true, get: function () { return nftAPI_1.getTrollCampInfo; } });
+    Object.defineProperty(exports, "fetchAllNftInfo", { enumerable: true, get: function () { return nftAPI_1.fetchAllNftInfo; } });
     Object.defineProperty(exports, "mintNFT", { enumerable: true, get: function () { return nftAPI_1.mintNFT; } });
     Object.defineProperty(exports, "burnNFT", { enumerable: true, get: function () { return nftAPI_1.burnNFT; } });
-    Object.defineProperty(exports, "getUserNFTs", { enumerable: true, get: function () { return nftAPI_1.getUserNFTs; } });
-    Object.defineProperty(exports, "getOwnRewards", { enumerable: true, get: function () { return nftAPI_1.getOwnRewards; } });
-    Object.defineProperty(exports, "claimReward", { enumerable: true, get: function () { return nftAPI_1.claimReward; } });
-    Object.defineProperty(exports, "claimMultiple", { enumerable: true, get: function () { return nftAPI_1.claimMultiple; } });
     Object.defineProperty(exports, "getNFTObject", { enumerable: true, get: function () { return nftAPI_1.getNFTObject; } });
 });
 define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/scom-network-picker", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, scom_network_picker_1, data_json_2) {
@@ -2175,127 +2019,17 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
 define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_8, assets_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.listMediaStyles = exports.nftStyle_375 = exports.nftStyle_480 = exports.nftStyle_525 = exports.nftStyle_767 = exports.nftStyle_1100 = exports.nftDefaultStyle = exports.tabStyle = exports.nftStyle = void 0;
-    const Theme = components_8.Styles.Theme.ThemeVars;
+    exports.listMediaStyles = exports.nftStyle_360 = exports.nftStyle_480 = exports.nftStyle_767 = exports.nftStyle_1100 = exports.nftDefaultStyle = exports.nftStyle = void 0;
     exports.nftStyle = components_8.Styles.style({
-        flex: '1 1 0% !important',
-        height: '100%',
-        minHeight: '100vh',
-        overflow: 'auto',
-        overflowX: 'hidden',
+        minHeight: '600px',
         paddingTop: '1rem',
         $nest: {
-            'i-combo-box': {
-                color: '#fff',
-                $nest: {
-                    '.item-list': {
-                        background: '#1f1e4f',
-                        $nest: {
-                            'i-combo-box > .item-list > ul > li.matched, i-combo-box > .item-list > ul > li:hover': {
-                                background: '#252a48'
-                            },
-                            'ul': {
-                                overflow: 'unset',
-                                maxHeight: 'fit-content',
-                                fontSize: '14px',
-                                textAlign: 'left'
-                            }
-                        }
-                    },
-                    'input': {
-                        width: '100%',
-                        color: '#fff',
-                        background: '#1f1e4f',
-                        border: 'none',
-                        paddingLeft: '15px'
-                    },
-                    'input:focus-visible': {
-                        outline: 'none'
-                    },
-                    '.icon-btn': {
-                        display: 'flex',
-                        alignItems: 'center',
-                        background: '#1f1e4f',
-                        color: '#fff',
-                        width: 'auto !important',
-                        borderRadius: '0 12px 12px 0'
-                    },
-                    '.selection': {
-                        background: '#1f1e4f',
-                        padding: 0,
-                        borderRadius: '12px 0 0 12px',
-                        border: 'none'
-                    }
-                }
-            },
-            'i-pagination': {
-                marginBottom: '1.5rem',
-                $nest: {
-                    '.paginate_button': {
-                        backgroundColor: 'rgb(12, 18, 52)',
-                        border: '1px solid #f15e61',
-                        color: '#f7d064',
-                        padding: '4px 16px',
-                        $nest: {
-                            '&.active': {
-                                backgroundColor: '#d05271',
-                                border: '1px solid #d05271',
-                                color: '#fff',
-                            },
-                        },
-                    },
-                },
-            },
-            '#myRewardTable': {
-                $nest: {
-                    'thead tr th': {
-                        borderTop: '1px solid #f7d063',
-                        borderBottom: '1px solid #f7d063',
-                    },
-                    'thead tr th:first-child': {
-                        borderLeft: '1px solid #f7d063',
-                        borderRadius: '12px 0 0 0',
-                    },
-                    'thead tr th:last-child': {
-                        borderRadius: '0 12px 0 0',
-                        borderRight: '1px solid #f7d063',
-                    },
-                    'tbody tr td': {
-                        borderBottom: '1px solid #f7d063',
-                        textAlign: 'center'
-                    },
-                    'tbody tr td:first-child': {
-                        borderLeft: '1px solid #f7d063',
-                    },
-                    'tbody tr td:last-child': {
-                        borderRight: '1px solid #f7d063',
-                    },
-                    'tbody tr:last-child td:first-child': {
-                        borderRadius: ' 0 0 0 12px',
-                    },
-                    'tbody tr:last-child td:last-child': {
-                        borderRadius: ' 0 0 12px 0',
-                    }
-                }
-            },
             '*': {
                 boxSizing: 'border-box',
             },
             '.widget': {
                 position: 'relative',
                 width: '100%',
-            },
-            '.btn-claim': {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0.35rem 0.5rem',
-                fontWeight: 'bold',
-                $nest: {
-                    'i-icon': {
-                        marginRight: '0.25rem',
-                    },
-                },
             },
             '.i-loading--active': {
                 marginTop: '2rem',
@@ -2308,25 +2042,11 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
                     },
                 },
             },
-            '.box-description': {
-                color: '#fff',
-                background: 'rgba(255, 255, 255, 0.2)',
-                margin: '1rem 0 0',
-                padding: '1rem 1.5rem',
-                borderRadius: '12px',
-                $nest: {
-                    'i-label': {
-                        $nest: {
-                            '*': {
-                                fontSize: '1rem',
-                            },
-                        },
-                    },
-                },
-            },
             '.current-nft': {
-                position: 'absolute',
-                right: 'calc(1rem - 5px)',
+                // position: 'absolute',
+                // right: 'calc(1rem - 5px)',
+                width: 'fit-content',
+                margin: '0 auto 20px',
                 display: 'block',
                 borderRadius: '12px',
                 background: '#252a48',
@@ -2403,59 +2123,6 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
                 height: '100%',
                 padding: '1rem',
             },
-            '.troll-img': {
-                position: 'relative',
-                margin: '25px auto',
-                width: '220px',
-                height: '300px',
-                $nest: {
-                    'i-image': {
-                        position: 'absolute',
-                        $nest: {
-                            img: {
-                                width: '100%',
-                            },
-                        },
-                    },
-                    '.coffin': {
-                        top: '-50px',
-                        left: '-50px',
-                    },
-                    '.death': {
-                        filter: 'grayscale(100%)',
-                        $nest: {
-                            '&:hover': {
-                                filter: 'inherit',
-                            }
-                        },
-                    },
-                    'i-label': {
-                        position: 'absolute',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        top: '81.5%',
-                        padding: '0 25%',
-                        fontWeight: 700,
-                        letterSpacing: 0,
-                        color: '#6f1018',
-                        textAlign: 'center',
-                        width: '100%',
-                        height: '40px',
-                        textTransform: 'uppercase',
-                    },
-                    'i-label *': {
-                        color: ' #6f1018',
-                    },
-                    '.background img': {
-                        padding: '20px 12px 0',
-                    },
-                    '.frame': {
-                        height: '100%',
-                        left: '-2px',
-                    },
-                },
-            },
             '.btn-stake': {
                 marginTop: '1.5rem',
                 width: '100%',
@@ -2514,71 +2181,10 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
                 fontSize: '1.2rem'
             },
             '.note-burn *': {
-                fontSize: '1.4rem',
+                fontSize: '1.25rem',
                 fontWeight: 'bold',
                 color: '#f7d063',
             },
-            '.render-mobile--item': {
-                display: 'none',
-                marginTop: '1rem',
-            }
-        }
-    });
-    exports.tabStyle = components_8.Styles.style({
-        $nest: {
-            '.tabs-nav-wrap': {
-                marginBottom: '2rem',
-                background: 'transparent',
-                $nest: {
-                    '.tabs-nav': {
-                        gap: '0 !important',
-                        border: 'none',
-                        flexWrap: 'wrap',
-                        width: '100%',
-                        maxWidth: 'calc(100% - 175px)',
-                    },
-                    'i-tab': {
-                        minWidth: '33.33%',
-                        // background: Theme.background.default,
-                        padding: '9px 16px',
-                        display: 'flex',
-                        alignSelf: 'center',
-                        cursor: 'pointer',
-                        position: 'relative',
-                        background: "transparent",
-                        marginBottom: '0px',
-                        border: "none",
-                        borderBottom: '4px solid transparent',
-                        $nest: {
-                            'i-label *': {
-                                fontSize: '1.3125rem',
-                                fontWeight: 700,
-                                marginLeft: '7px',
-                                display: 'inline-block'
-                            },
-                            '&::after': {
-                                position: 'absolute',
-                                bottom: '-1px',
-                                width: '100%',
-                                borderBottomColor: Theme.colors.warning.main + ' !important',
-                                borderBottomWidth: '4px !important',
-                                left: 0,
-                            },
-                            '.tab-item': {
-                                fontFamily: Theme.typography.fontFamily,
-                            },
-                        },
-                    },
-                    'i-tab:not(.disabled).active': {
-                        // background: Theme.background.gradient
-                        backgroundColor: 'transparent',
-                        borderBottom: '4px solid #e2c05e',
-                    },
-                    '.tab-item': {
-                        margin: 'auto'
-                    }
-                }
-            }
         }
     });
     exports.nftDefaultStyle = components_8.Styles.style({
@@ -2599,62 +2205,6 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
         $nest: {
             '.custom-card-column, .new-card-column': {
                 margin: '0 auto 1.5rem'
-            },
-            '.mobile-hidden': {
-                display: 'none !important'
-            },
-            '.render-mobile--item': {
-                display: 'flex',
-                $nest: {
-                    'i-label': {
-                        whiteSpace: 'nowrap',
-                        textAlign: 'left',
-                        lineHeight: '1rem'
-                    },
-                    'i-label *': {
-                        fontSize: '0.8rem'
-                    },
-                    '.custom-min--h': {
-                        minHeight: '32px'
-                    }
-                }
-            }
-        }
-    });
-    exports.nftStyle_525 = components_8.Styles.style({
-        $nest: {
-            '.current-nft': {
-                position: 'relative',
-                maxWidth: '12.5rem',
-                right: 0,
-                top: 0,
-                margin: '1rem auto',
-                textAlign: 'center'
-            },
-            '.nft-tabs .tabs-nav': {
-                maxWidth: '100%',
-                $nest: {
-                    'i-tab': {
-                        width: 'max-content',
-                        minWidth: '12rem'
-                    }
-                }
-            },
-            '.troll-img': {
-                width: '160px',
-                height: '220px',
-                $nest: {
-                    'i-label': {
-                        height: '30px'
-                    },
-                    'i-label *': {
-                        fontSize: '.75rem',
-                        lineHeight: '1rem'
-                    }
-                }
-            },
-            '.note-burn *': {
-                fontSize: '1.125rem'
             }
         }
     });
@@ -2672,30 +2222,42 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
             }
         }
     });
-    exports.nftStyle_375 = components_8.Styles.style({
+    exports.nftStyle_360 = components_8.Styles.style({
         $nest: {
-            '#myRewardTable .i-table-body>tr>td': {
-                padding: '1rem 0.5rem'
+            '.os-slider': {
+                $nest: {
+                    '.wrapper-slider': {
+                        $nest: {
+                            '.slider-arrow': {
+                                width: 20,
+                                height: 20
+                            },
+                            '.slider-arrow:first-child': {
+                                left: '-20px'
+                            },
+                            '.slider-arrow:last-child': {
+                                right: '-20px'
+                            }
+                        }
+                    }
+                }
             }
         }
     });
     exports.listMediaStyles = {
-        375: exports.nftStyle_375,
+        360: exports.nftStyle_360,
         480: exports.nftStyle_480,
-        525: exports.nftStyle_525,
         767: exports.nftStyle_767,
         1100: exports.nftStyle_1100
     };
 });
-define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, components_9, eth_wallet_7, index_4, index_5, assets_4, scom_commission_fee_setup_1, scom_token_list_5, index_6, formSchema_1, index_css_1, data_json_3) {
+define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, components_9, eth_wallet_5, index_4, index_5, assets_4, scom_commission_fee_setup_1, scom_token_list_3, index_6, formSchema_1, index_css_1, data_json_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = components_9.Styles.Theme.ThemeVars;
-    let myRewardData = [];
     let ScomOswapNftWidget = class ScomOswapNftWidget extends components_9.Module {
         constructor(parent, options) {
             super(parent, options);
-            this.currentTab = 0 /* KEY_TAB.NEW_NFT */;
             this._data = {
                 defaultChainId: 0,
                 wallets: [],
@@ -2704,7 +2266,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.tag = {};
             this.initWallet = async () => {
                 try {
-                    await eth_wallet_7.Wallet.getClientInstance().init();
+                    await eth_wallet_5.Wallet.getClientInstance().init();
                     const rpcWallet = this.state.getRpcWallet();
                     await rpcWallet.init();
                 }
@@ -2722,7 +2284,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             };
             this.onChainChange = async () => {
                 this.chainId = this.state.getChainId();
-                scom_token_list_5.tokenStore.updateTokenMapData(this.chainId);
+                scom_token_list_3.tokenStore.updateTokenMapData(this.chainId);
                 this.initializeWidgetConfig();
             };
             this.deferReadyCallback = true;
@@ -2999,12 +2561,12 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         async resetRpcWallet() {
             this.removeRpcWalletEvents();
-            const rpcWalletId = await this.state.initRpcWallet(this.defaultChainId);
+            await this.state.initRpcWallet(this.defaultChainId);
             const rpcWallet = this.state.getRpcWallet();
-            const chainChangedEvent = rpcWallet.registerWalletEvent(this, eth_wallet_7.Constants.RpcWalletEvent.ChainChanged, async (chainId) => {
+            const chainChangedEvent = rpcWallet.registerWalletEvent(this, eth_wallet_5.Constants.RpcWalletEvent.ChainChanged, async (chainId) => {
                 this.onChainChange();
             });
-            const connectedEvent = rpcWallet.registerWalletEvent(this, eth_wallet_7.Constants.RpcWalletEvent.Connected, async (connected) => {
+            const connectedEvent = rpcWallet.registerWalletEvent(this, eth_wallet_5.Constants.RpcWalletEvent.Connected, async (connected) => {
                 await this.initializeWidgetConfig();
             });
             const data = {
@@ -3021,7 +2583,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this._data = value;
             this.state.setNetworkConfig(value.networks);
             for (let network of this._data.networks) {
-                scom_token_list_5.tokenStore.updateTokenMapData(network.chainId);
+                scom_token_list_3.tokenStore.updateTokenMapData(network.chainId);
             }
             await this.resetRpcWallet();
             await this.refreshUI();
@@ -3069,42 +2631,6 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.updateStyle('--max-button-background', this.tag[themeVar]?.maxButtonBackground || 'transparent linear-gradient(255deg,#e75b66,#b52082) 0% 0% no-repeat padding-box');
             this.updateStyle('--max-button-hover-background', this.tag[themeVar]?.maxButtonHoverBackground || 'linear-gradient(255deg,#f15e61,#b52082)');
         }
-        myRewardsCols() {
-            let cols = index_6.nftMyRewardsColumns;
-            const self = this;
-            cols[cols.length - 1] = {
-                title: '',
-                fieldName: 'claim',
-                key: 'claim',
-                onRenderCell: async function (source, data, row) {
-                    const panel = await components_9.Panel.create();
-                    const button = await components_9.Button.create();
-                    button.caption = 'Claim';
-                    button.classList.add('btn-claim', 'btn-os');
-                    button.onClick = () => self.claimAllRewards(button, row.tokenId);
-                    panel.appendChild(button);
-                    const vstackMobile = new components_9.VStack();
-                    const hstackDate = new components_9.HStack(undefined, { margin: { bottom: '0.5rem' } });
-                    const hstackAmount = new components_9.HStack();
-                    const lbDate = await components_9.Label.create({ margin: { right: '0.25rem' } });
-                    const lbDateVal = await components_9.Label.create();
-                    const lbAmount = await components_9.Label.create({ margin: { right: '0.25rem' } });
-                    const lbAmountVal = await components_9.Label.create();
-                    vstackMobile.classList.add('render-mobile--item');
-                    hstackAmount.classList.add('custom-min--h');
-                    lbDate.caption = 'Vesting End Date:';
-                    lbDateVal.caption = row.endDate;
-                    lbAmount.caption = 'Claimable Amount:';
-                    lbAmountVal.caption = row.claimableAmount;
-                    hstackDate.append(lbDate, lbDateVal);
-                    hstackAmount.append(lbAmount, lbAmountVal);
-                    vstackMobile.append(hstackDate, hstackAmount);
-                    panel.appendChild(vstackMobile);
-                    return panel;
-                }
-            };
-            return cols;
-        }
         async refreshUI() {
             await this.initializeWidgetConfig();
         }
@@ -3120,7 +2646,6 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 const campaignId = this.getAttribute('campaignId', true);
                 const commissions = this.getAttribute('commissions', true, []);
                 const defaultChainId = this.getAttribute('defaultChainId', true);
-                const defaultInputToken = this.getAttribute('defaultInputToken', true);
                 const networks = this.getAttribute('networks', true);
                 const wallets = this.getAttribute('wallets', true);
                 const showHeader = this.getAttribute('showHeader', true);
@@ -3128,7 +2653,6 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     campaignId,
                     commissions,
                     defaultChainId,
-                    defaultInputToken,
                     networks,
                     wallets,
                     showHeader
@@ -3222,7 +2746,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             }, item.address);
         }
         async updateBalances() {
-            await scom_token_list_5.tokenStore.updateTokenBalancesByChainId(this.state.getChainId());
+            await scom_token_list_3.tokenStore.updateTokenBalancesByChainId(this.state.getChainId());
         }
         async switchNetworkByWallet() {
             if (this.mdWallet) {
@@ -3232,43 +2756,11 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 this.mdWallet.showModal();
             }
         }
-        onChangeTab(key) {
-            if (key === this.currentTab)
-                return;
-            this.currentTab = key;
-            this.resizeUI();
-            switch (key) {
-                case 0 /* KEY_TAB.NEW_NFT */:
-                    this.renderCards();
-                    break;
-                case 1 /* KEY_TAB.MY_NFTS */:
-                    this.renderMyCards();
-                    break;
-                case 2 /* KEY_TAB.MY_REWARD */:
-                    this.renderMyReward();
-                    break;
-                default:
-                    break;
-            }
-        }
         renderEmpty(elm, _msg) {
             if (!elm)
                 return;
-            let msg = '';
-            if ((0, index_4.isWalletConnected)()) {
-                switch (this.currentTab) {
-                    case 0 /* KEY_TAB.NEW_NFT */:
-                        msg = 'Your very own NFT is getting ready!';
-                        break;
-                    case 1 /* KEY_TAB.MY_NFTS */:
-                        msg = 'You have no NFT in the My NFTs!';
-                        break;
-                }
-            }
-            else {
-                msg = _msg || 'Please connect with you wallet!';
-            }
-            elm.innerHTML = '';
+            let msg = (0, index_4.isClientWalletConnected)() ? 'Your very own NFT is getting ready!' : 'Please connect with you wallet!';
+            elm.clearInnerHTML();
             elm.appendChild(this.$render("i-panel", { width: "100%" },
                 this.$render("i-hstack", { gap: "32px" },
                     this.$render("i-panel", { border: { radius: '12px' }, background: { color: "#ffffff33" }, width: "100%", height: "auto" },
@@ -3278,189 +2770,89 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                             this.$render("i-label", { class: "text-center", width: "100%", margin: { top: 20 }, caption: msg, font: { color: 'white', size: '1.5rem' } }))))));
         }
         ;
-        renderMyRewardEmpty(source) {
-            const emptyElm = (this.$render("i-hstack", { verticalAlignment: "center", width: "100%" },
-                this.$render("i-image", { url: assets_4.default.fullPath('img/icon-advice.svg') }),
-                this.$render("i-panel", null,
-                    this.$render("i-label", { id: "emptyRewardsMsg", caption: "No Data", font: { size: '1rem', bold: true }, margin: { left: 10 } }))));
-            const td = source.querySelector('td');
-            td && td.appendChild(emptyElm);
-        }
-        renderData() {
-            switch (this.currentTab) {
-                case 0 /* KEY_TAB.NEW_NFT */:
-                    this.renderCards();
-                    break;
-                case 1 /* KEY_TAB.MY_NFTS */:
-                    this.renderMyCards();
-                    break;
-                case 2 /* KEY_TAB.MY_REWARD */:
-                    this.renderMyReward();
-                    break;
-                default:
-                    break;
-            }
-        }
-        async renderMyReward() {
-            if (!(0, index_4.isWalletConnected)()) {
-                this.btnClaimAll.visible = false;
-                this.myRewardTable.data = [];
-                if (this.myRewardTable.pagination)
-                    this.myRewardTable.pagination.totalPages = 0;
-                this.emptyRewardsMsg.caption = 'Please connect with your wallet!';
-                if (this.myRewardLoading)
-                    this.myRewardLoading.visible = false;
-                return;
-            }
-            if (this.myRewardLoading)
-                this.myRewardLoading.visible = true;
-            let info = await (0, index_6.getOwnRewards)(index_4.NFT_TYPE.OSWAP);
-            myRewardData = [];
-            if (!info || !info.length) {
-                this.emptyRewardsMsg.caption = 'No Data';
-                this.myRewardTable.data = [];
-                if (this.myRewardTable.pagination)
-                    this.myRewardTable.pagination.totalPages = 0;
-                this.btnClaimAll.visible = false;
-                this.myRewardLoading.visible = false;
-                return;
-            }
-            if (!this.btnClaimAll.visible) {
-                this.btnClaimAll.visible = true;
-            }
-            for (let item of info) {
-                let lockedAmount = new eth_wallet_7.BigNumber(item.totalAmount).minus(new eth_wallet_7.BigNumber(item.claimedAmount).plus(item.unclaimedAmount)).toFixed();
-                myRewardData.push({
-                    tokenId: item.tokenId,
-                    token: item.token,
-                    startDate: (0, index_5.formatDate)(item.startDate),
-                    endDate: (0, index_5.formatDate)(item.endDate),
-                    lockedAmount: (0, index_5.formatNumber)(lockedAmount, 4),
-                    claimableAmount: (0, index_5.formatNumber)(item.unclaimedAmount, 4)
-                });
-            }
-            this.myRewardTable.data = myRewardData;
-            if (this.myRewardTable.pagination)
-                this.myRewardTable.pagination.totalPages = Math.ceil(myRewardData.length / 10);
-            if (this.myRewardLoading)
-                this.myRewardLoading.visible = false;
+        async renderData() {
+            this.updateButtons();
+            await this.renderCards();
         }
         async renderCards() {
-            let info = await (0, index_6.getTrollCampInfo)(this.state, index_4.NFT_TYPE.OSWAP);
-            this.dataCards = [];
-            if (!info || !info.length) {
+            this.pnlLoading.visible = true;
+            this.cardRow.visible = false;
+            const info = await (0, index_6.fetchAllNftInfo)(this.state);
+            if (!info || !Object.keys(info).length) {
                 this.renderEmpty(this.cardRow, 'Your very own NFT is getting ready!');
+                this.pnlLoading.visible = false;
+                this.cardRow.visible = true;
                 return;
             }
-            for (let item of info) {
-                let totalPayAmount = new eth_wallet_7.BigNumber(item.minimumStake).plus(item.protocolFee).toFixed();
-                this.dataCards.push({
-                    address: item.contract,
+            const types = Object.keys(info);
+            const cards = [];
+            for (let type of types) {
+                const item = info[type];
+                const { address, flashSales, apr, rewards, token, protocolFee, minimumStake, userNfts } = item;
+                const totalPayAmount = new eth_wallet_5.BigNumber(minimumStake).plus(protocolFee).toFixed();
+                const _userNfts = userNfts.map(v => {
+                    return {
+                        address,
+                        flashSales: flashSales,
+                        monthlyRewardAPR: apr,
+                        monthlyRewardText: `${apr}% APR`,
+                        rewardsBoost: `${rewards}%`,
+                        tier: type,
+                        trollNumber: v.tokenId,
+                        stakeToken: token,
+                        stakeAmount: v.stakeBalance,
+                        stakeAmountText: `${(0, index_5.formatNumber)(v.stakeBalance)} ${token?.symbol || ''}`,
+                        birthday: components_9.moment.unix(v.birthday).format(index_5.DefaultDateFormat),
+                        rarity: v.rarity,
+                        image: v.image
+                    };
+                });
+                cards.push({
+                    address: item.address,
                     flashSales: item.flashSales,
                     monthlyReward: `${item.apr}% APR`,
                     rewardsBoost: `${item.rewards}%`,
-                    tier: item.tier,
-                    slot: item.available,
-                    stakeAmount: item.minimumStake,
+                    tier: type,
+                    slot: '0',
+                    stakeAmount: item.minimumStake.shiftedBy(-(token?.decimals || 18)).toFixed(),
                     stakeToken: item.token,
-                    stakeAmountText: `${(0, index_5.formatNumber)(item.minimumStake)} ${item.token?.symbol || ''}`,
-                    protocolFee: item.protocolFee,
-                    totalPayAmount
+                    stakeAmountText: `${(0, index_5.formatNumber)(item.minimumStake.shiftedBy(-(token?.decimals || 18)))} ${item.token?.symbol || ''}`,
+                    protocolFee: item.protocolFee.toFixed(),
+                    totalPayAmount,
+                    userNFTs: _userNfts
                 });
             }
+            this.dataCards = cards;
             this.cardRow.clearInnerHTML();
-            this.dataCards.forEach((item, key) => {
-                const column = new components_9.VStack();
+            for (const item of this.dataCards) {
+                const column = await components_9.VStack.create();
                 column.classList.add('nft-card-column', 'new-card-column');
                 column.stack = { basis: '0%', shrink: '1', grow: '1' };
-                const elm = new index_6.NftCard(this.state);
-                column.appendChild(elm);
+                const nftCard = await index_6.NftCard.create();
+                column.appendChild(nftCard);
                 this.cardRow.appendChild(column);
-                elm.onStake = () => this.onStake(item);
-                elm.cardData = item;
-            });
-        }
-        async renderMyCards() {
-            if (!(0, index_4.isWalletConnected)()) {
-                this.myNFTsInfoPanel.visible = false;
-                this.renderEmpty(this.myCardRow);
-                if (this.myNFTsLoading)
-                    this.myNFTsLoading.visible = false;
-                return;
+                nftCard.state = this.state;
+                nftCard.onStake = () => this.onStake(item);
+                nftCard.onBurn = (userNFT) => this.handleBurn(userNFT);
+                nftCard.cardData = item;
             }
-            if (this.myNFTsLoading) {
-                this.myCardRow.clearInnerHTML();
-                this.myNFTsLoading.visible = true;
-            }
-            let userNFTs = await (0, index_6.getUserNFTs)(this.state, index_4.NFT_TYPE.OSWAP, eth_wallet_7.Wallet.getClientInstance().address);
-            this.dataMyCards = [];
-            this.myCardRow.clearInnerHTML();
-            if (userNFTs.length == 0 || userNFTs.every((f) => !f.listNFT.length)) {
-                this.lbMyNFTsNum.caption = '0';
-                this.lbMyNFTsStakeValue.caption = '0';
-                this.myNFTsInfoPanel.visible = false;
-                this.renderEmpty(this.myCardRow);
-                if (this.myNFTsLoading)
-                    this.myNFTsLoading.visible = false;
-                return;
-            }
-            if (!this.myNFTsInfoPanel.visible) {
-                this.myNFTsInfoPanel.visible = true;
-            }
-            for (let nftTypeItem of userNFTs) {
-                for (let item of nftTypeItem.listNFT) {
-                    let myCard = {
-                        address: nftTypeItem.contract,
-                        flashSales: nftTypeItem.flashSales,
-                        monthlyRewardAPR: nftTypeItem.apr,
-                        monthlyRewardText: `${nftTypeItem.apr}% APR`,
-                        rewardsBoost: `${nftTypeItem.rewards}%`,
-                        tier: nftTypeItem.tier,
-                        trollNumber: item.tokenID,
-                        stakeToken: item.token,
-                        stakeAmount: item.stakingBalance,
-                        stakeAmountText: `${(0, index_5.formatNumber)(item.stakingBalance)} ${item.token?.symbol || ''}`,
-                        rarity: item.rarity,
-                        birthday: components_9.moment.unix(item.birthday).format(index_5.DefaultDateFormat),
-                        image: item.image
-                    };
-                    this.dataMyCards.push(myCard);
-                }
-            }
-            let stakeToken = userNFTs[0].stakeToken;
-            if (this.dataMyCards.length > 0) {
-                this.lbMyNFTsNum.caption = `${(0, index_5.formatNumberWithSeparators)(this.dataMyCards.length)}`;
-                let totalStakeAmount = this.dataMyCards.reduce((prev, curr) => {
-                    return prev.plus(curr.stakeAmount);
-                }, new eth_wallet_7.BigNumber(0));
-                this.lbMyNFTsStakeValue.caption = `${(0, index_5.formatNumber)(totalStakeAmount.toFixed(), 4)} ${stakeToken.symbol}`;
-            }
-            else {
-                this.lbMyNFTsNum.caption = '0';
-                this.lbMyNFTsStakeValue.caption = `0 ${stakeToken.symbol}`;
-            }
-            this.dataMyCards = this.dataMyCards.sort((a, b) => b.monthlyRewardAPR - a.monthlyRewardAPR || b.rarity - a.rarity || a.trollNumber - b.trollNumber);
-            this.dataMyCards.forEach((item, key) => {
-                const card = new components_9.Panel();
-                card.classList.add('nft-card-column', 'custom-card-column');
-                const elm = new index_6.NftMyCard();
-                card.appendChild(elm);
-                this.myCardRow.appendChild(card);
-                elm.onBurn = () => this.handleBurn(item);
-                elm.cardData = item;
-            });
-            if (this.myNFTsLoading)
-                this.myNFTsLoading.visible = false;
+            this.pnlLoading.visible = false;
+            this.cardRow.visible = true;
         }
         async onSubmit(isMint) {
-            if (!(0, index_4.isWalletConnected)()) {
+            if (!(0, index_4.isClientWalletConnected)()) {
                 this.switchNetworkByWallet();
                 return;
             }
-            else if (!this.state.isRpcWalletConnected()) {
-                const chainId = this.state.getChainId();
-                const clientWallet = eth_wallet_7.Wallet.getClientInstance();
-                await clientWallet.switchNetwork(chainId);
+            else if (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
+                const rpcWallet = this.state.getRpcWallet();
+                if (rpcWallet.chainId != this.targetChainId) {
+                    await rpcWallet.switchNetwork(this.targetChainId);
+                }
+                if (!this.state.isRpcWalletConnected()) {
+                    const clientWallet = eth_wallet_5.Wallet.getClientInstance();
+                    await clientWallet.switchNetwork(this.targetChainId);
+                }
                 return;
             }
             if (isMint) {
@@ -3470,7 +2862,21 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 await this.handleConfirmBurn();
             }
         }
+        updateButtons() {
+            if (this.targetChainId && this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
+                this.btnApprove.caption = 'Switch Network';
+                this.btnBurn.caption = 'Switch Network';
+                this.btnMint.caption = 'Switch Network';
+            }
+            else {
+                this.btnApprove.caption = 'Approve';
+                this.btnBurn.caption = 'Burn';
+                this.btnMint.caption = 'Stake';
+            }
+        }
         async onStake(item) {
+            this.targetChainId = Number(this.state.getChainId());
+            this.updateButtons();
             this.mint.visible = false;
             this.minting.visible = true;
             this.currentDataCard = item;
@@ -3484,61 +2890,36 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             if (item.flashSales) {
                 this.lbMintFlashSales.caption = item.flashSales;
             }
-            let tokenBalances = scom_token_list_5.tokenStore.getTokenBalancesByChainId(this.chainId) || {};
+            let tokenBalances = scom_token_list_3.tokenStore.getTokenBalancesByChainId(this.chainId) || {};
             let tokenBalance = tokenBalances[item.stakeToken.address.toLowerCase()];
             this.lbTokenBalance.caption = (0, index_5.formatNumber)(tokenBalance, 4);
-            this.ImageMintStakeToken.url = scom_token_list_5.assets.tokenPath(item.stakeToken, eth_wallet_7.Wallet.getClientInstance().chainId);
+            this.ImageMintStakeToken.url = scom_token_list_3.assets.tokenPath(item.stakeToken, this.chainId);
             this.lbMintStakeToken.caption = stakeTokenSymbol;
             this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${item.stakeAmount} of ${stakeTokenSymbol}.`;
             this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
             await this.initApprovalModelAction(item);
-            this.approvalModelAction.checkAllowance(item.stakeToken, new eth_wallet_7.BigNumber(item.totalPayAmount).toFixed());
-        }
-        async claimAllRewards(btn, tokenId) {
-            (0, index_5.showResultMessage)(this.txStatusModal, 'warning', 'Claiming');
-            const txHashCallback = (err, receipt) => {
-                if (err) {
-                    (0, index_5.showResultMessage)(this.txStatusModal, 'error', err);
-                }
-                else if (receipt) {
-                    btn.rightIcon.visible = true;
-                    if (tokenId === undefined) {
-                        const btnClaims = this.myRewardTable.querySelectorAll('.btn-claim');
-                        btnClaims.forEach((elm) => elm.rightIcon.visible = true);
-                    }
-                    else {
-                        this.btnClaimAll.rightIcon.visible = true;
-                    }
-                    (0, index_5.showResultMessage)(this.txStatusModal, 'success', receipt);
-                }
-            };
-            const confirmationCallback = async (receipt) => {
-                await this.renderMyReward();
-                btn.rightIcon.visible = false;
-                if (tokenId === undefined) {
-                    const btnClaims = this.myRewardTable.querySelectorAll('.btn-claim');
-                    btnClaims.forEach((elm) => elm.rightIcon.visible = false);
-                }
-                else {
-                    this.btnClaimAll.rightIcon.visible = false;
-                }
-            };
-            (0, index_5.registerSendTxEvents)({
-                transactionHash: txHashCallback,
-                confirmation: confirmationCallback
-            });
-            if (tokenId === undefined) {
-                await (0, index_6.claimMultiple)();
-            }
-            else {
-                await (0, index_6.claimReward)(tokenId);
-            }
+            this.approvalModelAction.checkAllowance(item.stakeToken, new eth_wallet_5.BigNumber(item.totalPayAmount).toFixed());
         }
         async handleMint() {
             await this.approvalModelAction.doPayAction();
         }
-        clickApprove() {
-            this.approvalModelAction.doApproveAction(this.currentDataCard.stakeToken, new eth_wallet_7.BigNumber(this.currentDataCard.totalPayAmount).toFixed());
+        async clickApprove() {
+            if (!(0, index_4.isClientWalletConnected)()) {
+                this.switchNetworkByWallet();
+                return;
+            }
+            else if (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
+                const rpcWallet = this.state.getRpcWallet();
+                if (rpcWallet.chainId != this.targetChainId) {
+                    await rpcWallet.switchNetwork(this.targetChainId);
+                }
+                if (!this.state.isRpcWalletConnected()) {
+                    const clientWallet = eth_wallet_5.Wallet.getClientInstance();
+                    await clientWallet.switchNetwork(this.targetChainId);
+                }
+                return;
+            }
+            this.approvalModelAction.doApproveAction(this.currentDataCard.stakeToken, new eth_wallet_5.BigNumber(this.currentDataCard.totalPayAmount).toFixed());
         }
         handleBack() {
             this.mint.visible = true;
@@ -3549,6 +2930,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.burning.visible = false;
         }
         handleBurn(item) {
+            this.targetChainId = Number(this.state.getChainId());
             this.currentDataMyCard = item;
             this.lbBurnMessage.caption = `By confirmimg the transaction, you will burn NFT and receive ${item.stakeAmountText}`;
             this.ImageBurn.url = item.image;
@@ -3578,7 +2960,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 this.btnBurn.rightIcon.visible = false;
                 this.btnBurn.caption = 'Burn';
                 this.handleBurnBack();
-                this.renderMyCards();
+                this.renderCards();
             };
             (0, index_5.registerSendTxEvents)({
                 transactionHash: txHashCallback,
@@ -3592,42 +2974,12 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     this.$render("i-panel", { id: "mint", class: "widget" },
                         this.$render("i-panel", { class: "current-nft" },
                             this.$render("i-label", { caption: "oswap" })),
-                        this.$render("i-tabs", { id: "tabs", width: "100%", height: "100%", mode: "horizontal", class: index_css_1.tabStyle, onChanged: this.onChangeTab.bind(this) },
-                            this.$render("i-tab", { caption: "New NFT", icon: { image: { url: assets_4.default.fullPath('img/nft/Tiers.svg') } }, onClick: () => this.onChangeTab(0 /* KEY_TAB.NEW_NFT */) },
-                                this.$render("i-panel", { padding: { left: '1rem', right: '1rem' } },
-                                    this.$render("i-hstack", { gap: "2rem", id: "cardRow", wrap: "wrap" }))),
-                            this.$render("i-tab", { caption: "My NFTs", icon: { image: { url: assets_4.default.fullPath('img/nft/NFT.svg') } }, onClick: () => this.onChangeTab(1 /* KEY_TAB.MY_NFTS */) },
-                                this.$render("i-panel", null,
-                                    this.$render("i-vstack", { id: "myNFTsLoading", padding: { top: 100 }, class: "i-loading-overlay" },
-                                        this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
-                                            this.$render("i-icon", { class: "i-loading-spinner_icon", image: { url: assets_4.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
-                                            this.$render("i-label", { caption: "Loading...", font: { color: '#FD4A4C', size: '1.5em' }, class: "i-loading-spinner_text" }))),
-                                    this.$render("i-panel", { padding: { left: '1rem', right: '1rem' }, class: "tab-sheet--container" },
-                                        this.$render("i-panel", { id: "myNFTsInfoPanel", margin: { bottom: '0.25rem' }, class: "box-description" },
-                                            this.$render("i-hstack", null,
-                                                this.$render("i-hstack", { minWidth: "50%" },
-                                                    this.$render("i-label", { caption: "Number of NFTs:", margin: { right: '0.25rem' } }),
-                                                    this.$render("i-label", { id: "lbMyNFTsNum", font: { bold: true } })),
-                                                this.$render("i-hstack", { minWidth: "50%" },
-                                                    this.$render("i-label", { caption: "Stake Value:", margin: { right: '0.25rem' } }),
-                                                    this.$render("i-label", { id: "lbMyNFTsStakeValue", font: { bold: true } })))),
-                                        this.$render("i-hstack", { gap: "2rem", id: "myCardRow", wrap: "wrap", margin: { top: '2rem' } })))),
-                            this.$render("i-tab", { caption: "My Reward", onClick: () => this.onChangeTab(2 /* KEY_TAB.MY_REWARD */), icon: { image: { url: assets_4.default.fullPath('img/nft/NFT.svg') } } },
-                                this.$render("i-panel", null,
-                                    this.$render("i-vstack", { id: "myRewardLoading", padding: { top: 100 }, class: "i-loading-overlay" },
-                                        this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
-                                            this.$render("i-icon", { class: "i-loading-spinner_icon", image: { url: assets_4.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
-                                            this.$render("i-label", { caption: "Loading...", font: { color: '#FD4A4C', size: '1.5em' }, class: "i-loading-spinner_text" }))),
-                                    this.$render("i-hstack", { horizontalAlignment: "center", padding: { left: 18, right: 18, bottom: 18 } },
-                                        this.$render("i-button", { id: "btnClaimAll", caption: "Claim All", class: "btn-os btn-claim", rightIcon: { spin: true, visible: false }, onClick: () => this.claimAllRewards(this.btnClaimAll) })),
-                                    this.$render("i-table", { id: "myRewardTable", columns: this.myRewardsCols(), data: myRewardData, mediaQueries: [
-                                            {
-                                                maxWidth: '767px',
-                                                properties: {
-                                                    fieldNames: ['token', 'claim']
-                                                }
-                                            }
-                                        ], onRenderEmptyTable: this.renderMyRewardEmpty.bind(this) }))))),
+                        this.$render("i-panel", { padding: { left: '1rem', right: '1rem' } },
+                            this.$render("i-panel", { id: "pnlLoading", minHeight: 300, class: "i-loading-overlay" },
+                                this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
+                                    this.$render("i-icon", { class: "i-loading-spinner_icon", cursor: "default", image: { url: assets_4.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
+                                    this.$render("i-label", { caption: "Loading...", font: { color: '#FD4A4C', size: '1.5em' }, class: "i-loading-spinner_text" }))),
+                            this.$render("i-hstack", { gap: "2rem", id: "cardRow", wrap: "wrap" }))),
                     this.$render("i-hstack", { id: "minting", visible: false, gap: "30px", horizontalAlignment: "center" },
                         this.$render("i-vstack", { class: "nft-card-stake" },
                             this.$render("i-panel", { class: "card-widget" },

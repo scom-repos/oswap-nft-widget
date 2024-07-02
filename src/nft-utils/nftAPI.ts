@@ -13,6 +13,7 @@ import {
   mapRecordAwait,
   TokenConstant,
   UserNftInfo,
+  isClientWalletConnected,
 } from "../store/index";
 import { tokenStore } from '@scom/scom-token-list';
 import { ITokenObject } from "@scom/scom-token-list";
@@ -150,6 +151,7 @@ async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: NftInfo |
 }
 
 async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore):Promise<UserNftInfo[]>  { //only get user nft on current chain
+  if (!isClientWalletConnected()) return [];
   let wallet = state.getRpcWallet();
   let chainId = wallet.chainId;
   console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
@@ -246,17 +248,6 @@ const burnNFT = async (contractAddress: string, tokenID: number) => {
   return receipt;
 }
 
-// nft = OSWAP or OAX
-interface IOwnRewards {
-  token: ITokenObject;
-  startDate: number;
-  endDate: number;
-  claimedAmount: string;
-  unclaimedAmount: string;
-  totalAmount: string;
-  tokenId?: string;
-}
-
 export {
   NftInfo,
   nftInfoMap,
@@ -264,6 +255,5 @@ export {
   fetchAllNftInfo,
   mintNFT,
   burnNFT,
-  IOwnRewards,
   getNFTObject
 };

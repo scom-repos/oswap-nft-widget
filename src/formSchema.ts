@@ -1,4 +1,3 @@
-import { Styles } from '@ijstech/components';
 import ScomNetworkPicker from '@scom/scom-network-picker';
 import Config from './data.json';
 

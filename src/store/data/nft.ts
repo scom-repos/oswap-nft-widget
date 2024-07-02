@@ -49,6 +49,7 @@ export interface IDataCard {
   stakeAmountText: string;
   protocolFee: string;
   totalPayAmount: string;
+  userNFTs?: IDataMyCard[];
 }
 
 export interface IDataMyCard {
