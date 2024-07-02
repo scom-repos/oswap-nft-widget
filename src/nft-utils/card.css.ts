@@ -85,6 +85,27 @@ export const cardStyle = Styles.style({
       },
     },
 
+    '.os-slider': {
+      position: 'relative',
+      margin: '25px auto',
+      width: '230px',
+      height: '300px',
+      $nest: {
+        '.wrapper-slider': {
+          $nest: {
+            '.slider-arrow:first-child': {
+              left: '-30px'
+            },
+            '.slider-arrow:last-child': {
+              right: '-30px'
+            }
+          }
+        },
+        '.slider-arrow': {
+          position: 'absolute'
+        }
+      }
+    },
     '.troll-img': {
       position: 'relative',
       margin: '25px auto',
@@ -108,7 +129,7 @@ export const cardStyle = Styles.style({
         '.death': {
           filter: 'grayscale(100%)',
           $nest: {
-            '&:hover' :{
+            '&:hover': {
               filter: 'inherit',
             }
           },
@@ -129,7 +150,7 @@ export const cardStyle = Styles.style({
           textTransform: 'uppercase',
         },
         'i-label *': {
-          color:' #6f1018',
+          color: '#6f1018',
         },
         '.background img': {
           padding: '20px 12px 0',

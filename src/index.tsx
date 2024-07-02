@@ -1,6 +1,5 @@
 import {
   customModule,
-  Control,
   Module,
   Styles,
   Label,
@@ -13,24 +12,20 @@ import {
   VStack,
   ControlElement,
   customElements,
-  Table,
   moment
 } from '@ijstech/components';
 import { BigNumber, Constants, IERC20ApprovalAction, Wallet } from '@ijstech/eth-wallet';
 import {
-  isWalletConnected,
+  isClientWalletConnected,
   State,
   IDataCard,
   IDataMyCard,
-  NftInfoStore,
 } from './store/index';
 import {
   formatNumber,
   showResultMessage,
   registerSendTxEvents,
-  formatDate,
   DefaultDateFormat,
-  formatNumberWithSeparators,
 } from './global/index'
 import Assets from './assets';
 import ScomCommissionFeeSetup from '@scom/scom-commission-fee-setup';
@@ -38,9 +33,9 @@ import ScomTxStatusModal from '@scom/scom-tx-status-modal';
 import ScomDappContainer from '@scom/scom-dapp-container'
 import { tokenStore, assets as tokenAssets, ITokenObject } from '@scom/scom-token-list';
 import ScomWalletModal, { IWalletPlugin } from '@scom/scom-wallet-modal';
-import { NftCard, NftMyCard, fetchAllNftInfo, mintNFT, burnNFT, getCommissionRate, NftInfo } from './nft-utils/index';
+import { NftCard, fetchAllNftInfo, mintNFT, burnNFT, getCommissionRate, NftInfo } from './nft-utils/index';
 import { getBuilderSchema, getProjectOwnerSchema } from './formSchema';
-import { nftStyle, listMediaStyles, tabStyle, nftDefaultStyle } from './index.css';
+import { nftStyle, listMediaStyles, nftDefaultStyle } from './index.css';
 import configData from './data.json';
 
 const Theme = Styles.Theme.ThemeVars;
@@ -53,11 +48,6 @@ interface ICommissionInfo {
 interface INetworkConfig {
   chainName?: string;
   chainId: number;
-}
-
-const enum KEY_TAB {
-  NEW_NFT,
-  MY_NFTS,
 }
 
 interface ScomOswapNftWidgetElement extends ControlElement {
@@ -98,8 +88,8 @@ export default class ScomOswapNftWidget extends Module {
   private targetChainId: number;
   private approvalModelAction: IERC20ApprovalAction;
 
+  private pnlLoading: Panel;
   private cardRow: Panel;
-  private myCardRow: Panel;
   private mint: Panel;
   private minting: Panel;
   private burning: Panel;
@@ -120,16 +110,10 @@ export default class ScomOswapNftWidget extends Module {
   private btnMint: Button;
   private btnBurn: Button;
   private lbBurnMessage: Label;
-  private lbMyNFTsNum: Label;
-  private lbMyNFTsStakeValue: Label;
   private currentDataCard: IDataCard;
   private dataCards: IDataCard[];
   private ImageBurn: Image;
-  private dataMyCards: IDataMyCard[];
   private currentDataMyCard: IDataMyCard;
-  private currentTab: number = KEY_TAB.NEW_NFT;
-  private myNFTsLoading: Panel;
-  private myNFTsInfoPanel: Panel;
 
   private _data: INftOswapWidgetData = {
     defaultChainId: 0,
@@ -428,7 +412,7 @@ export default class ScomOswapNftWidget extends Module {
 
   private async resetRpcWallet() {
     this.removeRpcWalletEvents();
-    const rpcWalletId = await this.state.initRpcWallet(this.defaultChainId);
+    await this.state.initRpcWallet(this.defaultChainId);
     const rpcWallet = this.state.getRpcWallet();
     const chainChangedEvent = rpcWallet.registerWalletEvent(this, Constants.RpcWalletEvent.ChainChanged, async (chainId: number) => {
       this.onChainChange();
@@ -436,7 +420,7 @@ export default class ScomOswapNftWidget extends Module {
     const connectedEvent = rpcWallet.registerWalletEvent(this, Constants.RpcWalletEvent.Connected, async (connected: boolean) => {
       await this.initializeWidgetConfig();
     });
-    const data: any = {
+    const data = {
       defaultChainId: this.defaultChainId,
       wallets: this.wallets,
       networks: this.networks,
@@ -662,38 +646,10 @@ export default class ScomOswapNftWidget extends Module {
     }
   }
 
-  private onChangeTab(key: KEY_TAB) {
-    if (key === this.currentTab) return;
-    this.currentTab = key;
-    this.resizeUI();
-    switch (key) {
-      case KEY_TAB.NEW_NFT:
-        this.renderCards();
-        break;
-      case KEY_TAB.MY_NFTS:
-        this.renderMyCards();
-        break;
-      default:
-        break;
-    }
-  }
-
-  private renderEmpty(elm: any, _msg?: string) {
+  private renderEmpty(elm: Panel, _msg?: string) {
     if (!elm) return;
-    let msg = '';
-    if (isWalletConnected()) {
-      switch (this.currentTab) {
-        case KEY_TAB.NEW_NFT:
-          msg = 'Your very own NFT is getting ready!';
-          break;
-        case KEY_TAB.MY_NFTS:
-          msg = 'You have no NFT in the My NFTs!';
-          break;
-      }
-    } else {
-      msg = _msg || 'Please connect with you wallet!';
-    }
-    elm.innerHTML = '';
+    let msg = isClientWalletConnected() ? 'Your very own NFT is getting ready!' : 'Please connect with you wallet!';
+    elm.clearInnerHTML();
     elm.appendChild(<i-panel width="100%">
       <i-hstack gap="32px">
         <i-panel border={{ radius: '12px' }} background={{ color: "#ffffff33" }} width="100%" height="auto">
@@ -708,130 +664,80 @@ export default class ScomOswapNftWidget extends Module {
     </i-panel>)
   };
 
-  private renderData() {
+  private async renderData() {
     this.updateButtons();
-    switch (this.currentTab) {
-      case KEY_TAB.NEW_NFT:
-        this.renderCards();
-        break;
-      case KEY_TAB.MY_NFTS:
-        this.renderMyCards();
-        break;
-      default:
-        break;
-    }
+    await this.renderCards();
   }
 
   private async renderCards() {
-    let info = await fetchAllNftInfo(this.state);
-    this.dataCards = [];
-    if (!info || !info.length) {
+    this.pnlLoading.visible = true;
+    this.cardRow.visible = false;
+    const info = await fetchAllNftInfo(this.state);
+    if (!info || !Object.keys(info).length) {
       this.renderEmpty(this.cardRow, 'Your very own NFT is getting ready!');
+      this.pnlLoading.visible = false;
+      this.cardRow.visible = true;
       return;
     }
-    for (let item of info) {
-      let totalPayAmount = new BigNumber(item.minimumStake).plus(item.protocolFee).toFixed();
-      this.dataCards.push({
-        address: item.contract,
+
+    const types = Object.keys(info);
+    const cards: IDataCard[] = [];
+    for (let type of types) {
+      const item: NftInfo = info[type];
+      const { address, flashSales, apr, rewards, token, protocolFee, minimumStake, userNfts } = item;
+      const totalPayAmount = new BigNumber(minimumStake).plus(protocolFee).toFixed();
+      const _userNfts: IDataMyCard[] = userNfts.map(v => {
+        return {
+          address,
+          flashSales: flashSales,
+          monthlyRewardAPR: apr,
+          monthlyRewardText: `${apr}% APR`,
+          rewardsBoost: `${rewards}%`,
+          tier: type,
+          trollNumber: v.tokenId,
+          stakeToken: token,
+          stakeAmount: v.stakeBalance,
+          stakeAmountText: `${formatNumber(v.stakeBalance)} ${token?.symbol || ''}`,
+          birthday: moment.unix(v.birthday).format(DefaultDateFormat),
+          rarity: v.rarity,
+          image: v.image
+        }
+      })
+      cards.push({
+        address: item.address,
         flashSales: item.flashSales,
         monthlyReward: `${item.apr}% APR`,
         rewardsBoost: `${item.rewards}%`,
-        tier: item.tier,
-        slot: item.available,
-        stakeAmount: item.minimumStake,
+        tier: type,
+        slot: '0', // item.available,
+        stakeAmount: item.minimumStake.shiftedBy(-(token?.decimals || 18)).toFixed(),
         stakeToken: item.token,
-        stakeAmountText: `${formatNumber(item.minimumStake)} ${item.token?.symbol || ''}`,
-        protocolFee: item.protocolFee,
-        totalPayAmount
+        stakeAmountText: `${formatNumber(item.minimumStake.shiftedBy(-(token?.decimals || 18)))} ${item.token?.symbol || ''}`,
+        protocolFee: item.protocolFee.toFixed(),
+        totalPayAmount,
+        userNFTs: _userNfts
       })
     }
+    this.dataCards = cards;
     this.cardRow.clearInnerHTML();
-    this.dataCards.forEach((item, key: number) => {
-      const column = new VStack();
+    for (const item of this.dataCards) {
+      const column = await VStack.create();
       column.classList.add('nft-card-column', 'new-card-column');
       column.stack = { basis: '0%', shrink: '1', grow: '1' };
-      const elm = new NftCard(this.state);
-      column.appendChild(elm);
+      const nftCard = await NftCard.create() as NftCard;
+      column.appendChild(nftCard);
       this.cardRow.appendChild(column);
-      elm.onStake = () => this.onStake(item);
-      elm.cardData = item;
-    })
-  }
-
-  private async renderMyCards(nftInfo:NftInfo) {
-    if (!isWalletConnected()) {
-      this.myNFTsInfoPanel.visible = false;
-      this.renderEmpty(this.myCardRow);
-      if (this.myNFTsLoading) this.myNFTsLoading.visible = false;
-      return;
+      nftCard.state = this.state;
+      nftCard.onStake = () => this.onStake(item);
+      nftCard.onBurn = (userNFT: IDataMyCard) => this.handleBurn(userNFT);
+      nftCard.cardData = item;
     }
-    if (this.myNFTsLoading) {
-      this.myCardRow.clearInnerHTML();
-      this.myNFTsLoading.visible = true;
-    }
-    let userNFTs = nftInfo.userNfts;
-    this.dataMyCards = [];
-    this.myCardRow.clearInnerHTML();
-    if (userNFTs.length == 0) {
-      this.lbMyNFTsNum.caption = '0';
-      this.lbMyNFTsStakeValue.caption = '0';
-      this.myNFTsInfoPanel.visible = false;
-      this.renderEmpty(this.myCardRow);
-      if (this.myNFTsLoading)
-        this.myNFTsLoading.visible = false;
-      return;
-    }
-    if (!this.myNFTsInfoPanel.visible) {
-      this.myNFTsInfoPanel.visible = true;
-    }
-    for (let nft of userNFTs) {
-        let myCard: IDataMyCard = {
-          address: nftInfo.address,
-          flashSales: nftInfo.flashSales,
-          monthlyRewardAPR: nftInfo.apr,
-          monthlyRewardText: `${nftInfo.apr}% APR`,
-          rewardsBoost: `${nftInfo.rewards}%`,
-          tier: nftInfo.name,
-          trollNumber: nft.tokenId,
-          stakeToken: nftInfo.token,
-          stakeAmount: nft.stakeBalance,
-          stakeAmountText: `${formatNumber(nft.stakeBalance)} ${nftInfo.token.symbol || ''}`,
-          rarity: nft.rarity,
-          birthday: moment.unix(nft.birthday).format(DefaultDateFormat),
-          image: nft.image
-        }
-        this.dataMyCards.push(myCard);
-    }
-    let stakeToken = nftInfo.token;
-    if (this.dataMyCards.length > 0) {
-      this.lbMyNFTsNum.caption = `${formatNumberWithSeparators(this.dataMyCards.length)}`;
-      let totalStakeAmount = this.dataMyCards.reduce((prev, curr) => {
-        return prev.plus(curr.stakeAmount);
-      }, new BigNumber(0));
-      this.lbMyNFTsStakeValue.caption = `${formatNumber(totalStakeAmount.toFixed(), 4)} ${stakeToken.symbol}`;
-    }
-    else {
-      this.lbMyNFTsNum.caption = '0';
-      this.lbMyNFTsStakeValue.caption = `0 ${stakeToken.symbol}`;
-    }
-
-    this.dataMyCards = this.dataMyCards.sort((a, b) => b.monthlyRewardAPR - a.monthlyRewardAPR || b.rarity - a.rarity || a.trollNumber - b.trollNumber);
-
-    this.dataMyCards.forEach((item, key: number) => {
-      const card = new Panel();
-      card.classList.add('nft-card-column', 'custom-card-column');
-      const elm = new NftMyCard();
-      card.appendChild(elm);
-      this.myCardRow.appendChild(card);
-      elm.onBurn = () => this.handleBurn(item);
-      elm.cardData = item;
-    })
-    if (this.myNFTsLoading)
-      this.myNFTsLoading.visible = false;
+    this.pnlLoading.visible = false;
+    this.cardRow.visible = true;
   }
 
   private async onSubmit(isMint?: boolean) {
-    if (!isWalletConnected()) {
+    if (!isClientWalletConnected()) {
       this.switchNetworkByWallet();
       return;
     } else if (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
@@ -883,7 +789,7 @@ export default class ScomOswapNftWidget extends Module {
     let tokenBalances = tokenStore.getTokenBalancesByChainId(this.chainId) || {};
     let tokenBalance = tokenBalances[item.stakeToken.address.toLowerCase()];
     this.lbTokenBalance.caption = formatNumber(tokenBalance, 4);
-    this.ImageMintStakeToken.url = tokenAssets.tokenPath(item.stakeToken, this.chainId);
+    this.ImageMintStakeToken.url = tokenAssets.tokenPath(item.stakeToken as ITokenObject, this.chainId);
     this.lbMintStakeToken.caption = stakeTokenSymbol;
     this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${item.stakeAmount} of ${stakeTokenSymbol}.`;
     this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
@@ -896,7 +802,7 @@ export default class ScomOswapNftWidget extends Module {
   }
 
   private async clickApprove() {
-    if (!isWalletConnected()) {
+    if (!isClientWalletConnected()) {
       this.switchNetworkByWallet();
       return;
     } else if (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
@@ -956,7 +862,7 @@ export default class ScomOswapNftWidget extends Module {
       this.btnBurn.rightIcon.visible = false;
       this.btnBurn.caption = 'Burn';
       this.handleBurnBack();
-      this.renderMyCards();
+      this.renderCards();
     }
     registerSendTxEvents({
       transactionHash: txHashCallback,
@@ -974,59 +880,22 @@ export default class ScomOswapNftWidget extends Module {
             <i-panel class="current-nft">
               <i-label caption="oswap" />
             </i-panel>
-            <i-tabs
-              id="tabs"
-              width="100%"
-              height="100%"
-              mode="horizontal"
-              class={tabStyle}
-              onChanged={this.onChangeTab.bind(this)}
-            >
-              <i-tab
-                caption="New NFT"
-                icon={{ image: { url: Assets.fullPath('img/nft/Tiers.svg') } }}
-                onClick={() => this.onChangeTab(KEY_TAB.NEW_NFT)}
-              >
-                <i-panel padding={{ left: '1rem', right: '1rem' }}>
-                  <i-hstack gap="2rem" id="cardRow" wrap="wrap" />
-                </i-panel>
-              </i-tab>
-              <i-tab
-                caption="My NFTs"
-                icon={{ image: { url: Assets.fullPath('img/nft/NFT.svg') } }}
-                onClick={() => this.onChangeTab(KEY_TAB.MY_NFTS)}
-              >
-                <i-panel>
-                  <i-vstack id="myNFTsLoading" padding={{ top: 100 }} class="i-loading-overlay">
-                    <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
-                      <i-icon
-                        class="i-loading-spinner_icon"
-                        image={{ url: Assets.fullPath('img/loading.svg'), width: 36, height: 36 }}
-                      />
-                      <i-label
-                        caption="Loading..." font={{ color: '#FD4A4C', size: '1.5em' }}
-                        class="i-loading-spinner_text"
-                      />
-                    </i-vstack>
-                  </i-vstack>
-                  <i-panel padding={{ left: '1rem', right: '1rem' }} class="tab-sheet--container">
-                    <i-panel id="myNFTsInfoPanel" margin={{ bottom: '0.25rem' }} class="box-description">
-                      <i-hstack>
-                        <i-hstack minWidth="50%">
-                          <i-label caption="Number of NFTs:" margin={{ right: '0.25rem' }} />
-                          <i-label id="lbMyNFTsNum" font={{ bold: true }} />
-                        </i-hstack>
-                        <i-hstack minWidth="50%">
-                          <i-label caption="Stake Value:" margin={{ right: '0.25rem' }} />
-                          <i-label id="lbMyNFTsStakeValue" font={{ bold: true }} />
-                        </i-hstack>
-                      </i-hstack>
-                    </i-panel>
-                    <i-hstack gap="2rem" id="myCardRow" wrap="wrap" margin={{ top: '2rem' }} />
-                  </i-panel>
-                </i-panel>
-              </i-tab>
-            </i-tabs>
+            <i-panel padding={{ left: '1rem', right: '1rem' }}>
+              <i-panel id="pnlLoading" minHeight={300} class="i-loading-overlay">
+                <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
+                  <i-icon
+                    class="i-loading-spinner_icon"
+                    cursor="default"
+                    image={{ url: Assets.fullPath('img/loading.svg'), width: 36, height: 36 }}
+                  />
+                  <i-label
+                    caption="Loading..." font={{ color: '#FD4A4C', size: '1.5em' }}
+                    class="i-loading-spinner_text"
+                  />
+                </i-vstack>
+              </i-panel>
+              <i-hstack gap="2rem" id="cardRow" wrap="wrap" />
+            </i-panel>
           </i-panel>
           <i-hstack id="minting" visible={false} gap="30px" horizontalAlignment="center">
             <i-vstack class="nft-card-stake">

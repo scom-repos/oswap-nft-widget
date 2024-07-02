@@ -52,10 +52,9 @@ export default class Module1 extends Module {
 
   async init() {
     super.init();
-    this.nftWidget.style.width = 'calc(100% - 50px)';
+    this.nftWidget.style.width = '100%';
     this.nftWidget.style.maxWidth = '1440px';
     const dapp: any = this.nftWidget.querySelector('i-scom-dapp-container');
-    console.log(dapp)
     if (dapp) {
       dapp.style.setProperty('--background-default', Theme.background.default);
     }
@@ -73,7 +72,7 @@ export default class Module1 extends Module {
         >
           <i-scom-oswap-nft-widget
             id="nftWidget"
-            defaultChainId={43113}
+            defaultChainId={97}
             networks={[
               {
                 "chainId": 43113

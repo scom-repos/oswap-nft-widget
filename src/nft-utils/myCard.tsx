@@ -6,11 +6,11 @@ import {
   Module,
   Panel,
   Image,
-  Button,
   Icon,
   Container
 } from '@ijstech/components';
 import { myCardStyle } from './myCard.css';
+import { IDataMyCard } from '../store/index';
 
 declare global {
   namespace JSX {
@@ -23,9 +23,7 @@ declare global {
 
 @customElements('nft-my-card')
 export class NftMyCard extends Module {
-  private _cardData: any;
-  private caption1: Label;
-  private caption2: Label;
+  private _cardData: IDataMyCard;
   private stakeAmount: Label;
   private trollImage: Panel;
   private reward: Label;
@@ -33,28 +31,44 @@ export class NftMyCard extends Module {
   private flashSales: Label;
   private birthday: Label;
   private rarity: Panel;
-  private btnHanldeStake: Button;
-  private panel1: Panel;
-  private _onBurn: any;
+  onBurn: () => void;
   constructor(parent?: Container, options?: any) {
     super(parent, options)
   }
 
-  get cardData(): any {
+  get cardData(): IDataMyCard {
     return this._cardData
   }
 
-  set cardData(value: any) {
+  set cardData(value: IDataMyCard) {
     this._cardData = value;
-    if (this.stakeAmount) this.stakeAmount.caption = value.stakeAmountText;
-    if (this.reward) this.reward.caption = value.rewardsBoost;
-    if (this.monthlyReward) this.monthlyReward.caption = value.monthlyRewardText;
-    if (this.flashSales) this.flashSales.caption = value.flashSales;
-    if (this.birthday) this.birthday.caption = value.birthday;
+    this.renderCard();
+  }
+
+  async renderStar() {
+    let icon = await Icon.create();
+    icon.name = 'star';
+    icon.fill = '#fff';
+    icon.width = 20;
+    icon.height = 20;
+    this.rarity.appendChild(icon);
+  }
+
+  private async renderCard() {
+    const value = this.cardData;
+    if (!this.stakeAmount.isConnected) await this.stakeAmount.ready();
+    this.stakeAmount.caption = value.stakeAmountText;
+    if (this.reward) await this.reward.ready();
+    this.reward.caption = value.rewardsBoost;
+    if (this.monthlyReward) await this.monthlyReward.ready();
+    this.monthlyReward.caption = value.monthlyRewardText;
+    if (this.flashSales) await this.flashSales.ready();
+    this.flashSales.caption = value.flashSales;
+    if (this.birthday) await this.birthday.ready();
+    this.birthday.caption = value.birthday;
     if (this.rarity) {
       for (let i = 0; i < value.rarity; i++) {
         this.renderStar();
-
       }
     }
 
@@ -64,26 +78,11 @@ export class NftMyCard extends Module {
       this.trollImage.appendChild(img1);
     }
   }
-  async renderStar() {
-    let icon = await Icon.create();
-    icon.name = 'star';
-    icon.fill = '#fff';
-    icon.width = 20;
-    icon.height = 20;
-    this.rarity.appendChild(icon);
-  }
-  get onBurn() {
-    return this._onBurn;
-  }
-
-  set onBurn(callback: any) {
-    this._onBurn = callback;
-  }
 
   handleFlipCard(sender: Control, event: Event) {
     const target = event.target as HTMLElement;
     if (target.classList.contains('btn-burn') || target.closest('.btn-burn')) {
-      this._onBurn();
+      this.onBurn();
     } else {
       sender.classList.toggle('active');
     }

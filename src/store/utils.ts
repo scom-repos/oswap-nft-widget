@@ -305,7 +305,7 @@ export function getWalletProvider() {
   return localStorage.getItem('walletProvider') || '';
 }
 
-export function isWalletConnected() {
+export function isClientWalletConnected() {
   const wallet = Wallet.getClientInstance();
   return wallet.isConnected;
 }
