@@ -22,6 +22,7 @@ import {
   State,
   IDataCard,
   IDataMyCard,
+  NftInfoStore,
 } from './store/index';
 import {
   formatNumber,
@@ -37,7 +38,7 @@ import ScomTxStatusModal from '@scom/scom-tx-status-modal';
 import ScomDappContainer from '@scom/scom-dapp-container'
 import { tokenStore, assets as tokenAssets, ITokenObject } from '@scom/scom-token-list';
 import ScomWalletModal, { IWalletPlugin } from '@scom/scom-wallet-modal';
-import { nftMyRewardsColumns, NftCard, NftMyCard, fetchAllNftInfo, getUserNFTs, mintNFT, burnNFT, getCommissionRate } from './nft-utils/index';
+import { NftCard, NftMyCard, fetchAllNftInfo, mintNFT, burnNFT, getCommissionRate, NftInfo } from './nft-utils/index';
 import { getBuilderSchema, getProjectOwnerSchema } from './formSchema';
 import { nftStyle, listMediaStyles, tabStyle, nftDefaultStyle } from './index.css';
 import configData from './data.json';
@@ -54,12 +55,9 @@ interface INetworkConfig {
   chainId: number;
 }
 
-let myRewardData: any[] = [];
-
 const enum KEY_TAB {
   NEW_NFT,
   MY_NFTS,
-  MY_REWARD
 }
 
 interface ScomOswapNftWidgetElement extends ControlElement {
@@ -102,7 +100,6 @@ export default class ScomOswapNftWidget extends Module {
 
   private cardRow: Panel;
   private myCardRow: Panel;
-  private myRewardTable: Table;
   private mint: Panel;
   private minting: Panel;
   private burning: Panel;
@@ -132,9 +129,6 @@ export default class ScomOswapNftWidget extends Module {
   private currentDataMyCard: IDataMyCard;
   private currentTab: number = KEY_TAB.NEW_NFT;
   private myNFTsLoading: Panel;
-  private myRewardLoading: Panel;
-  private btnClaimAll: Button;
-  private emptyRewardsMsg: Label;
   private myNFTsInfoPanel: Panel;
 
   private _data: INftOswapWidgetData = {
@@ -510,44 +504,6 @@ export default class ScomOswapNftWidget extends Module {
     this.updateStyle('--max-button-hover-background', this.tag[themeVar]?.maxButtonHoverBackground || 'linear-gradient(255deg,#f15e61,#b52082)');
   }
 
-  private myRewardsCols() {
-    let cols = nftMyRewardsColumns(this.state);
-    const self = this;
-    cols[cols.length - 1] = {
-      title: '',
-      fieldName: 'claim',
-      key: 'claim',
-      onRenderCell: async function (source: Control, data: any, row: any) {
-        const panel = await Panel.create();
-        const button = await Button.create();
-        button.caption = !self.state.isRpcWalletConnected() ? 'Switch Network' : 'Claim';
-        button.classList.add('btn-claim', 'btn-os');
-        button.onClick = () => self.claimAllRewards(button, row.tokenId);
-        panel.appendChild(button);
-
-        const vstackMobile = new VStack();
-        const hstackDate = new HStack(undefined, { margin: { bottom: '0.5rem' } });
-        const hstackAmount = new HStack();
-        const lbDate = await Label.create({ margin: { right: '0.25rem' } });
-        const lbDateVal = await Label.create();
-        const lbAmount = await Label.create({ margin: { right: '0.25rem' } });
-        const lbAmountVal = await Label.create();
-        vstackMobile.classList.add('render-mobile--item');
-        hstackAmount.classList.add('custom-min--h');
-        lbDate.caption = 'Vesting End Date:';
-        lbDateVal.caption = row.endDate;
-        lbAmount.caption = 'Claimable Amount:';
-        lbAmountVal.caption = row.claimableAmount;
-        hstackDate.append(lbDate, lbDateVal);
-        hstackAmount.append(lbAmount, lbAmountVal);
-        vstackMobile.append(hstackDate, hstackAmount);
-        panel.appendChild(vstackMobile);
-        return panel;
-      }
-    }
-    return cols;
-  }
-
   private async refreshUI() {
     await this.initializeWidgetConfig();
   }
@@ -717,9 +673,6 @@ export default class ScomOswapNftWidget extends Module {
       case KEY_TAB.MY_NFTS:
         this.renderMyCards();
         break;
-      case KEY_TAB.MY_REWARD:
-        this.renderMyReward();
-        break;
       default:
         break;
     }
@@ -755,24 +708,6 @@ export default class ScomOswapNftWidget extends Module {
     </i-panel>)
   };
 
-  private renderMyRewardEmpty(source: Control) {
-    const emptyElm = (
-      <i-hstack verticalAlignment="center" width="100%">
-        <i-image url={Assets.fullPath('img/icon-advice.svg')} />
-        <i-panel>
-          <i-label
-            id="emptyRewardsMsg"
-            caption="No Data"
-            font={{ size: '1rem', bold: true }}
-            margin={{ left: 10 }}
-          />
-        </i-panel>
-      </i-hstack>
-    )
-    const td = source.querySelector('td');
-    td && td.appendChild(emptyElm);
-  }
-
   private renderData() {
     this.updateButtons();
     switch (this.currentTab) {
@@ -782,55 +717,9 @@ export default class ScomOswapNftWidget extends Module {
       case KEY_TAB.MY_NFTS:
         this.renderMyCards();
         break;
-      case KEY_TAB.MY_REWARD:
-        this.renderMyReward();
-        break;
       default:
         break;
     }
-  }
-
-  private async renderMyReward() {
-    if (!isWalletConnected()) {
-      this.btnClaimAll.visible = false;
-      this.myRewardTable.data = [];
-      if (this.myRewardTable.pagination) this.myRewardTable.pagination.totalPages = 0;
-      this.emptyRewardsMsg.caption = 'Please connect with your wallet!';
-      if (this.myRewardLoading) this.myRewardLoading.visible = false;
-      return;
-    }
-    if (this.myRewardLoading)
-      this.myRewardLoading.visible = true;
-    let info = await getOwnRewards(this.state);
-    myRewardData = [];
-    if (!info || !info.length) {
-      this.emptyRewardsMsg.caption = 'No Data';
-      this.myRewardTable.data = [];
-      if (this.myRewardTable.pagination) this.myRewardTable.pagination.totalPages = 0;
-      this.btnClaimAll.visible = false;
-      this.myRewardLoading.visible = false;
-      return;
-    }
-    if (!this.btnClaimAll.visible) {
-      this.btnClaimAll.visible = true;
-    }
-    for (let item of info) {
-      let lockedAmount = new BigNumber(item.totalAmount).minus(new BigNumber(item.claimedAmount).plus(item.unclaimedAmount)).toFixed()
-      myRewardData.push({
-        tokenId: item.tokenId,
-        token: item.token,
-        startDate: formatDate(item.startDate),
-        endDate: formatDate(item.endDate),
-        lockedAmount: formatNumber(lockedAmount, 4),
-        claimableAmount: formatNumber(item.unclaimedAmount, 4)
-      })
-    }
-    this.myRewardTable.columns = this.myRewardsCols();
-    this.myRewardTable.data = myRewardData;
-    if (this.myRewardTable.pagination)
-      this.myRewardTable.pagination.totalPages = Math.ceil(myRewardData.length / 10);
-    if (this.myRewardLoading)
-      this.myRewardLoading.visible = false;
   }
 
   private async renderCards() {
@@ -869,7 +758,7 @@ export default class ScomOswapNftWidget extends Module {
     })
   }
 
-  private async renderMyCards() {
+  private async renderMyCards(nftInfo:NftInfo) {
     if (!isWalletConnected()) {
       this.myNFTsInfoPanel.visible = false;
       this.renderEmpty(this.myCardRow);
@@ -880,10 +769,10 @@ export default class ScomOswapNftWidget extends Module {
       this.myCardRow.clearInnerHTML();
       this.myNFTsLoading.visible = true;
     }
-    let userNFTs = await getUserNFTs(this.state, Wallet.getClientInstance().address);
+    let userNFTs = nftInfo.userNfts;
     this.dataMyCards = [];
     this.myCardRow.clearInnerHTML();
-    if (userNFTs.length == 0 || userNFTs.every((f: any) => !f.listNFT.length)) {
+    if (userNFTs.length == 0) {
       this.lbMyNFTsNum.caption = '0';
       this.lbMyNFTsStakeValue.caption = '0';
       this.myNFTsInfoPanel.visible = false;
@@ -895,27 +784,25 @@ export default class ScomOswapNftWidget extends Module {
     if (!this.myNFTsInfoPanel.visible) {
       this.myNFTsInfoPanel.visible = true;
     }
-    for (let nftTypeItem of userNFTs) {
-      for (let item of nftTypeItem.listNFT) {
+    for (let nft of userNFTs) {
         let myCard: IDataMyCard = {
-          address: nftTypeItem.contract,
-          flashSales: nftTypeItem.flashSales,
-          monthlyRewardAPR: nftTypeItem.apr,
-          monthlyRewardText: `${nftTypeItem.apr}% APR`,
-          rewardsBoost: `${nftTypeItem.rewards}%`,
-          tier: nftTypeItem.tier,
-          trollNumber: item.tokenID,
-          stakeToken: item.token,
-          stakeAmount: item.stakingBalance,
-          stakeAmountText: `${formatNumber(item.stakingBalance)} ${item.token?.symbol || ''}`,
-          rarity: item.rarity,
-          birthday: moment.unix(item.birthday).format(DefaultDateFormat),
-          image: item.image
+          address: nftInfo.address,
+          flashSales: nftInfo.flashSales,
+          monthlyRewardAPR: nftInfo.apr,
+          monthlyRewardText: `${nftInfo.apr}% APR`,
+          rewardsBoost: `${nftInfo.rewards}%`,
+          tier: nftInfo.name,
+          trollNumber: nft.tokenId,
+          stakeToken: nftInfo.token,
+          stakeAmount: nft.stakeBalance,
+          stakeAmountText: `${formatNumber(nft.stakeBalance)} ${nftInfo.token.symbol || ''}`,
+          rarity: nft.rarity,
+          birthday: moment.unix(nft.birthday).format(DefaultDateFormat),
+          image: nft.image
         }
         this.dataMyCards.push(myCard);
-      }
     }
-    let stakeToken = userNFTs[0].stakeToken;
+    let stakeToken = nftInfo.token;
     if (this.dataMyCards.length > 0) {
       this.lbMyNFTsNum.caption = `${formatNumberWithSeparators(this.dataMyCards.length)}`;
       let totalStakeAmount = this.dataMyCards.reduce((prev, curr) => {
@@ -966,7 +853,6 @@ export default class ScomOswapNftWidget extends Module {
   }
 
   private updateButtons() {
-    this.btnClaimAll.caption = !this.state.isRpcWalletConnected() ? 'Switch Network' : 'Claim All';
     if (this.targetChainId && this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
       this.btnApprove.caption = 'Switch Network';
       this.btnBurn.caption = 'Switch Network';
@@ -1003,50 +889,6 @@ export default class ScomOswapNftWidget extends Module {
     this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
     await this.initApprovalModelAction(item);
     this.approvalModelAction.checkAllowance(item.stakeToken, new BigNumber(item.totalPayAmount).toFixed());
-  }
-
-  private async claimAllRewards(btn: Button, tokenId?: string) {
-    if (!this.state.isRpcWalletConnected()) {
-      const chainId = this.state.getChainId();
-      const clientWallet = Wallet.getClientInstance();
-      await clientWallet.switchNetwork(chainId);
-      return;
-    }
-    showResultMessage(this.txStatusModal, 'warning', 'Claiming');
-    const txHashCallback = (err: Error, receipt?: string) => {
-      if (err) {
-        showResultMessage(this.txStatusModal, 'error', err);
-      }
-      else if (receipt) {
-        btn.rightIcon.visible = true;
-        if (tokenId === undefined) {
-          const btnClaims = this.myRewardTable.querySelectorAll('.btn-claim');
-          btnClaims.forEach((elm: any) => elm.rightIcon.visible = true);
-        } else {
-          this.btnClaimAll.rightIcon.visible = true;
-        }
-        showResultMessage(this.txStatusModal, 'success', receipt);
-      }
-    }
-    const confirmationCallback = async (receipt: any) => {
-      await this.renderMyReward();
-      btn.rightIcon.visible = false;
-      if (tokenId === undefined) {
-        const btnClaims = this.myRewardTable.querySelectorAll('.btn-claim');
-        btnClaims.forEach((elm: any) => elm.rightIcon.visible = false);
-      } else {
-        this.btnClaimAll.rightIcon.visible = false;
-      }
-    }
-    registerSendTxEvents({
-      transactionHash: txHashCallback,
-      confirmation: confirmationCallback
-    })
-    if (tokenId === undefined) {
-      await claimMultiple();
-    } else {
-      await claimReward(tokenId);
-    }
   }
 
   private async handleMint() {
@@ -1182,51 +1024,6 @@ export default class ScomOswapNftWidget extends Module {
                     </i-panel>
                     <i-hstack gap="2rem" id="myCardRow" wrap="wrap" margin={{ top: '2rem' }} />
                   </i-panel>
-                </i-panel>
-              </i-tab>
-              <i-tab
-                caption="My Reward"
-                onClick={() => this.onChangeTab(KEY_TAB.MY_REWARD)}
-                icon={{ image: { url: Assets.fullPath('img/nft/NFT.svg') } }}
-              >
-                <i-panel>
-                  <i-vstack id="myRewardLoading" padding={{ top: 100 }} class="i-loading-overlay">
-                    <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
-                      <i-icon
-                        class="i-loading-spinner_icon"
-                        image={{ url: Assets.fullPath('img/loading.svg'), width: 36, height: 36 }}
-                      />
-                      <i-label
-                        caption="Loading..." font={{ color: '#FD4A4C', size: '1.5em' }}
-                        class="i-loading-spinner_text"
-                      />
-                    </i-vstack>
-                  </i-vstack>
-                  <i-hstack horizontalAlignment="center" padding={{ left: 18, right: 18, bottom: 18 }}>
-                    <i-button
-                      id="btnClaimAll"
-                      caption="Claim All"
-                      class="btn-os btn-claim"
-                      rightIcon={{ spin: true, visible: false }}
-                      onClick={() => this.claimAllRewards(this.btnClaimAll)}
-                    />
-                  </i-hstack>
-                  <i-table
-                    id="myRewardTable"
-                    columns={this.myRewardsCols()}
-                    data={myRewardData}
-                    mediaQueries={
-                      [
-                        {
-                          maxWidth: '767px',
-                          properties: {
-                            fieldNames: ['token', 'claim']
-                          }
-                        }
-                      ]
-                    }
-                    onRenderEmptyTable={this.renderMyRewardEmpty.bind(this)}
-                  />
                 </i-panel>
               </i-tab>
             </i-tabs>
