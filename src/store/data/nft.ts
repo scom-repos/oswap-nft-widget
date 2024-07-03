@@ -20,23 +20,6 @@ export interface UserNFTsInfo extends NftInfoStore {
   userNfts: UserNftInfo[];
 }
 
-export interface INFTCollectionCard {
-  contract: string;
-  token: TokenConstant;
-  tier?: string;
-  tokenID: number;
-  owner: string;
-  attributes: string[] | null;
-  rarity: number;
-  birthday: number;
-  image: string;
-}
-
-export interface INFTCollectionInfo {
-  list: INFTCollectionCard[];
-  total: number;
-}
-
 export interface IDataCard {
   address: string;
   flashSales?: string;

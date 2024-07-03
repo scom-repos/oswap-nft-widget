@@ -1,6 +1,6 @@
 import { application } from '@ijstech/components';
 import { BigNumber, ERC20ApprovalModel, IERC20ApprovalEventOptions, INetwork, Wallet } from '@ijstech/eth-wallet';
-import { IExtendedNetwork, TokenMapType } from '../global/index';
+import { IExtendedNetwork } from '../global/index';
 import getNetworkList from '@scom/scom-network-list';
 import ConfigData from '../data.json';
 import { Mainnets, Testnets } from './data/core';
@@ -93,7 +93,6 @@ export type ProxyAddresses = { [key: number]: string };
 
 export class State {
   defaultChainId: number = 0;
-  slippageTolerance = "0.5";
   proxyAddresses: ProxyAddresses = {};
   infuraId: string = "";
   rpcWalletId: string = "";
@@ -129,11 +128,12 @@ export class State {
       acc[cur.chainId] = cur;
       return acc;
     }, {});
-    const supportedNetworks = ConfigData.supportedNetworks || [];
+    // const supportedNetworks = ConfigData.supportedNetworks || [];
     for (let network of networkList) {
       const networkInfo = defaultNetworkMap[network.chainId];
-      const supportedNetwork = supportedNetworks.find(v => v.chainId == network.chainId);
-      if (!networkInfo || !supportedNetwork) continue;
+      // const supportedNetwork = supportedNetworks.find(v => v.chainId == network.chainId);
+      // if (!networkInfo || !supportedNetwork) continue;
+      if (!networkInfo) continue;
       if (this.infuraId && network.rpcUrls && network.rpcUrls.length > 0) {
         for (let i = 0; i < network.rpcUrls.length; i++) {
           network.rpcUrls[i] = network.rpcUrls[i].replace(/{InfuraId}/g, this.infuraId);
@@ -141,8 +141,7 @@ export class State {
       }
       this.networkMap[network.chainId] = {
         ...networkInfo,
-        ...network,
-        isTestnet: supportedNetwork.isTestnet
+        ...network
       };
     }
     return instanceId;
@@ -169,38 +168,6 @@ export class State {
   getNetworkInfo = (chainId: number) => {
     return this.networkMap[chainId];
   }
-
-  getFilteredNetworks = (filter: (value: IExtendedNetwork, index: number, array: IExtendedNetwork[]) => boolean) => {
-    let networkFullList = Object.values(this.networkMap);
-    return networkFullList.filter(filter);
-  }
-
-  getSiteSupportedNetworks = () => {
-    let networkFullList = Object.values(this.networkMap);
-    let list = networkFullList.filter(network => !this.getNetworkInfo(network.chainId)?.isDisabled);
-    return list;
-  }
-
-  getMatchNetworks = (conditions: NetworkConditions): IExtendedNetwork[] => {
-    let networkFullList = Object.values(this.networkMap);
-    let out = matchFilter(networkFullList, conditions);
-    return out;
-  }
-  
-  getNetworkExplorerName = (chainId: number) => {
-    if (this.getNetworkInfo(chainId)) {
-      return this.getNetworkInfo(chainId).explorerName;
-    }
-    return 'Unknown';
-  }
-
-  viewOnExplorerByTxHash = (chainId: number, txHash: string) => {
-    let network = this.getNetworkInfo(chainId);
-    if (network && network.explorerTxUrl) {
-      let url = `${network.explorerTxUrl}${txHash}`;
-      window.open(url);
-    }
-  }
   
   viewOnExplorerByAddress = (chainId: number, address: string) => {
     let network = this.getNetworkInfo(chainId);
@@ -214,15 +181,6 @@ export class State {
     const rpcWallet = this.getRpcWallet();
     return rpcWallet?.chainId;
   }
-
-  getSlippageTolerance = (): number => {
-    return Number(this.slippageTolerance) || 0;
-  }
-
-  setSlippageTolerance = (value: number) => {
-    this.slippageTolerance = new BigNumber(value).toFixed();
-  }
-
 
   setNetworkConfig = (networks: INetworkConfig[]) => {
     this.networkConfig = networks;
@@ -253,53 +211,6 @@ export class State {
   }
 }
 
-interface NetworkConditions {
-  isDisabled?: boolean,
-  isTestnet?: boolean,
-  isMainChain?: boolean
-}
-
-function matchFilter<O extends { [keys: string]: any }>(list: O[], filter: Partial<O>): O[] {
-  let filters = Object.keys(filter);
-  return list.filter(item => filters.every(f => {
-    switch (typeof filter[f]) {
-      case 'boolean':
-        if (filter[f] === false) {
-          return !item[f];
-        }
-      // also case for filter[f] === true 
-      case 'string':
-      case 'number':
-        return filter[f] === item[f];
-      case 'object': // have not implemented yet
-      default:
-        console.log(`matchFilter do not support ${typeof filter[f]} yet!`)
-        return false;
-    }
-  }));
-}
-
-export const getTokensDataList = async (tokenMapData: TokenMapType, tokenBalances: any): Promise<any[]> => {
-  let dataList: any[] = [];
-  for (let i = 0; i < Object.keys(tokenMapData).length; i++) {
-    let tokenAddress = Object.keys(tokenMapData)[i];
-    let tokenObject = tokenMapData[tokenAddress];
-    if (tokenBalances) {
-      dataList.push({
-        ...tokenObject,
-        status: false,
-        value: tokenBalances[tokenAddress] ? tokenBalances[tokenAddress] : 0,
-      });
-    } else {
-      dataList.push({
-        ...tokenObject,
-        status: null,
-      })
-    }
-  }
-  return dataList;
-}
-
 // wallet
 export function getWalletProvider() {
   return localStorage.getItem('walletProvider') || '';
@@ -308,11 +219,6 @@ export function getWalletProvider() {
 export function isClientWalletConnected() {
   const wallet = Wallet.getClientInstance();
   return wallet.isConnected;
-}
-
-export const truncateAddress = (address: string) => {
-  if (address === undefined || address === null) return '';
-  return address.substr(0, 6) + '...' + address.substr(-4);
 }
 
 export const getChainNativeToken = (chainId: number): ITokenObject => {

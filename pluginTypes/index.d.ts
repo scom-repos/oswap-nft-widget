@@ -2,229 +2,12 @@
 /// <reference path="@scom/scom-dapp-container/@ijstech/eth-wallet/index.d.ts" />
 /// <reference path="@scom/scom-commission-proxy-contract/@ijstech/eth-wallet/index.d.ts" />
 /// <reference path="@ijstech/eth-contract/index.d.ts" />
-/// <amd-module name="@scom/oswap-nft-widget/global/helper.ts" />
-declare module "@scom/oswap-nft-widget/global/helper.ts" {
-    import { BigNumber } from "@ijstech/eth-wallet";
-    export enum SITE_ENV {
-        DEV = "dev",
-        TESTNET = "testnet",
-        MAINNET = "mainnet"
-    }
-    export const DefaultDateTimeFormat = "DD/MM/YYYY HH:mm:ss";
-    export const DefaultDateFormat = "DD/MM/YYYY";
-    export const formatDate: (date: any, customType?: string, showTimezone?: boolean) => string;
-    export const formatUTCDate: (date: any, customType?: string, showTimezone?: boolean) => string;
-    export const compareDate: (fromDate: any, toDate?: any) => boolean;
-    export const formatNumber: (value: any, decimals?: number, options?: {
-        min?: number;
-        sign?: string;
-    }) => string;
-    export const formatPercentNumber: (value: any, decimals?: number) => string;
-    export const formatNumberWithSeparators: (value: number, precision?: number) => string;
-    export const isInvalidInput: (val: any) => boolean;
-    export const limitInputNumber: (input: any, decimals: number) => void;
-    export const limitDecimals: (value: any, decimals: number) => any;
-    export function getAPI(url: string, paramsObj?: any): Promise<any>;
-    export const toWeiInv: (n: string, unit?: number) => BigNumber;
-    export const padLeft: (string: string, chars: number, sign?: string) => string;
-    export const numberToBytes32: (value: any, prefix?: string) => any;
-    export const getParamsFromUrl: () => URLSearchParams;
-    export const uniqWith: (array: any[], compareFn: (cur: any, oth: any) => boolean) => any;
-    export const getWeekDays: () => any[];
-    export const showResultMessage: (result: any, status: 'warning' | 'success' | 'error', content?: string | Error) => void;
-    export function flatMap<T, U>(array: T[], callback: (item: T) => U[]): U[];
-}
-/// <amd-module name="@scom/oswap-nft-widget/global/error.ts" />
-declare module "@scom/oswap-nft-widget/global/error.ts" {
-    export function parseContractError(oMessage: string, tokens: string[]): Promise<string>;
-}
-/// <amd-module name="@scom/oswap-nft-widget/global/common.ts" />
-declare module "@scom/oswap-nft-widget/global/common.ts" {
-    import { BigNumber, ISendTxEventsOptions } from "@ijstech/eth-wallet";
-    import { ITokenObject } from "@scom/scom-token-list";
-    export type TokenMapType = {
-        [token: string]: ITokenObject;
-    };
-    export const ERC20MaxAmount: BigNumber;
-    export const isTransactionConfirmed: (txHash: string) => Promise<boolean>;
-    export const registerSendTxEvents: (sendTxEventHandlers: ISendTxEventsOptions) => void;
-    export const isAddressValid: (address: string) => Promise<any>;
-}
-/// <amd-module name="@scom/oswap-nft-widget/global/index.ts" />
-declare module "@scom/oswap-nft-widget/global/index.ts" {
-    import { INetwork } from '@ijstech/eth-wallet';
-    export interface IExtendedNetwork extends INetwork {
-        shortName?: string;
-        isDisabled?: boolean;
-        isMainChain?: boolean;
-        explorerName?: string;
-        explorerTxUrl?: string;
-        explorerAddressUrl?: string;
-        isTestnet?: boolean;
-    }
-    export const enum EventId {
-        IsWalletConnected = "isWalletConnected",
-        IsWalletDisconnected = "IsWalletDisconnected",
-        Paid = "Paid"
-    }
-    export { getAPI, formatNumber, formatNumberWithSeparators, DefaultDateTimeFormat, DefaultDateFormat, formatDate, formatUTCDate, limitDecimals, limitInputNumber, isInvalidInput, toWeiInv, numberToBytes32, getParamsFromUrl, uniqWith, getWeekDays, compareDate, formatPercentNumber, SITE_ENV, showResultMessage, flatMap } from "@scom/oswap-nft-widget/global/helper.ts";
-    export { parseContractError } from "@scom/oswap-nft-widget/global/error.ts";
-    export { isTransactionConfirmed, registerSendTxEvents, TokenMapType, isAddressValid, ERC20MaxAmount, } from "@scom/oswap-nft-widget/global/common.ts";
-}
-/// <amd-module name="@scom/oswap-nft-widget/data.json.ts" />
-declare module "@scom/oswap-nft-widget/data.json.ts" {
-    const _default: {
-        infuraId: string;
-        defaultBuilderData: {
-            defaultChainId: number;
-            networks: {
-                chainId: number;
-            }[];
-            wallets: {
-                name: string;
-            }[];
-            showHeader: boolean;
-            showFooter: boolean;
-        };
-        supportedNetworks: ({
-            chainId: number;
-            isMainChain: boolean;
-            isTestnet?: undefined;
-        } | {
-            chainId: number;
-            isMainChain: boolean;
-            isTestnet: boolean;
-        })[];
-    };
-    export default _default;
-}
 /// <amd-module name="@scom/oswap-nft-widget/store/data/core.ts" />
 declare module "@scom/oswap-nft-widget/store/data/core.ts" {
     export const MainnetMainChain = 56;
     export const TestnetMainChain = 97;
     export const Mainnets: number[];
     export const Testnets: number[];
-}
-/// <amd-module name="@scom/oswap-nft-widget/store/utils.ts" />
-declare module "@scom/oswap-nft-widget/store/utils.ts" {
-    import { ERC20ApprovalModel, IERC20ApprovalEventOptions } from '@ijstech/eth-wallet';
-    import { IExtendedNetwork, TokenMapType } from "@scom/oswap-nft-widget/global/index.ts";
-    import { ITokenObject } from '@scom/scom-token-list';
-    import { INetworkConfig } from '@scom/scom-network-picker';
-    export interface IWalletConnectMetadata {
-        name: string;
-        description: string;
-        url: string;
-        icons: string[];
-    }
-    export interface IWalletConnectConfig {
-        projectId: string;
-        metadata: IWalletConnectMetadata;
-    }
-    export enum WalletPlugin {
-        MetaMask = "metamask",
-        Coin98 = "coin98",
-        TrustWallet = "trustwallet",
-        BinanceChainWallet = "binancechainwallet",
-        ONTOWallet = "onto",
-        WalletConnect = "walletconnect",
-        BitKeepWallet = "bitkeepwallet",
-        FrontierWallet = "frontierwallet"
-    }
-    export enum NetworkType {
-        Mainnet = 0,
-        Testnet = 1,
-        NotSupported = 2
-    }
-    export function getNetworkType(chainId: number): NetworkType;
-    export function getNetworksByType(chainId: number): number[];
-    interface Logo {
-        default: string;
-        mobile: string;
-        footer: string;
-    }
-    interface FooterPageInfo {
-        caption: string;
-        link: string;
-    }
-    interface SocialMediaInfo {
-        img: string;
-        link: string;
-    }
-    interface TokenInfo {
-        symbol: string;
-        img: string;
-    }
-    export interface ProjectInfo {
-        logo: Logo;
-        versionText: string;
-    }
-    export interface IParams {
-        projectInfo: ProjectInfo;
-        footerPagesInfo: FooterPageInfo[];
-        socialMediaInfo: SocialMediaInfo[];
-        tokenInfo: TokenInfo;
-    }
-    export type ProxyAddresses = {
-        [key: number]: string;
-    };
-    export class State {
-        defaultChainId: number;
-        slippageTolerance: string;
-        proxyAddresses: ProxyAddresses;
-        infuraId: string;
-        rpcWalletId: string;
-        networkMap: {
-            [key: number]: IExtendedNetwork;
-        };
-        networkConfig: INetworkConfig[];
-        embedderCommissionFee: string;
-        approvalModel: ERC20ApprovalModel;
-        constructor(options: any);
-        initRpcWallet(defaultChainId: number): string;
-        getRpcWallet(): import("@ijstech/eth-wallet").IRpcWallet;
-        isRpcWalletConnected(): boolean;
-        getProxyAddress(chainId?: number): string;
-        getNetworkInfo: (chainId: number) => IExtendedNetwork;
-        getFilteredNetworks: (filter: (value: IExtendedNetwork, index: number, array: IExtendedNetwork[]) => boolean) => IExtendedNetwork[];
-        getSiteSupportedNetworks: () => IExtendedNetwork[];
-        getMatchNetworks: (conditions: NetworkConditions) => IExtendedNetwork[];
-        getNetworkExplorerName: (chainId: number) => string;
-        viewOnExplorerByTxHash: (chainId: number, txHash: string) => void;
-        viewOnExplorerByAddress: (chainId: number, address: string) => void;
-        getChainId(): number;
-        getSlippageTolerance: () => number;
-        setSlippageTolerance: (value: number) => void;
-        setNetworkConfig: (networks: INetworkConfig[]) => void;
-        getNetworkConfig: () => INetworkConfig[];
-        private initData;
-        setApprovalModelAction(options: IERC20ApprovalEventOptions, spenderAddress: string): Promise<import("@ijstech/eth-wallet").IERC20ApprovalAction>;
-    }
-    interface NetworkConditions {
-        isDisabled?: boolean;
-        isTestnet?: boolean;
-        isMainChain?: boolean;
-    }
-    export const getTokensDataList: (tokenMapData: TokenMapType, tokenBalances: any) => Promise<any[]>;
-    export function getWalletProvider(): string;
-    export function isClientWalletConnected(): boolean;
-    export const truncateAddress: (address: string) => string;
-    export const getChainNativeToken: (chainId: number) => ITokenObject;
-    export function forEachNumberIndexAwait<T>(list: {
-        [index: number]: T;
-    }, callbackFn: (item: T, index: number) => Promise<void>): Promise<void>;
-    export function forEachNumberIndex<T>(list: {
-        [index: number]: T;
-    }, callbackFn: (item: T, index: number) => void): void;
-    export function mapIndexNumber<T, X>(list: {
-        [index: number]: T;
-    }, callbackFn: (item: T, index: number) => X): X[];
-    export function mapRecordIndex<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): X[];
-    export function forEachRecordIndex<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): void;
-    export function mapRecord<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): Record<I, X>;
-    export function mapRecordAwait<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => Promise<X>): Promise<Record<I, X>>;
-    export function mapRecordNumber<T, X>(list: Record<number, T>, callbackFn: (item: T, index: number, list: Record<number, T>) => X): Record<number, X>;
-    export function mapRecordNumberAwait<T, X>(list: Record<number, T>, callbackFn: (item: T, index: number, list: Record<number, T>) => Promise<X>): Promise<Record<number, X>>;
 }
 /// <amd-module name="@scom/oswap-nft-widget/store/data/nft.ts" />
 declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
@@ -245,21 +28,6 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
     export interface UserNFTsInfo extends NftInfoStore {
         stakeToken: TokenConstant;
         userNfts: UserNftInfo[];
-    }
-    export interface INFTCollectionCard {
-        contract: string;
-        token: TokenConstant;
-        tier?: string;
-        tokenID: number;
-        owner: string;
-        attributes: string[] | null;
-        rarity: number;
-        birthday: number;
-        image: string;
-    }
-    export interface INFTCollectionInfo {
-        list: INFTCollectionCard[];
-        total: number;
     }
     export interface IDataCard {
         address: string;
@@ -327,15 +95,183 @@ declare module "@scom/oswap-nft-widget/store/data/index.ts" {
     export * from "@scom/oswap-nft-widget/store/data/core.ts";
     export * from "@scom/oswap-nft-widget/store/data/nft.ts";
 }
+/// <amd-module name="@scom/oswap-nft-widget/global/helper.ts" />
+declare module "@scom/oswap-nft-widget/global/helper.ts" {
+    export enum SITE_ENV {
+        DEV = "dev",
+        TESTNET = "testnet",
+        MAINNET = "mainnet"
+    }
+    export const DefaultDateTimeFormat = "DD/MM/YYYY HH:mm:ss";
+    export const DefaultDateFormat = "DD/MM/YYYY";
+    export const formatNumber: (value: any, decimals?: number, options?: {
+        min?: number;
+        sign?: string;
+    }) => string;
+    export const formatNumberWithSeparators: (value: number, precision?: number) => string;
+    export const showResultMessage: (result: any, status: 'warning' | 'success' | 'error', content?: string | Error) => void;
+}
+/// <amd-module name="@scom/oswap-nft-widget/global/common.ts" />
+declare module "@scom/oswap-nft-widget/global/common.ts" {
+    import { ISendTxEventsOptions } from "@ijstech/eth-wallet";
+    export const registerSendTxEvents: (sendTxEventHandlers: ISendTxEventsOptions) => void;
+}
+/// <amd-module name="@scom/oswap-nft-widget/global/index.ts" />
+declare module "@scom/oswap-nft-widget/global/index.ts" {
+    import { INetwork } from '@ijstech/eth-wallet';
+    export interface IExtendedNetwork extends INetwork {
+        shortName?: string;
+        isDisabled?: boolean;
+        isMainChain?: boolean;
+        explorerName?: string;
+        explorerTxUrl?: string;
+        explorerAddressUrl?: string;
+        isTestnet?: boolean;
+    }
+    export const enum EventId {
+        IsWalletConnected = "isWalletConnected",
+        IsWalletDisconnected = "IsWalletDisconnected",
+        Paid = "Paid"
+    }
+    export { formatNumber, formatNumberWithSeparators, DefaultDateTimeFormat, DefaultDateFormat, SITE_ENV, showResultMessage, } from "@scom/oswap-nft-widget/global/helper.ts";
+    export { registerSendTxEvents, } from "@scom/oswap-nft-widget/global/common.ts";
+}
+/// <amd-module name="@scom/oswap-nft-widget/data.json.ts" />
+declare module "@scom/oswap-nft-widget/data.json.ts" {
+    const _default: {
+        infuraId: string;
+        defaultBuilderData: {
+            defaultChainId: number;
+            networks: {
+                chainId: number;
+            }[];
+            wallets: {
+                name: string;
+            }[];
+            showHeader: boolean;
+            showFooter: boolean;
+        };
+        supportedNetworks: ({
+            chainId: number;
+            isMainChain: boolean;
+            isTestnet?: undefined;
+        } | {
+            chainId: number;
+            isMainChain: boolean;
+            isTestnet: boolean;
+        })[];
+    };
+    export default _default;
+}
+/// <amd-module name="@scom/oswap-nft-widget/store/utils.ts" />
+declare module "@scom/oswap-nft-widget/store/utils.ts" {
+    import { ERC20ApprovalModel, IERC20ApprovalEventOptions } from '@ijstech/eth-wallet';
+    import { IExtendedNetwork } from "@scom/oswap-nft-widget/global/index.ts";
+    import { ITokenObject } from '@scom/scom-token-list';
+    import { INetworkConfig } from '@scom/scom-network-picker';
+    export interface IWalletConnectMetadata {
+        name: string;
+        description: string;
+        url: string;
+        icons: string[];
+    }
+    export interface IWalletConnectConfig {
+        projectId: string;
+        metadata: IWalletConnectMetadata;
+    }
+    export enum WalletPlugin {
+        MetaMask = "metamask",
+        Coin98 = "coin98",
+        TrustWallet = "trustwallet",
+        BinanceChainWallet = "binancechainwallet",
+        ONTOWallet = "onto",
+        WalletConnect = "walletconnect",
+        BitKeepWallet = "bitkeepwallet",
+        FrontierWallet = "frontierwallet"
+    }
+    export enum NetworkType {
+        Mainnet = 0,
+        Testnet = 1,
+        NotSupported = 2
+    }
+    export function getNetworkType(chainId: number): NetworkType;
+    export function getNetworksByType(chainId: number): number[];
+    interface Logo {
+        default: string;
+        mobile: string;
+        footer: string;
+    }
+    interface FooterPageInfo {
+        caption: string;
+        link: string;
+    }
+    interface SocialMediaInfo {
+        img: string;
+        link: string;
+    }
+    interface TokenInfo {
+        symbol: string;
+        img: string;
+    }
+    export interface ProjectInfo {
+        logo: Logo;
+        versionText: string;
+    }
+    export interface IParams {
+        projectInfo: ProjectInfo;
+        footerPagesInfo: FooterPageInfo[];
+        socialMediaInfo: SocialMediaInfo[];
+        tokenInfo: TokenInfo;
+    }
+    export type ProxyAddresses = {
+        [key: number]: string;
+    };
+    export class State {
+        defaultChainId: number;
+        proxyAddresses: ProxyAddresses;
+        infuraId: string;
+        rpcWalletId: string;
+        networkMap: {
+            [key: number]: IExtendedNetwork;
+        };
+        networkConfig: INetworkConfig[];
+        embedderCommissionFee: string;
+        approvalModel: ERC20ApprovalModel;
+        constructor(options: any);
+        initRpcWallet(defaultChainId: number): string;
+        getRpcWallet(): import("@ijstech/eth-wallet").IRpcWallet;
+        isRpcWalletConnected(): boolean;
+        getProxyAddress(chainId?: number): string;
+        getNetworkInfo: (chainId: number) => IExtendedNetwork;
+        viewOnExplorerByAddress: (chainId: number, address: string) => void;
+        getChainId(): number;
+        setNetworkConfig: (networks: INetworkConfig[]) => void;
+        getNetworkConfig: () => INetworkConfig[];
+        private initData;
+        setApprovalModelAction(options: IERC20ApprovalEventOptions, spenderAddress: string): Promise<import("@ijstech/eth-wallet").IERC20ApprovalAction>;
+    }
+    export function getWalletProvider(): string;
+    export function isClientWalletConnected(): boolean;
+    export const getChainNativeToken: (chainId: number) => ITokenObject;
+    export function forEachNumberIndexAwait<T>(list: {
+        [index: number]: T;
+    }, callbackFn: (item: T, index: number) => Promise<void>): Promise<void>;
+    export function forEachNumberIndex<T>(list: {
+        [index: number]: T;
+    }, callbackFn: (item: T, index: number) => void): void;
+    export function mapIndexNumber<T, X>(list: {
+        [index: number]: T;
+    }, callbackFn: (item: T, index: number) => X): X[];
+    export function mapRecordIndex<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): X[];
+    export function forEachRecordIndex<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): void;
+    export function mapRecord<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): Record<I, X>;
+    export function mapRecordAwait<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => Promise<X>): Promise<Record<I, X>>;
+    export function mapRecordNumber<T, X>(list: Record<number, T>, callbackFn: (item: T, index: number, list: Record<number, T>) => X): Record<number, X>;
+    export function mapRecordNumberAwait<T, X>(list: Record<number, T>, callbackFn: (item: T, index: number, list: Record<number, T>) => Promise<X>): Promise<Record<number, X>>;
+}
 /// <amd-module name="@scom/oswap-nft-widget/store/index.ts" />
 declare module "@scom/oswap-nft-widget/store/index.ts" {
-    import { State } from "@scom/oswap-nft-widget/store/utils.ts";
     export * from "@scom/oswap-nft-widget/store/data/index.ts";
-    export const nullAddress = "0x0000000000000000000000000000000000000000";
-    export const getTokenIcon: (address: string, chainId: number) => string;
-    export const tokenSymbol: (address: string, chainId: number) => string;
-    export const tokenName: (address: string, chainId: number) => string;
-    export const getNetworkImg: (state: State, chainId: number) => string;
     export * from "@scom/oswap-nft-widget/store/utils.ts";
 }
 /// <amd-module name="@scom/oswap-nft-widget/assets.ts" />
@@ -356,7 +292,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/myCard.css.ts" {
 }
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/myCard.tsx" />
 declare module "@scom/oswap-nft-widget/nft-utils/myCard.tsx" {
-    import { Control, ControlElement, Module, Container } from '@ijstech/components';
+    import { ControlElement, Module, Container } from '@ijstech/components';
     import { IDataMyCard } from "@scom/oswap-nft-widget/store/index.ts";
     global {
         namespace JSX {
@@ -378,9 +314,9 @@ declare module "@scom/oswap-nft-widget/nft-utils/myCard.tsx" {
         constructor(parent?: Container, options?: any);
         get cardData(): IDataMyCard;
         set cardData(value: IDataMyCard);
-        renderStar(): Promise<void>;
+        private renderStar;
         private renderCard;
-        handleFlipCard(sender: Control, event: Event): void;
+        private handleFlipCard;
         init(): Promise<void>;
         render(): Promise<any>;
     }
@@ -397,7 +333,6 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         }
     }
     export class NftCard extends Module {
-        private $eventBus;
         private _cardData;
         private pnlSlots;
         private stakeAmountText;
@@ -410,10 +345,8 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         private carouselSlider;
         onStake: () => void;
         onBurn: (item: IDataMyCard) => void;
-        private clientEvents;
         private _state;
         constructor(state: State, parent?: Container, options?: any);
-        onHide(): void;
         get state(): State;
         set state(value: State);
         get cardData(): IDataCard;
@@ -421,9 +354,8 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         private capitalizeFirstLetter;
         private renderCard;
         private updateBtn;
-        registerEvent(): void;
-        handleStake(): void;
-        openLink(): void;
+        private handleStake;
+        private openLink;
         init(): Promise<void>;
         render(): any;
     }
@@ -442,7 +374,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/nftAPI.ts" {
     let nftInfoMap: Record<SupportedNetworkId, Record<OswapNfts, NftInfo>>;
     const getCommissionRate: (state: State, campaignId: number) => Promise<string>;
     const getNFTObject: (trollAPI: string, nft: string, tokenId?: number, owner?: string) => Promise<any>;
-    function fetchAllNftInfo(state: State): Promise<Record<OswapNfts, NftInfo>>;
+    function fetchAllNftInfo(state: State): Promise<false | Record<OswapNfts, NftInfo>>;
     const mintNFT: (contractAddress: string, token: TokenConstant, amount: string) => Promise<TransactionReceipt>;
     const burnNFT: (contractAddress: string, tokenID: number) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
     export { NftInfo, nftInfoMap, getCommissionRate, fetchAllNftInfo, mintNFT, burnNFT, getNFTObject };
@@ -647,7 +579,7 @@ declare module "@scom/oswap-nft-widget" {
         chainName?: string;
         chainId: number;
     }
-    interface ScomOswapNftWidgetElement extends ControlElement {
+    interface OswapNftWidgetElement extends ControlElement {
         lazyLoad?: boolean;
         campaignId?: number;
         defaultChainId: number;
@@ -656,7 +588,7 @@ declare module "@scom/oswap-nft-widget" {
         showHeader?: boolean;
         commissions?: ICommissionInfo[];
     }
-    export interface INftOswapWidgetData {
+    export interface IOswapNftWidgetData {
         campaignId?: number;
         commissions?: ICommissionInfo[];
         defaultChainId: number;
@@ -667,11 +599,11 @@ declare module "@scom/oswap-nft-widget" {
     global {
         namespace JSX {
             interface IntrinsicElements {
-                ['i-scom-oswap-nft-widget']: ScomOswapNftWidgetElement;
+                ['i-oswap-nft-widget']: OswapNftWidgetElement;
             }
         }
     }
-    export default class ScomOswapNftWidget extends Module {
+    export default class OswapNftWidget extends Module {
         private dappContainer;
         private mdWallet;
         private state;
@@ -704,6 +636,7 @@ declare module "@scom/oswap-nft-widget" {
         private dataCards;
         private ImageBurn;
         private currentDataMyCard;
+        private initializedState;
         private _data;
         tag: any;
         constructor(parent?: Container, options?: any);
@@ -739,7 +672,7 @@ declare module "@scom/oswap-nft-widget" {
                 networks: INetworkConfig[];
                 showHeader?: boolean;
             }>;
-            setData: (properties: INftOswapWidgetData, linkParams?: Record<string, any>) => Promise<void>;
+            setData: (properties: IOswapNftWidgetData, linkParams?: Record<string, any>) => Promise<void>;
             getTag: any;
             setTag: any;
             getActions?: undefined;

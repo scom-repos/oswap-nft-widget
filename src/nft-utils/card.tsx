@@ -7,13 +7,10 @@ import {
   Panel,
   Image,
   Button,
-  IEventBus,
-  application,
   CarouselSlider
 } from '@ijstech/components'
 import { BigNumber } from '@ijstech/eth-wallet';
 import Assets from '../assets';
-import { EventId } from '../global/index';
 import { IDataCard, IDataMyCard, isClientWalletConnected, State } from '../store/index';
 import { cardStyle } from './card.css';
 import { NftMyCard } from './myCard';
@@ -28,7 +25,6 @@ declare global {
 
 @customElements('nft-card')
 export class NftCard extends Module {
-  private $eventBus: IEventBus;
   private _cardData: IDataCard;
   private pnlSlots: Panel;
   private stakeAmountText: Label;
@@ -41,21 +37,11 @@ export class NftCard extends Module {
   private carouselSlider: CarouselSlider;
   onStake: () => void;
   onBurn: (item: IDataMyCard) => void;
-  private clientEvents: any[] = [];
   private _state: State;
 
   constructor(state: State, parent?: Container, options?: any) {
     super(parent, options);
     this.state = state;
-    this.$eventBus = application.EventBus;
-    this.registerEvent();
-  }
-
-  onHide() {
-    for (let event of this.clientEvents) {
-      event.unregister();
-    }
-    this.clientEvents = [];
   }
 
   get state() {
@@ -168,16 +154,11 @@ export class NftCard extends Module {
     }
   }
 
-  registerEvent() {
-    this.clientEvents.push(this.$eventBus.register(this, EventId.IsWalletConnected, this.updateBtn));
-    this.clientEvents.push(this.$eventBus.register(this, EventId.IsWalletDisconnected, this.updateBtn));
-  }
-
-  handleStake() {
+  private handleStake() {
     this.onStake();
   }
 
-  openLink() {
+  private openLink() {
     const chainId = this.state.getChainId();
     this.state.viewOnExplorerByAddress(chainId, this._cardData.address);
   }

@@ -75,9 +75,6 @@ export default class Module1 extends Module {
             defaultChainId={97}
             networks={[
               {
-                "chainId": 43113
-              },
-              {
                 "chainId": 97
               }
             ]}
