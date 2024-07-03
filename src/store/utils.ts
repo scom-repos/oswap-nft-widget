@@ -305,7 +305,7 @@ export function getWalletProvider() {
   return localStorage.getItem('walletProvider') || '';
 }
 
-export function isWalletConnected() {
+export function isClientWalletConnected() {
   const wallet = Wallet.getClientInstance();
   return wallet.isConnected;
 }
@@ -318,3 +318,83 @@ export const truncateAddress = (address: string) => {
 export const getChainNativeToken = (chainId: number): ITokenObject => {
   return ChainNativeTokenByChainId[chainId];
 };
+
+//custom loop
+export async function forEachNumberIndexAwait<T>(list: { [index: number]: T }, callbackFn: (item: T, index: number) => Promise<void>) {
+  for (const chainId in list) {
+    if (
+      Object.prototype.hasOwnProperty.call(list, chainId)
+      && new BigNumber(chainId).isInteger()
+    ) await callbackFn(list[chainId], Number(chainId));
+  }
+}
+
+export function forEachNumberIndex<T>(list: { [index: number]: T }, callbackFn: (item: T, index: number) => void) {
+  for (const chainId in list) {
+    if (
+      Object.prototype.hasOwnProperty.call(list, chainId)
+      && new BigNumber(chainId).isInteger()
+    ) callbackFn(list[chainId], Number(chainId));
+  }
+}
+
+export function mapIndexNumber<T,X>(list: { [index: number]: T }, callbackFn: (item: T, index: number) => X) {
+  let out:X[] = [];
+  for (const chainId in list) {
+    if (
+      Object.prototype.hasOwnProperty.call(list, chainId)
+      && new BigNumber(chainId).isInteger()
+    ) out.push(callbackFn(list[chainId], Number(chainId)));
+  }
+  return out;
+}
+
+export function mapRecordIndex<T,X,I extends string | number | symbol>(list: Record<I,T>, callbackFn: (item: T, index: I, list:Record<I,T>) => X) {
+  let out:X[] = [];
+  for (const index in list) {
+    if (Object.prototype.hasOwnProperty.call(list, index)) out.push(callbackFn(list[index], index, list));
+  }
+  return out;
+}
+
+export function forEachRecordIndex<T,X,I extends string | number | symbol>(list: Record<I,T>, callbackFn: (item: T, index: I, list:Record<I,T>) => X) {
+  for (const index in list) {
+    if (Object.prototype.hasOwnProperty.call(list, index)) callbackFn(list[index], index, list);
+  }
+}
+
+export function mapRecord<T,X,I extends string | number | symbol>(list: Record<I,T>, callbackFn: (item: T, index: I, list:Record<I,T>) => X):Record<I,X> {
+  let out = {} as Record<I,X>;
+  for (const index in list) {
+    if (Object.prototype.hasOwnProperty.call(list, index)) out[index] = callbackFn(list[index], index, list);
+  }
+  return out;
+}
+
+export async function mapRecordAwait<T,X,I extends string | number | symbol>(list: Record<I,T>, callbackFn: (item: T, index: I, list:Record<I,T>) => Promise<X>):Promise<Record<I, X>> {
+  let out = {} as Record<I,X>;
+  for (const index in list) {
+    if (Object.prototype.hasOwnProperty.call(list, index)) out[index] = await callbackFn(list[index], index, list);
+  }
+  return out;
+}
+
+export function mapRecordNumber<T,X>(list: Record<number,T>, callbackFn: (item: T, index: number, list:Record<number,T>) => X):Record<number,X> {
+  let out = {} as Record<number,X>;
+  for (const key in list) {
+    if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
+      out[+key]=callbackFn(list[key], +key, list);
+    }
+  }
+  return out;
+}
+
+export async function mapRecordNumberAwait<T,X>(list: Record<number,T>, callbackFn: (item: T, index: number, list:Record<number,T>) => Promise<X>):Promise<Record<number, X>> {
+  let out = {} as Record<number,X>;
+  for (const key in list) {
+    if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
+      out[+key] = await callbackFn(list[key], +key, list);
+    }
+  }
+  return out;
+}

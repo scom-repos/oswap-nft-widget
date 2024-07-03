@@ -3,7 +3,7 @@ const InfuraId = "adc596bf88b648e2a8902bc9093930c5";
 export default {
   "infuraId": InfuraId,
   "defaultBuilderData": {
-    "defaultChainId": 43113,
+    "defaultChainId": 97,
     "networks": [
       {
         "chainId": 43113
@@ -30,12 +30,12 @@ export default {
       "isMainChain": true,
       "isTestnet": true
     },
-    {
-      "chainId": 43113,
-      "isTestnet": true
-    },
-    {
-      "chainId": 43114
-    }
+    // {
+    //   "chainId": 43113,
+    //   "isTestnet": true
+    // },
+    // {
+    //   "chainId": 43114
+    // }
   ]
 }

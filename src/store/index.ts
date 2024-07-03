@@ -1,5 +1,5 @@
 import { assets as tokenAssets, tokenStore } from '@scom/scom-token-list';
-import { getChainNativeToken, isWalletConnected, State } from './utils';
+import { getChainNativeToken, isClientWalletConnected, State } from './utils';
 
 export * from './data/index';
 
@@ -10,7 +10,7 @@ export const getTokenIcon = (address: string, chainId: number) => {
   const tokenMap = tokenStore.getTokenMapByChainId(chainId);
   let ChainNativeToken;
   let tokenObject;
-  if (isWalletConnected()) {
+  if (isClientWalletConnected()) {
     ChainNativeToken = getChainNativeToken(chainId);
     tokenObject = address == ChainNativeToken.symbol ? ChainNativeToken : tokenMap[address.toLowerCase()];
   } else {

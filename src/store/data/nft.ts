@@ -1,210 +1,28 @@
-import { ITokenObject } from "@scom/scom-token-list";
-
-
-enum NFT_TYPE {
-  OSWAP = 'oswap',
-  OAX = 'oax',
+export interface TokenConstant {
+  address: string;
+  name: string;
+  decimals: number;
+  symbol: string;
 }
 
-const trollAPIUrl: { [key: number]: string } = {
-  56: 'https://data.openswap.xyz/nft/v1',
-  97: 'https://bsc-test-data.openswap.xyz/nft/v1',
-  31337: 'https://amino.openswap.xyz/nft/v1',
-  43113: 'https://bsc-test-data.openswap.xyz/nft/v1'  //FIXME
-}
+export interface UserNftInfo {
+  tokenId: number;
+  stakeBalance: string;
 
-const rewardAddress: { [key: number]: string } = {
-  56: '0x37c8207975D5B04cc6c2C2570d91425985cF61Df',
-  97: '0x265F91CdFC308275504120E32B6A2B09B066df1a',
-}
-
-const attributesDistribution: { [key: string]: { base: number, digits: number[], probability: number[][], rarityIndex: number | null, rarityMatrix?: number[] } } = {
-  generalTroll: {
-    base: 10,
-    digits: [3, 3, 3, 3, 3, 3, 3],
-    probability: [
-      [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-      [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-      [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-      [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-      [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-      [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
-      [0.5, 0.25, 0.15, 0.09, 0.01]
-    ],
-    rarityIndex: 6
-  },
-  oax: {
-    base: 8,
-    digits: [3, 3, 3, 3, 3],
-    probability: [
-      [0.6, 0.4],
-      [0.7, 0.3],
-      [0.7, 0.2, 0.1],
-      [0.8, 0.2],
-      [0.4, 0.4, 0.2]
-    ],
-    rarityIndex: null,
-    rarityMatrix: [0.002, 0.0051, 0.01, 0.03, 0.1]
-  }
-}
-
-interface ITrollCampBasicInfo {
-  tier?: string;
-  contract: string;
-  rewards?: number;
-  apr: number;
-  flashSales?: string;
-  attributes: any;
-  hide?: boolean;
-}
-
-interface TrollCampInfoMapType { [chainId: number]: ITrollCampBasicInfo[] }
-
-const trollCampInfoMap: TrollCampInfoMapType = {
-  // Binance Mainnet
-  56: [
-    {
-      tier: 'hungry',
-      contract: '0x1254132567549292388cd699Cb78B47d3101c8A9',
-      rewards: 5,
-      apr: 2,
-      flashSales: 'Periodic',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'happy',
-      contract: '0x2d74990f55faeA086A83B9fE176FD36a34bA617b',
-      rewards: 15,
-      apr: 4,
-      flashSales: 'Priority',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'hunny',
-      contract: '0x3E8fb94D9dD7A8f9b2ccF0B4CCdC768628890eeB',
-      rewards: 40,
-      apr: 6,
-      flashSales: 'Guaranteed',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'mean',
-      contract: '0x4c934C39a766c8DbcB3F40bD597201d07851ccAa',
-      rewards: 0,
-      apr: 0,
-      flashSales: 'Guaranteed',
-      attributes: attributesDistribution.generalTroll,
-      hide: true
-    }
-  ],
-  // Binance Test Chain
-  97: [
-    {
-      tier: 'hungry',
-      contract: '0x946985e7C43Ed2fc7985e89a49A251D52d824122',
-      rewards: 5,
-      apr: 2,
-      flashSales: 'Periodic',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'happy',
-      contract: '0x157538c2d508CDb1A6cf48B8336E4e56350A97C8',
-      rewards: 15,
-      apr: 4,
-      flashSales: 'Priority',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'hunny',
-      contract: '0xB9425ddFB534CA87B73613283F4fB0073B63F31D',
-      rewards: 40,
-      apr: 6,
-      flashSales: 'Guaranteed',
-      attributes: attributesDistribution.generalTroll
-    },
-  ],
-  31337: [
-    {
-      tier: 'hungry',
-      contract: '0xA887958C66bec5da6a884936c050FeB32D67F4d3',
-      rewards: 5,
-      apr: 2,
-      flashSales: 'Periodic',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'happy',
-      contract: '0x26c5B9cE4ca0792f98ef4B6D9b7a71Af11aA033b',
-      rewards: 15,
-      apr: 4,
-      flashSales: 'Priority',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'hunny',
-      contract: '0x8882aF970E7856127E4f1afa88CF401A22F4d1D1',
-      rewards: 40,
-      apr: 6,
-      flashSales: 'Guaranteed',
-      attributes: attributesDistribution.generalTroll
-    }
-  ],
-  // Contracts without vrf
-  43113: [
-    {
-      tier: 'hungry',
-      contract: '0x390118aa8bde8c63f159a0d032dbdc8bed83ef42',
-      rewards: 5,
-      apr: 2,
-      flashSales: 'Periodic',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'happy',
-      contract: '0x4e616ae82324b519c7d338450e7048024390be32',
-      rewards: 15,
-      apr: 4,
-      flashSales: 'Priority',
-      attributes: attributesDistribution.generalTroll
-    },
-    {
-      tier: 'hunny',
-      contract: '0xc11c7b25e97b85657be6c8c9f057214cf793b536',
-      rewards: 40,
-      apr: 6,
-      flashSales: 'Guaranteed',
-      attributes: attributesDistribution.generalTroll
-    }
-  ]
-}
-
-interface ITrollCampInfo extends ITrollCampBasicInfo {
-  token: ITokenObject;
-  minimumStake: string;
-  cap: string;
-  available: string;
-  protocolFee: string;
-}
-
-interface IMyNFTInfo {
-  token: ITokenObject;
-  tokenID: number;
-  stakingBalance: string;
   attributes: string[] | null;
   rarity: number;
   birthday: number;
   image: string;
 }
 
-interface IUserNFTsInfo extends ITrollCampBasicInfo {
-  stakeToken: ITokenObject;
-  listNFT: IMyNFTInfo[];
+export interface UserNFTsInfo extends NftInfoStore {
+  stakeToken: TokenConstant;
+  userNfts: UserNftInfo[];
 }
 
-interface INFTCollectionCard {
+export interface INFTCollectionCard {
   contract: string;
-  token: ITokenObject;
+  token: TokenConstant;
   tier?: string;
   tokenID: number;
   owner: string;
@@ -214,41 +32,27 @@ interface INFTCollectionCard {
   image: string;
 }
 
-interface INFTCollectionInfo {
+export interface INFTCollectionInfo {
   list: INFTCollectionCard[];
   total: number;
 }
 
-const oaxNFTInfo: TrollCampInfoMapType = {
-  // Binance Mainnet
-  56: [
-  ],
-  // Binance Test Chain
-  97: [
-    {
-      contract: '0x47Ee972499dD103fa2Fb101b49a385d8024C1BA9',
-      apr: 10,
-      attributes: attributesDistribution.oax
-    },
-  ],
-}
-
-
-interface IDataCard {
+export interface IDataCard {
   address: string;
   flashSales?: string;
   monthlyReward: string;
   rewardsBoost: string;
   tier?: string;
-  slot: string;
+  slot: number;
   stakeAmount: string;
-  stakeToken: ITokenObject;
+  stakeToken: TokenConstant;
   stakeAmountText: string;
   protocolFee: string;
   totalPayAmount: string;
+  userNFTs?: IDataMyCard[];
 }
 
-interface IDataMyCard {
+export interface IDataMyCard {
   address: string;
   flashSales?: string;
   monthlyRewardAPR: number;
@@ -256,7 +60,7 @@ interface IDataMyCard {
   rewardsBoost: string;
   tier?: string;
   trollNumber: number;
-  stakeToken: ITokenObject;
+  stakeToken: TokenConstant;
   stakeAmount: string;
   stakeAmountText: string;
   rarity: number;
@@ -264,20 +68,122 @@ interface IDataMyCard {
   image: string;
 }
 
-export {
-  NFT_TYPE,
-  trollAPIUrl,
-  rewardAddress,
-  attributesDistribution,
-  ITrollCampBasicInfo,
-  TrollCampInfoMapType,
-  trollCampInfoMap,
-  ITrollCampInfo,
-  IMyNFTInfo,
-  IUserNFTsInfo,
-  INFTCollectionCard,
-  INFTCollectionInfo,
-  oaxNFTInfo,
-  IDataCard,
-  IDataMyCard
+export const trollAPIUrl: Record<SupportedNetworkId,string> = {
+  56: 'https://data.openswap.xyz/nft/v1',
+  97: 'https://bsc-test-data.openswap.xyz/nft/v1',
+}
+
+export const rewardAddress:Record<SupportedNetworkId,string> = {
+  56: '0x37c8207975D5B04cc6c2C2570d91425985cF61Df',
+  97: '0x265F91CdFC308275504120E32B6A2B09B066df1a',
+}
+
+//General Troll Attribute Distribution
+export interface AttributeDistribution { base: number, digits: number[], probability: number[][], rarityIndex: number }
+export const attributeDistribution: AttributeDistribution = {
+  base: 10,
+  digits: [3, 3, 3, 3, 3, 3, 3],
+  probability: [
+    [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    [0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125],
+    [0.5, 0.25, 0.15, 0.09, 0.01]
+  ],
+  rarityIndex: 6
+}
+export interface NftInfoStore {
+  chainId: SupportedNetworkId,
+  name: OswapNfts,
+  address: string,
+  token: TokenConstant,
+  rewards: number, // oswap staking bouns in %
+  apr: number, // apr to holder in %
+  flashSales: string, //description to the level of Flash Sales Inclusion
+  attributes: AttributeDistribution,
+}
+
+export enum SupportedNetworkId { 
+  bscMain=56,
+  bscTest=97,
+}
+
+export const defaultChainId = SupportedNetworkId.bscMain;
+export enum OswapNfts { 
+  tier1="hungry",
+  tier2="happy",
+  tier3="hunny"
+}
+
+export const stakeTokenMap: Record<SupportedNetworkId, TokenConstant> = {
+  56: {address:"0xb32aC3C79A94aC1eb258f3C830bBDbc676483c93",decimals:18,name:"OpenSwap",symbol:"OSWAP"},
+  97: {address:"0x45eee762aaeA4e5ce317471BDa8782724972Ee19",decimals:18,name:"OpenSwap",symbol:"OSWAP"},
+}
+export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInfoStore>> = {
+  56: {
+    [OswapNfts.tier1]:{
+      chainId: 56,
+      name: OswapNfts.tier1,
+      address: '0x1254132567549292388cd699Cb78B47d3101c8A9',
+      token: stakeTokenMap[56],
+      rewards: 5,
+      apr: 2,
+      flashSales: 'Periodic',
+      attributes: attributeDistribution
+    },
+    [OswapNfts.tier2]:{
+      chainId: 56,
+      name: OswapNfts.tier2,
+      address: '0x2d74990f55faeA086A83B9fE176FD36a34bA617b',
+      token: stakeTokenMap[56],
+      rewards: 15,
+      apr: 4,
+      flashSales: 'Priority',
+      attributes: attributeDistribution
+    },
+    [OswapNfts.tier3]:{
+      chainId: 56,
+      name: OswapNfts.tier3,
+      address: '0x3E8fb94D9dD7A8f9b2ccF0B4CCdC768628890eeB',
+      token: stakeTokenMap[56],
+      rewards: 40,
+      apr: 6,
+      flashSales: 'Guaranteed',
+      attributes: attributeDistribution
+    },
+  },
+  97: {
+    [OswapNfts.tier1]:{
+      chainId: 97,
+      name: OswapNfts.tier1,
+      address: '0x946985e7C43Ed2fc7985e89a49A251D52d824122',
+      token: stakeTokenMap[97],
+      rewards: 5,
+      apr: 2,
+      flashSales: 'Periodic',
+      attributes: attributeDistribution
+    },
+    [OswapNfts.tier2]:{
+      chainId: 97,
+      name: OswapNfts.tier2,
+      address: '0x157538c2d508CDb1A6cf48B8336E4e56350A97C8',
+      token: stakeTokenMap[97],
+      rewards: 15,
+      apr: 4,
+      flashSales: 'Priority',
+      attributes: attributeDistribution
+    },
+    [OswapNfts.tier3]:{
+      chainId: 97,
+      name: OswapNfts.tier3,
+      address: '0xB9425ddFB534CA87B73613283F4fB0073B63F31D',
+      token: stakeTokenMap[97],
+      rewards: 40,
+      apr: 6,
+      flashSales: 'Guaranteed',
+      attributes: attributeDistribution
+    },
+  },
 }

@@ -94,14 +94,6 @@ declare module "@scom/oswap-nft-widget/data.json.ts" {
             chainId: number;
             isMainChain: boolean;
             isTestnet: boolean;
-        } | {
-            chainId: number;
-            isTestnet: boolean;
-            isMainChain?: undefined;
-        } | {
-            chainId: number;
-            isMainChain?: undefined;
-            isTestnet?: undefined;
         })[];
     };
     export default _default;
@@ -215,68 +207,48 @@ declare module "@scom/oswap-nft-widget/store/utils.ts" {
     }
     export const getTokensDataList: (tokenMapData: TokenMapType, tokenBalances: any) => Promise<any[]>;
     export function getWalletProvider(): string;
-    export function isWalletConnected(): boolean;
+    export function isClientWalletConnected(): boolean;
     export const truncateAddress: (address: string) => string;
     export const getChainNativeToken: (chainId: number) => ITokenObject;
+    export function forEachNumberIndexAwait<T>(list: {
+        [index: number]: T;
+    }, callbackFn: (item: T, index: number) => Promise<void>): Promise<void>;
+    export function forEachNumberIndex<T>(list: {
+        [index: number]: T;
+    }, callbackFn: (item: T, index: number) => void): void;
+    export function mapIndexNumber<T, X>(list: {
+        [index: number]: T;
+    }, callbackFn: (item: T, index: number) => X): X[];
+    export function mapRecordIndex<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): X[];
+    export function forEachRecordIndex<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): void;
+    export function mapRecord<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => X): Record<I, X>;
+    export function mapRecordAwait<T, X, I extends string | number | symbol>(list: Record<I, T>, callbackFn: (item: T, index: I, list: Record<I, T>) => Promise<X>): Promise<Record<I, X>>;
+    export function mapRecordNumber<T, X>(list: Record<number, T>, callbackFn: (item: T, index: number, list: Record<number, T>) => X): Record<number, X>;
+    export function mapRecordNumberAwait<T, X>(list: Record<number, T>, callbackFn: (item: T, index: number, list: Record<number, T>) => Promise<X>): Promise<Record<number, X>>;
 }
 /// <amd-module name="@scom/oswap-nft-widget/store/data/nft.ts" />
 declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
-    import { ITokenObject } from "@scom/scom-token-list";
-    enum NFT_TYPE {
-        OSWAP = "oswap",
-        OAX = "oax"
+    export interface TokenConstant {
+        address: string;
+        name: string;
+        decimals: number;
+        symbol: string;
     }
-    const trollAPIUrl: {
-        [key: number]: string;
-    };
-    const rewardAddress: {
-        [key: number]: string;
-    };
-    const attributesDistribution: {
-        [key: string]: {
-            base: number;
-            digits: number[];
-            probability: number[][];
-            rarityIndex: number | null;
-            rarityMatrix?: number[];
-        };
-    };
-    interface ITrollCampBasicInfo {
-        tier?: string;
-        contract: string;
-        rewards?: number;
-        apr: number;
-        flashSales?: string;
-        attributes: any;
-        hide?: boolean;
-    }
-    interface TrollCampInfoMapType {
-        [chainId: number]: ITrollCampBasicInfo[];
-    }
-    const trollCampInfoMap: TrollCampInfoMapType;
-    interface ITrollCampInfo extends ITrollCampBasicInfo {
-        token: ITokenObject;
-        minimumStake: string;
-        cap: string;
-        available: string;
-        protocolFee: string;
-    }
-    interface IMyNFTInfo {
-        token: ITokenObject;
-        tokenID: number;
-        stakingBalance: string;
+    export interface UserNftInfo {
+        tokenId: number;
+        stakeBalance: string;
         attributes: string[] | null;
         rarity: number;
         birthday: number;
         image: string;
     }
-    interface IUserNFTsInfo extends ITrollCampBasicInfo {
-        stakeToken: ITokenObject;
-        listNFT: IMyNFTInfo[];
+    export interface UserNFTsInfo extends NftInfoStore {
+        stakeToken: TokenConstant;
+        userNfts: UserNftInfo[];
     }
-    interface INFTCollectionCard {
+    export interface INFTCollectionCard {
         contract: string;
-        token: ITokenObject;
+        token: TokenConstant;
         tier?: string;
         tokenID: number;
         owner: string;
@@ -285,25 +257,25 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
         birthday: number;
         image: string;
     }
-    interface INFTCollectionInfo {
+    export interface INFTCollectionInfo {
         list: INFTCollectionCard[];
         total: number;
     }
-    const oaxNFTInfo: TrollCampInfoMapType;
-    interface IDataCard {
+    export interface IDataCard {
         address: string;
         flashSales?: string;
         monthlyReward: string;
         rewardsBoost: string;
         tier?: string;
-        slot: string;
+        slot: number;
         stakeAmount: string;
-        stakeToken: ITokenObject;
+        stakeToken: TokenConstant;
         stakeAmountText: string;
         protocolFee: string;
         totalPayAmount: string;
+        userNFTs?: IDataMyCard[];
     }
-    interface IDataMyCard {
+    export interface IDataMyCard {
         address: string;
         flashSales?: string;
         monthlyRewardAPR: number;
@@ -311,14 +283,44 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
         rewardsBoost: string;
         tier?: string;
         trollNumber: number;
-        stakeToken: ITokenObject;
+        stakeToken: TokenConstant;
         stakeAmount: string;
         stakeAmountText: string;
         rarity: number;
         birthday: string;
         image: string;
     }
-    export { NFT_TYPE, trollAPIUrl, rewardAddress, attributesDistribution, ITrollCampBasicInfo, TrollCampInfoMapType, trollCampInfoMap, ITrollCampInfo, IMyNFTInfo, IUserNFTsInfo, INFTCollectionCard, INFTCollectionInfo, oaxNFTInfo, IDataCard, IDataMyCard };
+    export const trollAPIUrl: Record<SupportedNetworkId, string>;
+    export const rewardAddress: Record<SupportedNetworkId, string>;
+    export interface AttributeDistribution {
+        base: number;
+        digits: number[];
+        probability: number[][];
+        rarityIndex: number;
+    }
+    export const attributeDistribution: AttributeDistribution;
+    export interface NftInfoStore {
+        chainId: SupportedNetworkId;
+        name: OswapNfts;
+        address: string;
+        token: TokenConstant;
+        rewards: number;
+        apr: number;
+        flashSales: string;
+        attributes: AttributeDistribution;
+    }
+    export enum SupportedNetworkId {
+        bscMain = 56,
+        bscTest = 97
+    }
+    export const defaultChainId = SupportedNetworkId.bscMain;
+    export enum OswapNfts {
+        tier1 = "hungry",
+        tier2 = "happy",
+        tier3 = "hunny"
+    }
+    export const stakeTokenMap: Record<SupportedNetworkId, TokenConstant>;
+    export const nftInfoStoreMap: Record<SupportedNetworkId, Record<OswapNfts, NftInfoStore>>;
 }
 /// <amd-module name="@scom/oswap-nft-widget/store/data/index.ts" />
 declare module "@scom/oswap-nft-widget/store/data/index.ts" {
@@ -348,10 +350,45 @@ declare module "@scom/oswap-nft-widget/assets.ts" {
 declare module "@scom/oswap-nft-widget/nft-utils/card.css.ts" {
     export const cardStyle: string;
 }
+/// <amd-module name="@scom/oswap-nft-widget/nft-utils/myCard.css.ts" />
+declare module "@scom/oswap-nft-widget/nft-utils/myCard.css.ts" {
+    export const myCardStyle: string;
+}
+/// <amd-module name="@scom/oswap-nft-widget/nft-utils/myCard.tsx" />
+declare module "@scom/oswap-nft-widget/nft-utils/myCard.tsx" {
+    import { Control, ControlElement, Module, Container } from '@ijstech/components';
+    import { IDataMyCard } from "@scom/oswap-nft-widget/store/index.ts";
+    global {
+        namespace JSX {
+            interface IntrinsicElements {
+                ['nft-my-card']: ControlElement;
+            }
+        }
+    }
+    export class NftMyCard extends Module {
+        private _cardData;
+        private stakeAmount;
+        private trollImage;
+        private reward;
+        private monthlyReward;
+        private flashSales;
+        private birthday;
+        private rarity;
+        onBurn: () => void;
+        constructor(parent?: Container, options?: any);
+        get cardData(): IDataMyCard;
+        set cardData(value: IDataMyCard);
+        renderStar(): Promise<void>;
+        private renderCard;
+        handleFlipCard(sender: Control, event: Event): void;
+        init(): Promise<void>;
+        render(): Promise<any>;
+    }
+}
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/card.tsx" />
 declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
     import { Container, ControlElement, Module } from '@ijstech/components';
-    import { State } from "@scom/oswap-nft-widget/store/index.ts";
+    import { IDataCard, IDataMyCard, State } from "@scom/oswap-nft-widget/store/index.ts";
     global {
         namespace JSX {
             interface IntrinsicElements {
@@ -368,17 +405,22 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         private reward;
         private monthlyReward;
         private flashSales;
+        private lbCount;
         private btnHandleStake;
-        private _onStake;
+        private carouselSlider;
+        onStake: () => void;
+        onBurn: (item: IDataMyCard) => void;
         private clientEvents;
-        private state;
+        private _state;
         constructor(state: State, parent?: Container, options?: any);
         onHide(): void;
-        get onStake(): any;
-        set onStake(callback: any);
-        get cardData(): any;
-        set cardData(value: any);
-        updateBtn(): void;
+        get state(): State;
+        set state(value: State);
+        get cardData(): IDataCard;
+        set cardData(value: IDataCard);
+        private capitalizeFirstLetter;
+        private renderCard;
+        private updateBtn;
         registerEvent(): void;
         handleStake(): void;
         openLink(): void;
@@ -386,110 +428,30 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         render(): any;
     }
 }
-/// <amd-module name="@scom/oswap-nft-widget/nft-utils/myCard.css.ts" />
-declare module "@scom/oswap-nft-widget/nft-utils/myCard.css.ts" {
-    export const myCardStyle: string;
-}
-/// <amd-module name="@scom/oswap-nft-widget/nft-utils/myCard.tsx" />
-declare module "@scom/oswap-nft-widget/nft-utils/myCard.tsx" {
-    import { Control, ControlElement, Module, Container } from '@ijstech/components';
-    global {
-        namespace JSX {
-            interface IntrinsicElements {
-                ['nft-my-card']: ControlElement;
-            }
-        }
-    }
-    export class NftMyCard extends Module {
-        private _cardData;
-        private caption1;
-        private caption2;
-        private stakeAmount;
-        private trollImage;
-        private reward;
-        private monthlyReward;
-        private flashSales;
-        private birthday;
-        private rarity;
-        private btnHanldeStake;
-        private panel1;
-        private _onBurn;
-        constructor(parent?: Container, options?: any);
-        get cardData(): any;
-        set cardData(value: any);
-        renderStar(): Promise<void>;
-        get onBurn(): any;
-        set onBurn(callback: any);
-        handleFlipCard(sender: Control, event: Event): void;
-        init(): Promise<void>;
-        render(): Promise<any>;
-    }
-}
-/// <amd-module name="@scom/oswap-nft-widget/nft-utils/ntfColumn.ts" />
-declare module "@scom/oswap-nft-widget/nft-utils/ntfColumn.ts" {
-    import { Control } from '@ijstech/components';
-    import { ITokenObject } from '@scom/scom-token-list';
-    export const nftMyRewardsColumns: ({
-        title: string;
-        fieldName: string;
-        key: string;
-        textAlign: any;
-        onRenderCell?: undefined;
-    } | {
-        title: string;
-        fieldName: string;
-        key: string;
-        onRenderCell: (source: Control, token: ITokenObject, rowData: any) => any;
-        textAlign?: undefined;
-    })[];
-    const _default_2: {
-        nftMyRewardsColumns: ({
-            title: string;
-            fieldName: string;
-            key: string;
-            textAlign: any;
-            onRenderCell?: undefined;
-        } | {
-            title: string;
-            fieldName: string;
-            key: string;
-            onRenderCell: (source: Control, token: ITokenObject, rowData: any) => any;
-            textAlign?: undefined;
-        })[];
-    };
-    export default _default_2;
-}
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/nftAPI.ts" />
 declare module "@scom/oswap-nft-widget/nft-utils/nftAPI.ts" {
-    import { TransactionReceipt } from "@ijstech/eth-wallet";
-    import { ITrollCampInfo, IUserNFTsInfo, State } from "@scom/oswap-nft-widget/store/index.ts";
-    import { ITokenObject } from "@scom/scom-token-list";
+    import { BigNumber, TransactionReceipt } from "@ijstech/eth-wallet";
+    import { State, NftInfoStore, OswapNfts, SupportedNetworkId, TokenConstant, UserNftInfo } from "@scom/oswap-nft-widget/store/index.ts";
+    interface NftInfo extends NftInfoStore {
+        minimumStake: BigNumber;
+        cap: BigNumber;
+        totalSupply: BigNumber;
+        protocolFee: BigNumber;
+        userNfts: UserNftInfo[];
+    }
+    let nftInfoMap: Record<SupportedNetworkId, Record<OswapNfts, NftInfo>>;
     const getCommissionRate: (state: State, campaignId: number) => Promise<string>;
     const getNFTObject: (trollAPI: string, nft: string, tokenId?: number, owner?: string) => Promise<any>;
-    const getTrollCampInfo: (state: State, nftCampaign: string) => Promise<ITrollCampInfo[]>;
-    const getUserNFTs: (state: State, nftCampaign: string, address: string) => Promise<IUserNFTsInfo[]>;
-    const mintNFT: (contractAddress: string, token: ITokenObject, amount: string) => Promise<TransactionReceipt>;
+    function fetchAllNftInfo(state: State): Promise<Record<OswapNfts, NftInfo>>;
+    const mintNFT: (contractAddress: string, token: TokenConstant, amount: string) => Promise<TransactionReceipt>;
     const burnNFT: (contractAddress: string, tokenID: number) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
-    interface IOwnRewards {
-        token: ITokenObject;
-        startDate: number;
-        endDate: number;
-        claimedAmount: string;
-        unclaimedAmount: string;
-        totalAmount: string;
-        tokenId?: string;
-    }
-    const getOwnRewards: (nft: string) => Promise<IOwnRewards[]>;
-    const claimReward: (tokenId: string) => Promise<any>;
-    const claimMultiple: () => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
-    export { getCommissionRate, getTrollCampInfo, mintNFT, burnNFT, getUserNFTs, getOwnRewards, IOwnRewards, claimReward, claimMultiple, getNFTObject };
+    export { NftInfo, nftInfoMap, getCommissionRate, fetchAllNftInfo, mintNFT, burnNFT, getNFTObject };
 }
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/index.ts" />
 declare module "@scom/oswap-nft-widget/nft-utils/index.ts" {
     export { NftCard } from "@scom/oswap-nft-widget/nft-utils/card.tsx";
     export { NftMyCard } from "@scom/oswap-nft-widget/nft-utils/myCard.tsx";
-    export { nftMyRewardsColumns } from "@scom/oswap-nft-widget/nft-utils/ntfColumn.ts";
-    export { getCommissionRate, getTrollCampInfo, mintNFT, burnNFT, getUserNFTs, getOwnRewards, IOwnRewards, claimReward, claimMultiple, getNFTObject } from "@scom/oswap-nft-widget/nft-utils/nftAPI.ts";
+    export { NftInfo, getCommissionRate, fetchAllNftInfo, mintNFT, burnNFT, getNFTObject } from "@scom/oswap-nft-widget/nft-utils/nftAPI.ts";
 }
 /// <amd-module name="@scom/oswap-nft-widget/formSchema.ts" />
 declare module "@scom/oswap-nft-widget/formSchema.ts" {
@@ -514,14 +476,6 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                                     chainId: number;
                                     isMainChain: boolean;
                                     isTestnet: boolean;
-                                } | {
-                                    chainId: number;
-                                    isTestnet: boolean;
-                                    isMainChain?: undefined;
-                                } | {
-                                    chainId: number;
-                                    isMainChain?: undefined;
-                                    isTestnet?: undefined;
                                 })[];
                                 required: boolean;
                             };
@@ -668,17 +622,14 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
 /// <amd-module name="@scom/oswap-nft-widget/index.css.ts" />
 declare module "@scom/oswap-nft-widget/index.css.ts" {
     export const nftStyle: string;
-    export const tabStyle: string;
     export const nftDefaultStyle: string;
     export const nftStyle_1100: string;
     export const nftStyle_767: string;
-    export const nftStyle_525: string;
     export const nftStyle_480: string;
-    export const nftStyle_375: string;
+    export const nftStyle_360: string;
     export const listMediaStyles: {
-        375: string;
+        360: string;
         480: string;
-        525: string;
         767: string;
         1100: string;
     };
@@ -725,10 +676,10 @@ declare module "@scom/oswap-nft-widget" {
         private mdWallet;
         private state;
         private chainId;
+        private targetChainId;
         private approvalModelAction;
+        private pnlLoading;
         private cardRow;
-        private myCardRow;
-        private myRewardTable;
         private mint;
         private minting;
         private burning;
@@ -749,19 +700,10 @@ declare module "@scom/oswap-nft-widget" {
         private btnMint;
         private btnBurn;
         private lbBurnMessage;
-        private lbMyNFTsNum;
-        private lbMyNFTsStakeValue;
         private currentDataCard;
         private dataCards;
         private ImageBurn;
-        private dataMyCards;
         private currentDataMyCard;
-        private currentTab;
-        private myNFTsLoading;
-        private myRewardLoading;
-        private btnClaimAll;
-        private emptyRewardsMsg;
-        private myNFTsInfoPanel;
         private _data;
         tag: any;
         constructor(parent?: Container, options?: any);
@@ -821,7 +763,6 @@ declare module "@scom/oswap-nft-widget" {
         private setTag;
         private updateStyle;
         private updateTheme;
-        private myRewardsCols;
         private refreshUI;
         private isEmptyData;
         init(): Promise<void>;
@@ -833,16 +774,12 @@ declare module "@scom/oswap-nft-widget" {
         private initApprovalModelAction;
         private updateBalances;
         private switchNetworkByWallet;
-        private onChangeTab;
         private renderEmpty;
-        private renderMyRewardEmpty;
         private renderData;
-        private renderMyReward;
         private renderCards;
-        private renderMyCards;
         private onSubmit;
+        private updateButtons;
         private onStake;
-        private claimAllRewards;
         private handleMint;
         private clickApprove;
         private handleBack;

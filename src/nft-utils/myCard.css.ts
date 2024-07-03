@@ -76,7 +76,7 @@ export const myCardStyle = Styles.style({
         'i-label': {
           $nest: {
             '*': {
-              fontSize: '14px',
+              fontSize: '0.75rem',
             },
           },
         },
