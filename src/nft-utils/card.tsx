@@ -162,7 +162,7 @@ export class NftCard extends Module {
       this.btnHandleStake.caption = 'No Wallet';
       this.btnHandleStake.enabled = false;
     } else {
-      const isSoldedOut = this.cardData?.slot == '0';
+      const isSoldedOut = this.cardData?.slot <= 0;
       this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
       this.btnHandleStake.enabled = !isSoldedOut;
     }

@@ -1444,7 +1444,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
                 this.btnHandleStake.enabled = false;
             }
             else {
-                const isSoldedOut = this.cardData?.slot == '0';
+                const isSoldedOut = this.cardData?.slot <= 0;
                 this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
                 this.btnHandleStake.enabled = !isSoldedOut;
             }
@@ -1511,9 +1511,9 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     exports.getNFTObject = exports.burnNFT = exports.mintNFT = exports.fetchAllNftInfo = exports.getCommissionRate = exports.nftInfoMap = void 0;
     function convToken(t) {
         if (!t.address)
-            console.log(`${t.name}`);
+            console.log(`no address for ${t.name}`);
         return {
-            address: t.address,
+            address: t.address || "",
             decimals: t.decimals,
             name: t.name,
             symbol: t.symbol,
@@ -1609,23 +1609,57 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             if (wallet.chainId !== nftInfo.chainId)
                 throw new Error("chain id do not match");
             let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
-            let minimumStake = await trollNFT.minimumStake();
-            let cap = await trollNFT.cap();
-            let totalSupply = await trollNFT.totalSupply();
-            //let tokenAddress = await trollNFT.stakeToken();
-            let protocolFee = await trollNFT.protocolFee();
-            //let token = tokenMap[tokenAddress.toLowerCase()];
-            let userNfts = await fetchUserNft(state, nftInfo) || [];
-            let out = {
+            let calls = [
+                {
+                    contract: trollNFT,
+                    methodName: 'minimumStake',
+                    params: [],
+                    to: nftInfo.address
+                },
+                {
+                    contract: trollNFT,
+                    methodName: 'cap',
+                    params: [],
+                    to: nftInfo.address
+                },
+                {
+                    contract: trollNFT,
+                    methodName: 'totalSupply',
+                    params: [],
+                    to: nftInfo.address
+                },
+                {
+                    contract: trollNFT,
+                    methodName: 'protocolFee',
+                    params: [],
+                    to: nftInfo.address
+                },
+            ];
+            try {
+                let [minimumStake, cap, totalSupply, protocolFee] = await wallet.doMulticall(calls) || [];
+                let userNfts = await fetchUserNft(state, nftInfo) || [];
+                let out = {
+                    ...nftInfo,
+                    minimumStake: new eth_wallet_4.BigNumber(minimumStake).shiftedBy(-nftInfo.token.decimals),
+                    cap: new eth_wallet_4.BigNumber(cap),
+                    totalSupply: new eth_wallet_4.BigNumber(totalSupply),
+                    protocolFee: new eth_wallet_4.BigNumber(protocolFee).shiftedBy(-nftInfo.token.decimals),
+                    userNfts,
+                };
+                nftInfoMap[nftInfo.chainId][out.name] = out;
+                return out;
+            }
+            catch (error) {
+                console.log("fetchNftInfo", nftInfo.chainId, nftInfo.address, error);
+            }
+            return {
                 ...nftInfo,
-                minimumStake,
-                cap,
-                totalSupply,
-                protocolFee,
-                userNfts,
+                minimumStake: new eth_wallet_4.BigNumber(0),
+                cap: new eth_wallet_4.BigNumber(0),
+                totalSupply: new eth_wallet_4.BigNumber(0),
+                protocolFee: new eth_wallet_4.BigNumber(0),
+                userNfts: [],
             };
-            nftInfoMap[nftInfo.chainId][out.name] = out;
-            return out;
         }
         catch (e) {
             console.log(e);
@@ -1712,7 +1746,9 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             let tokenAmount = eth_wallet_4.Utils.toDecimals(amount, token.decimals);
             receipt = await trollNFT.stake(tokenAmount);
         }
-        catch { }
+        catch (e) {
+            console.log(e);
+        }
         return receipt;
     };
     exports.mintNFT = mintNFT;
@@ -2813,10 +2849,10 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     monthlyReward: `${item.apr}% APR`,
                     rewardsBoost: `${item.rewards}%`,
                     tier: type,
-                    slot: '0',
-                    stakeAmount: item.minimumStake.shiftedBy(-(token?.decimals || 18)).toFixed(),
+                    slot: item.cap.minus(item.totalSupply).toNumber(),
+                    stakeAmount: item.minimumStake.toFixed(),
                     stakeToken: item.token,
-                    stakeAmountText: `${(0, index_5.formatNumber)(item.minimumStake.shiftedBy(-(token?.decimals || 18)))} ${item.token?.symbol || ''}`,
+                    stakeAmountText: `${(0, index_5.formatNumber)(item.minimumStake)} ${item.token?.symbol || ''}`,
                     protocolFee: item.protocolFee.toFixed(),
                     totalPayAmount,
                     userNFTs: _userNfts

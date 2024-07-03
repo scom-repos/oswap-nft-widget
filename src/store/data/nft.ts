@@ -43,7 +43,7 @@ export interface IDataCard {
   monthlyReward: string;
   rewardsBoost: string;
   tier?: string;
-  slot: string;
+  slot: number;
   stakeAmount: string;
   stakeToken: TokenConstant;
   stakeAmountText: string;

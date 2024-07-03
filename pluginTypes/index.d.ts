@@ -267,7 +267,7 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
         monthlyReward: string;
         rewardsBoost: string;
         tier?: string;
-        slot: string;
+        slot: number;
         stakeAmount: string;
         stakeToken: TokenConstant;
         stakeAmountText: string;
