@@ -1,4 +1,4 @@
-import { Wallet, BigNumber, Utils, TransactionReceipt, IWallet, IRpcWallet } from "@ijstech/eth-wallet";
+import { Wallet, BigNumber, Utils, TransactionReceipt, IWallet, IRpcWallet, IMulticallContractCall } from "@ijstech/eth-wallet";
 import { Contracts, Contracts as TrollNFTContracts } from '@scom/oswap-troll-nft-contract';
 
 import {
@@ -47,7 +47,7 @@ function initNftInfo() {
         cap: new BigNumber("0"),
         totalSupply: new BigNumber("0"),
         protocolFee: new BigNumber("0"),
-        userNfts:[],
+        userNfts: [],
       }
     });
   });
@@ -113,7 +113,7 @@ const distributeByProbability = (index: BigNumber, base: number, power: number, 
   return output;
 }
 
-async function fetchAllNftInfo(state: State){
+async function fetchAllNftInfo(state: State) {
   const chainId = state.getChainId();
   if (!(chainId in SupportedNetworkId)) throw new Error(`chain id ${chainId} is not suppported`);
   let wallet = state.getRpcWallet();
@@ -125,32 +125,62 @@ async function fetchAllNftInfo(state: State){
 }
 
 async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: NftInfo | NftInfoStore): Promise<NftInfo> {
-  try {
     if (wallet.chainId !== nftInfo.chainId) throw new Error("chain id do not match");
     let trollNFT = new TrollNFTContracts.TrollNFT(wallet, nftInfo.address);
-    let minimumStake = await trollNFT.minimumStake();
-    let cap = await trollNFT.cap();
-    let totalSupply = await trollNFT.totalSupply();
-    //let tokenAddress = await trollNFT.stakeToken();
-    let protocolFee = await trollNFT.protocolFee();
-    //let token = tokenMap[tokenAddress.toLowerCase()];
-    let userNfts = await fetchUserNft(state,nftInfo) || [];
-    let out: NftInfo = {
-      ...nftInfo,
-      minimumStake:minimumStake.shiftedBy(-nftInfo.token.decimals),
-      cap,
-      totalSupply,
-      protocolFee:protocolFee.shiftedBy(-nftInfo.token.decimals),
-      userNfts,
+    let calls: IMulticallContractCall[] = [
+      {
+        contract: trollNFT,
+        methodName: 'minimumStake',
+        params: [],
+        to: nftInfo.address
+      },
+      {
+        contract: trollNFT,
+        methodName: 'cap',
+        params: [],
+        to: nftInfo.address
+      },
+      {
+        contract: trollNFT,
+        methodName: 'totalSupply',
+        params: [],
+        to: nftInfo.address
+      },
+      {
+        contract: trollNFT,
+        methodName: 'protocolFee',
+        params: [],
+        to: nftInfo.address
+      },
+    ];
+
+    try {
+      let [minimumStake, cap, totalSupply, protocolFee] = await wallet.doMulticall(calls) || [];
+      let userNfts = await fetchUserNft(state, nftInfo) || [];
+      let out: NftInfo = {
+        ...nftInfo,
+        minimumStake: new BigNumber(minimumStake).shiftedBy(-nftInfo.token.decimals),
+        cap: new BigNumber(cap),
+        totalSupply: new BigNumber(totalSupply),
+        protocolFee: new BigNumber(protocolFee).shiftedBy(-nftInfo.token.decimals),
+        userNfts,
+      }
+      nftInfoMap[nftInfo.chainId][out.name] = out;
+      return out;
+    } catch (error) {
+      console.log("fetchNftInfo",nftInfo.chainId,nftInfo.address, error);
     }
-    nftInfoMap[nftInfo.chainId][out.name] = out;
-    return out;
-  } catch (e) {
-    console.log(e)
-  }
+    return {
+      ...nftInfo,
+      minimumStake: new BigNumber(0),
+      cap: new BigNumber(0),
+      totalSupply: new BigNumber(0),
+      protocolFee: new BigNumber(0),
+      userNfts:[],
+    }
 }
 
-async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore):Promise<UserNftInfo[]>  { //only get user nft on current chain
+async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore): Promise<UserNftInfo[]> { //only get user nft on current chain
   if (!isClientWalletConnected()) return [];
   let wallet = state.getRpcWallet();
   let chainId = wallet.chainId;
@@ -163,7 +193,7 @@ async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore):Promi
   let tier = nftInfo.name;
   let token = nftInfo.token;
 
-  const fetchInfoByDapp = async (info: NftInfo|NftInfoStore, contractAddress: string, token: TokenConstant, i: number) => {
+  const fetchInfoByDapp = async (info: NftInfo | NftInfoStore, contractAddress: string, token: TokenConstant, i: number) => {
     let trollNFT = new Contracts.TrollNFT(wallet, contractAddress);
     let tokenId = (await trollNFT.tokenOfOwnerByIndex({
       owner: wallet.address,
@@ -237,7 +267,7 @@ const mintNFT = async (contractAddress: string, token: TokenConstant, amount: st
     let trollNFT = new TrollNFTContracts.TrollNFT(wallet, contractAddress);
     let tokenAmount = Utils.toDecimals(amount, token.decimals);
     receipt = await trollNFT.stake(tokenAmount);
-  } catch(e) {console.log(e);}
+  } catch (e) { console.log(e); }
   return receipt;
 }
 
