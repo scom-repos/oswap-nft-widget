@@ -70,7 +70,7 @@ export default class Module1 extends Module {
           justifyContent="center"
           width="100%"
         >
-          <i-scom-oswap-nft-widget
+          <i-oswap-nft-widget
             id="nftWidget"
             defaultChainId={97}
             networks={[
