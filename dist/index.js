@@ -1278,7 +1278,7 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             return [];
         let wallet = state.getRpcWallet();
         let chainId = wallet.chainId;
-        console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
+        //console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
         let userNfts = [];
         const trollAPI = index_3.trollAPIUrl[chainId];
         let nftContract = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);

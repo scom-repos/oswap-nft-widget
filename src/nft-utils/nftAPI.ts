@@ -183,7 +183,7 @@ async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore): Prom
   if (!isClientWalletConnected()) return [];
   let wallet = state.getRpcWallet();
   let chainId = wallet.chainId;
-  console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
+  //console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
 
   let userNfts: UserNftInfo[] = [];
   const trollAPI = trollAPIUrl[chainId];
