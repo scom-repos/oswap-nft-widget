@@ -28,9 +28,9 @@ interface NftInfo extends NftInfoStore {
 }
 
 function convToken(t: ITokenObject): TokenConstant {
-  if (!t.address) console.log(`${t.name}`)
+  if (!t.address) console.log(`no address for ${t.name}`);
   return {
-    address: t.address,
+    address: t.address || "",
     decimals: t.decimals,
     name: t.name,
     symbol: t.symbol,

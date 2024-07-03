@@ -1444,7 +1444,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
                 this.btnHandleStake.enabled = false;
             }
             else {
-                const isSoldedOut = this.cardData?.slot == '0';
+                const isSoldedOut = this.cardData?.slot <= 0;
                 this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
                 this.btnHandleStake.enabled = !isSoldedOut;
             }
@@ -1511,9 +1511,9 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     exports.getNFTObject = exports.burnNFT = exports.mintNFT = exports.fetchAllNftInfo = exports.getCommissionRate = exports.nftInfoMap = void 0;
     function convToken(t) {
         if (!t.address)
-            console.log(`${t.name}`);
+            console.log(`no address for ${t.name}`);
         return {
-            address: t.address,
+            address: t.address || "",
             decimals: t.decimals,
             name: t.name,
             symbol: t.symbol,
@@ -2813,7 +2813,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     monthlyReward: `${item.apr}% APR`,
                     rewardsBoost: `${item.rewards}%`,
                     tier: type,
-                    slot: '0',
+                    slot: item.cap.minus(item.totalSupply).toNumber(),
                     stakeAmount: item.minimumStake.shiftedBy(-(token?.decimals || 18)).toFixed(),
                     stakeToken: item.token,
                     stakeAmountText: `${(0, index_5.formatNumber)(item.minimumStake.shiftedBy(-(token?.decimals || 18)))} ${item.token?.symbol || ''}`,
