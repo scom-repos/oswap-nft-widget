@@ -5,8 +5,8 @@
     "dependencies": [
         "@ijstech/components",
         "@ijstech/eth-wallet",
-        "@scom/scom-token-list",
         "@scom/scom-network-list",
+        "@scom/scom-token-list",
         "@scom/scom-network-picker",
         "@scom/scom-commission-fee-setup",
         "@scom/scom-tx-status-modal",

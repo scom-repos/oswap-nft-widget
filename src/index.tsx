@@ -50,7 +50,7 @@ interface INetworkConfig {
   chainId: number;
 }
 
-interface ScomOswapNftWidgetElement extends ControlElement {
+interface OswapNftWidgetElement extends ControlElement {
   lazyLoad?: boolean;
   campaignId?: number;
   defaultChainId: number;
@@ -60,7 +60,7 @@ interface ScomOswapNftWidgetElement extends ControlElement {
   commissions?: ICommissionInfo[];
 }
 
-export interface INftOswapWidgetData {
+export interface IOswapNftWidgetData {
   campaignId?: number;
   commissions?: ICommissionInfo[];
   defaultChainId: number;
@@ -72,15 +72,15 @@ export interface INftOswapWidgetData {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      ['i-scom-oswap-nft-widget']: ScomOswapNftWidgetElement;
+      ['i-oswap-nft-widget']: OswapNftWidgetElement;
     }
   }
 }
 declare const window: any;
 
 @customModule
-@customElements('i-scom-oswap-nft-widget')
-export default class ScomOswapNftWidget extends Module {
+@customElements('i-oswap-nft-widget')
+export default class OswapNftWidget extends Module {
   private dappContainer: ScomDappContainer;
   private mdWallet: ScomWalletModal;
   private state: State;
@@ -89,7 +89,7 @@ export default class ScomOswapNftWidget extends Module {
   private approvalModelAction: IERC20ApprovalAction;
 
   private pnlLoading: Panel;
-  private cardRow: Panel;
+  private cardRow: HStack;
   private mint: Panel;
   private minting: Panel;
   private burning: Panel;
@@ -114,8 +114,9 @@ export default class ScomOswapNftWidget extends Module {
   private dataCards: IDataCard[];
   private ImageBurn: Image;
   private currentDataMyCard: IDataMyCard;
+  private initializedState: { chainId: number, connected: boolean, fetching: boolean };
 
-  private _data: INftOswapWidgetData = {
+  private _data: IOswapNftWidgetData = {
     defaultChainId: 0,
     wallets: [],
     networks: []
@@ -198,7 +199,7 @@ export default class ScomOswapNftWidget extends Module {
         name: 'Commissions',
         icon: 'dollar-sign',
         command: (builder: any, userInputData: any) => {
-          let _oldData: INftOswapWidgetData = {
+          let _oldData: IOswapNftWidgetData = {
             defaultChainId: 0,
             wallets: [],
             networks: []
@@ -375,7 +376,7 @@ export default class ScomOswapNftWidget extends Module {
           const fee = this.state.embedderCommissionFee;
           return { ...this._data, fee }
         },
-        setData: async (properties: INftOswapWidgetData, linkParams?: Record<string, any>) => {
+        setData: async (properties: IOswapNftWidgetData, linkParams?: Record<string, any>) => {
           let resultingData = {
             ...properties
           }
@@ -430,7 +431,7 @@ export default class ScomOswapNftWidget extends Module {
     if (this.dappContainer?.setData) this.dappContainer.setData(data);
   }
 
-  private async setData(value: INftOswapWidgetData) {
+  private async setData(value: IOswapNftWidgetData) {
     this._data = value;
     this.state.setNetworkConfig(value.networks);
     for (let network of this._data.networks) {
@@ -492,7 +493,7 @@ export default class ScomOswapNftWidget extends Module {
     await this.initializeWidgetConfig();
   }
 
-  private isEmptyData(value: INftOswapWidgetData) {
+  private isEmptyData(value: IOswapNftWidgetData) {
     return !value || !value.networks || value.networks.length === 0;
   }
 
@@ -590,7 +591,7 @@ export default class ScomOswapNftWidget extends Module {
       onToBeApproved: async (token: ITokenObject) => {
         this.btnApprove.visible = true;
         this.btnMint.visible = false;
-        this.btnApprove.caption = `Approve ${token.symbol}`;
+        this.btnApprove.caption = (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
         this.btnApprove.enabled = true;
         this.btnMint.enabled = false;
       },
@@ -646,35 +647,49 @@ export default class ScomOswapNftWidget extends Module {
     }
   }
 
-  private renderEmpty(elm: Panel, _msg?: string) {
+  private renderEmpty(elm: HStack, msg: string) {
     if (!elm) return;
-    let msg = isClientWalletConnected() ? 'Your very own NFT is getting ready!' : 'Please connect with you wallet!';
     elm.clearInnerHTML();
     elm.appendChild(<i-panel width="100%">
       <i-hstack gap="32px">
         <i-panel border={{ radius: '12px' }} background={{ color: "#ffffff33" }} width="100%" height="auto">
           <i-vstack padding={{ top: 30, bottom: 30 }} horizontalAlignment="center">
             <i-panel class="text-center" width="100%">
-              <i-image url={Assets.fullPath('img/nft/TrollEgg.svg')} width={200} height="auto" />
+              <i-image url={Assets.fullPath('img/nft/TrollEgg.svg')} width={200} height="auto" display="block" margin={{ left: 'auto', right: 'auto' }} />
             </i-panel>
             <i-label class="text-center" width="100%" margin={{ top: 20 }} caption={msg} font={{ color: 'white', size: '1.5rem' }} />
           </i-vstack>
         </i-panel>
       </i-hstack>
     </i-panel>)
-  };
+  }
 
   private async renderData() {
     this.updateButtons();
+    const currentChainId = this.state.getChainId();
+    const isConnected = isClientWalletConnected();
+    const { chainId, connected, fetching } = this.initializedState || {};
+    if (chainId === currentChainId && connected === isConnected && fetching === true) return;
+    this.initializedState = {
+      chainId: currentChainId,
+      connected: isConnected,
+      fetching: true
+    }
     await this.renderCards();
+    this.updateButtons();
+    this.initializedState.fetching = false;
   }
 
   private async renderCards() {
     this.pnlLoading.visible = true;
     this.cardRow.visible = false;
     const info = await fetchAllNftInfo(this.state);
+    const chainId = this.state.getChainId();
+    if (this.initializedState.chainId !== chainId) return;
     if (!info || !Object.keys(info).length) {
-      this.renderEmpty(this.cardRow, 'Your very own NFT is getting ready!');
+      const network = this.state.getNetworkInfo(chainId);
+      const msg = info === false ? `${network ? `${network.chainName} (${chainId})` : `Chain ID ${chainId}`} is not supported!` : 'Your very own NFT is getting ready!';
+      this.renderEmpty(this.cardRow, msg);
       this.pnlLoading.visible = false;
       this.cardRow.visible = true;
       return;
@@ -764,7 +779,7 @@ export default class ScomOswapNftWidget extends Module {
       this.btnBurn.caption = 'Switch Network';
       this.btnMint.caption = 'Switch Network';
     } else {
-      this.btnApprove.caption = 'Approve';
+      this.btnApprove.caption = `Approve ${this.currentDataCard?.stakeToken?.symbol || ''}`;
       this.btnBurn.caption = 'Burn';
       this.btnMint.caption = 'Stake';
     }
@@ -894,7 +909,7 @@ export default class ScomOswapNftWidget extends Module {
                   />
                 </i-vstack>
               </i-panel>
-              <i-hstack gap="2rem" id="cardRow" wrap="wrap" />
+              <i-hstack gap="2rem" id="cardRow" maxWidth={1440} margin={{ left: 'auto', right: 'auto' }} wrap="wrap" />
             </i-panel>
           </i-panel>
           <i-hstack id="minting" visible={false} gap="30px" horizontalAlignment="center">
@@ -967,16 +982,16 @@ export default class ScomOswapNftWidget extends Module {
                       <i-label id="lbMintFee" caption="" font={{ color: '#f7d063', size: '1.4rem', bold: true }}></i-label>
                     </i-panel>
                     <i-panel class="section-1">
-                      <i-hstack class="mb-1" verticalAlignment='center' horizontalAlignment='space-between'>
-                        <i-label caption="Stake Amount"></i-label>
-                        <i-hstack verticalAlignment='center' horizontalAlignment='end'>
-                          <i-label font={{ color: '#f7d063', size: '1.2rem' }} margin={{ right: 4 }} caption="Balance: " />
-                          <i-label id="lbTokenBalance" font={{ color: '#f7d063', size: '1.2rem' }} caption="10000" />
+                      <i-hstack gap={4} margin={{ bottom: '0.75rem' }} verticalAlignment="center" horizontalAlignment="space-between">
+                        <i-label caption="Stake Amount" />
+                        <i-hstack gap={4} verticalAlignment="center" horizontalAlignment="end">
+                          <i-label font={{ color: '#f7d063', size: '1rem' }} caption="Balance: " />
+                          <i-label id="lbTokenBalance" font={{ color: '#f7d063', size: '1rem' }} />
                         </i-hstack>
                       </i-hstack>
-                      <i-hstack verticalAlignment='center' horizontalAlignment='space-between'>
-                        <i-label id="lbMintStakeAmount" font={{ color: '#f7d063', size: '1.2rem' }} caption="50000"></i-label>
-                        <i-hstack verticalAlignment='center' horizontalAlignment='end'>
+                      <i-hstack verticalAlignment="center" horizontalAlignment="space-between">
+                        <i-label id="lbMintStakeAmount" font={{ color: '#f7d063', size: '1.2rem' }} />
+                        <i-hstack verticalAlignment="center" horizontalAlignment="end">
                           <i-image
                             id="ImageMintStakeToken"
                             width={20}
@@ -1049,6 +1064,7 @@ export default class ScomOswapNftWidget extends Module {
             </i-vstack>
           </i-hstack>
         </i-panel>
+        <i-scom-tx-status-modal id="txStatusModal" />
         <i-scom-wallet-modal id="mdWallet" wallets={[]} />
       </i-scom-dapp-container>
     )

@@ -6,7 +6,7 @@ export default {
     "defaultChainId": 97,
     "networks": [
       {
-        "chainId": 43113
+        "chainId": 56
       },
       {
         "chainId": 97
@@ -29,13 +29,6 @@ export default {
       "chainId": 97,
       "isMainChain": true,
       "isTestnet": true
-    },
-    // {
-    //   "chainId": 43113,
-    //   "isTestnet": true
-    // },
-    // {
-    //   "chainId": 43114
-    // }
+    }
   ]
 }

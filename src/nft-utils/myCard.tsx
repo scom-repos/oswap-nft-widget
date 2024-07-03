@@ -45,7 +45,7 @@ export class NftMyCard extends Module {
     this.renderCard();
   }
 
-  async renderStar() {
+  private async renderStar() {
     let icon = await Icon.create();
     icon.name = 'star';
     icon.fill = '#fff';
@@ -79,7 +79,7 @@ export class NftMyCard extends Module {
     }
   }
 
-  handleFlipCard(sender: Control, event: Event) {
+  private handleFlipCard(sender: Control, event: Event) {
     const target = event.target as HTMLElement;
     if (target.classList.contains('btn-burn') || target.closest('.btn-burn')) {
       this.onBurn();

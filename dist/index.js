@@ -18,384 +18,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define("@scom/oswap-nft-widget/global/helper.ts", ["require", "exports", "@ijstech/eth-wallet", "@ijstech/components"], function (require, exports, eth_wallet_1, components_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.flatMap = exports.showResultMessage = exports.getWeekDays = exports.uniqWith = exports.getParamsFromUrl = exports.numberToBytes32 = exports.padLeft = exports.toWeiInv = exports.getAPI = exports.limitDecimals = exports.limitInputNumber = exports.isInvalidInput = exports.formatNumberWithSeparators = exports.formatPercentNumber = exports.formatNumber = exports.compareDate = exports.formatUTCDate = exports.formatDate = exports.DefaultDateFormat = exports.DefaultDateTimeFormat = exports.SITE_ENV = void 0;
-    var SITE_ENV;
-    (function (SITE_ENV) {
-        SITE_ENV["DEV"] = "dev";
-        SITE_ENV["TESTNET"] = "testnet";
-        SITE_ENV["MAINNET"] = "mainnet";
-    })(SITE_ENV = exports.SITE_ENV || (exports.SITE_ENV = {}));
-    exports.DefaultDateTimeFormat = 'DD/MM/YYYY HH:mm:ss';
-    exports.DefaultDateFormat = 'DD/MM/YYYY';
-    const formatDate = (date, customType, showTimezone) => {
-        const formatType = customType || exports.DefaultDateFormat;
-        const formatted = (0, components_1.moment)(date).format(formatType);
-        if (showTimezone) {
-            let offsetHour = (0, components_1.moment)().utcOffset() / 60;
-            //will look like UTC-2 UTC+2 UTC+0
-            return `${formatted} (UTC${offsetHour >= 0 ? "+" : ""}${offsetHour})`;
-        }
-        return formatted;
-    };
-    exports.formatDate = formatDate;
-    const formatUTCDate = (date, customType, showTimezone) => {
-        const formatType = customType || exports.DefaultDateFormat;
-        const formatted = (0, components_1.moment)(date).utc().format(formatType);
-        return showTimezone ? `${formatted} (UTC)` : formatted;
-    };
-    exports.formatUTCDate = formatUTCDate;
-    const compareDate = (fromDate, toDate) => {
-        if (!toDate) {
-            toDate = (0, components_1.moment)();
-        }
-        return (0, components_1.moment)(fromDate).isSameOrBefore(toDate);
-    };
-    exports.compareDate = compareDate;
-    const formatNumber = (value, decimals, options) => {
-        let val = value;
-        const { min = '0.0000001', sign = '' } = options || {};
-        const minValue = min;
-        if (typeof value === 'string') {
-            val = new eth_wallet_1.BigNumber(value).toNumber();
-        }
-        else if (typeof value === 'object') {
-            val = value.toNumber();
-        }
-        if (val != 0 && new eth_wallet_1.BigNumber(val).lt(minValue)) {
-            return `< ${sign}${minValue}`;
-        }
-        return `${sign}${(0, exports.formatNumberWithSeparators)(val, decimals || 4)}`;
-    };
-    exports.formatNumber = formatNumber;
-    const formatPercentNumber = (value, decimals) => {
-        let val = value;
-        if (typeof value === 'string') {
-            val = new eth_wallet_1.BigNumber(value).toNumber();
-        }
-        else if (typeof value === 'object') {
-            val = value.toNumber();
-        }
-        return (0, exports.formatNumberWithSeparators)(val, decimals || 2);
-    };
-    exports.formatPercentNumber = formatPercentNumber;
-    const formatNumberWithSeparators = (value, precision) => {
-        if (!value)
-            value = 0;
-        if (precision) {
-            let outputStr = '';
-            if (value >= 1) {
-                const unit = Math.pow(10, precision);
-                const rounded = Math.floor(value * unit) / unit;
-                outputStr = rounded.toLocaleString('en-US', { maximumFractionDigits: precision });
-            }
-            else {
-                outputStr = value.toLocaleString('en-US', { maximumSignificantDigits: precision });
-            }
-            if (outputStr.length > 18) {
-                outputStr = outputStr.substring(0, 18) + '...';
-            }
-            return outputStr;
-        }
-        return value.toLocaleString('en-US');
-    };
-    exports.formatNumberWithSeparators = formatNumberWithSeparators;
-    const isInvalidInput = (val) => {
-        const value = new eth_wallet_1.BigNumber(val);
-        if (value.lt(0))
-            return true;
-        return (val || '').toString().substring(0, 2) === '00' || val === '-';
-    };
-    exports.isInvalidInput = isInvalidInput;
-    const limitInputNumber = (input, decimals) => {
-        const amount = input.value;
-        if ((0, exports.isInvalidInput)(amount)) {
-            input.value = '0';
-            return;
-        }
-        if (!new eth_wallet_1.BigNumber(amount).isNaN()) {
-            input.value = (0, exports.limitDecimals)(amount, decimals || 18);
-        }
-    };
-    exports.limitInputNumber = limitInputNumber;
-    const limitDecimals = (value, decimals) => {
-        let val = value;
-        if (typeof value !== 'string') {
-            val = val.toString();
-        }
-        let chart;
-        if (val.includes('.')) {
-            chart = '.';
-        }
-        else if (val.includes(',')) {
-            chart = ',';
-        }
-        else {
-            return value;
-        }
-        const parts = val.split(chart);
-        let decimalsPart = parts[1];
-        if (decimalsPart && decimalsPart.length > decimals) {
-            parts[1] = decimalsPart.substr(0, decimals);
-        }
-        return parts.join(chart);
-    };
-    exports.limitDecimals = limitDecimals;
-    async function getAPI(url, paramsObj) {
-        let queries = '';
-        if (paramsObj) {
-            try {
-                queries = new URLSearchParams(paramsObj).toString();
-            }
-            catch (err) {
-                console.log('err', err);
-            }
-        }
-        let fullURL = url + (queries ? `?${queries}` : '');
-        const response = await fetch(fullURL, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            },
-        });
-        return response.json();
-    }
-    exports.getAPI = getAPI;
-    const toWeiInv = (n, unit) => {
-        if (new eth_wallet_1.BigNumber(n).eq(0))
-            return new eth_wallet_1.BigNumber('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
-        return new eth_wallet_1.BigNumber('1').shiftedBy((unit || 18) * 2).idiv(new eth_wallet_1.BigNumber(n).shiftedBy(unit || 18));
-    };
-    exports.toWeiInv = toWeiInv;
-    const padLeft = function (string, chars, sign) {
-        return new Array(chars - string.length + 1).join(sign ? sign : "0") + string;
-    };
-    exports.padLeft = padLeft;
-    const numberToBytes32 = (value, prefix) => {
-        if (!value)
-            return;
-        let v = value;
-        if (typeof value == "number") {
-            // covert to a hex string
-            v = value.toString(16);
-        }
-        else if (/^[0-9]*$/.test(value)) {
-            // assuming value to be a decimal number, value could be a hex
-            v = new eth_wallet_1.BigNumber(value).toString(16);
-        }
-        else if (/^(0x)?[0-9A-Fa-f]*$/.test(value)) {
-            // value already a hex
-            v = value;
-        }
-        else if (eth_wallet_1.BigNumber.isBigNumber(value)) {
-            v = value.toString(16);
-        }
-        v = v.replace("0x", "");
-        v = (0, exports.padLeft)(v, 64);
-        if (prefix)
-            v = '0x' + v;
-        return v;
-    };
-    exports.numberToBytes32 = numberToBytes32;
-    const getParamsFromUrl = () => {
-        const startIdx = window.location.href.indexOf("?");
-        const search = window.location.href.substring(startIdx, window.location.href.length);
-        const queryString = search;
-        const urlParams = new URLSearchParams(queryString);
-        return urlParams;
-    };
-    exports.getParamsFromUrl = getParamsFromUrl;
-    const uniqWith = (array, compareFn) => {
-        const unique = [];
-        for (const cur of array) {
-            const isDuplicate = unique.some((oth) => compareFn(cur, oth));
-            if (!isDuplicate)
-                unique.push(cur);
-        }
-        return unique;
-    };
-    exports.uniqWith = uniqWith;
-    const getWeekDays = () => {
-        const d = new Date();
-        d.setDate(d.getDate() - 7);
-        let days = [];
-        let day = d;
-        for (let i = 0; i < 7; i++) {
-            days.push(day.setDate(day.getDate() + 1));
-        }
-        return days;
-    };
-    exports.getWeekDays = getWeekDays;
-    const showResultMessage = (result, status, content) => {
-        if (!result)
-            return;
-        let params = { status };
-        if (status === 'success') {
-            params.txtHash = content;
-        }
-        else {
-            params.content = content;
-        }
-        result.message = { ...params };
-        result.showModal();
-    };
-    exports.showResultMessage = showResultMessage;
-    function flatMap(array, callback) {
-        return array.reduce((acc, item) => {
-            return acc.concat(callback(item));
-        }, []);
-    }
-    exports.flatMap = flatMap;
-});
-define("@scom/oswap-nft-widget/global/error.ts", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.parseContractError = void 0;
-    ///<amd-module name='@scom/oswap-nft-widget/global/error.ts'/> 
-    async function parseContractError(oMessage, tokens) {
-        const staticMessageMap = {
-            'execution reverted: OAXDEX: K': 'x * y = k Violated',
-            'execution reverted: OAXDEX: FORBIDDEN': 'Forbidden',
-            'execution reverted: OAXDEX: INSUFFICIENT_INPUT_AMOUNT': 'Insufficient input amount',
-            'execution reverted: OAXDEX: INVALID_TO': 'Invalid to',
-            'execution reverted: OAXDEX: INSUFFICIENT_LIQUIDITY': 'Insufficient liquidity',
-            'execution reverted: OAXDEX: INSUFFICIENT_OUTPUT_AMOUNT': 'Insufficient output amount',
-            'execution reverted: OAXDEX: PAIR PAUSED': 'Pair paused',
-            'execution reverted: OAXDEX: GLOBALLY PAUSED': 'Globally paused',
-            'execution reverted: OAXDEX: INSUFFICIENT_LIQUIDITY_BURNED': 'Insufficient liquidity burned',
-            'execution reverted: OAXDEX: INSUFFICIENT_LIQUIDITY_MINTED': 'Insufficient liquidity minted',
-            'execution reverted: OAXDEX: OVERFLOW': 'Overflow',
-            'execution reverted: OAXDEX_Pair: INSUFFICIENT_LIQUIDITY': 'Insufficient liquidity',
-            'execution reverted: OAXDEX_Pair: INSUFFICIENT_OUTPUT_AMOUNT': 'Insufficient output amount',
-            'execution reverted: OAXDEX_Pair: INSUFFICIENT_INPUT_AMOUNT': 'Insufficient input amount',
-            'execution reverted: OAXDEX: LOCKED': 'Locked',
-            'execution reverted: OAXDEX: INVALID_SIGNATURE': 'Invalid signature',
-            'execution reverted: OAXDEX: EXPIRED': 'Expired',
-            'Returned error: MetaMask Tx Signature: User denied transaction signature.': 'User denied transaction signature',
-            'MetaMask Tx Signature: User denied transaction signature.': 'User denied transaction signature',
-            'execution reverted: OracleAdaptor: Price outside allowed range': 'Circuit Breaker: Exceeds Price Protection Range',
-            'execution reverted: PAIR_NOT_MATCH': 'Pair Not Match',
-            'execution reverted: Cap exceeded': 'Trolls have been sold out',
-            'execution reverted: No oracle found': 'No Oracle found',
-            'execution reverted: Amount exceeds available fund': 'Insufficient liquidity',
-            'execution reverted: OAXDEX_VotingRegistry: exceeded maxVoteDuration': 'Exceeded maxVoteDuration'
-        };
-        return staticMessageMap[oMessage] ?? `Unknown Error: ${oMessage}`;
-    }
-    exports.parseContractError = parseContractError;
-});
-define("@scom/oswap-nft-widget/global/common.ts", ["require", "exports", "@ijstech/eth-wallet"], function (require, exports, eth_wallet_2) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.isAddressValid = exports.registerSendTxEvents = exports.isTransactionConfirmed = exports.ERC20MaxAmount = void 0;
-    exports.ERC20MaxAmount = new eth_wallet_2.BigNumber(2).pow(256).minus(1);
-    const isTransactionConfirmed = async (txHash) => {
-        const wallet = eth_wallet_2.Wallet.getClientInstance();
-        const tx = await wallet.getTransactionReceipt(txHash); // wallet.web3.eth.getTransaction(txHash);
-        return tx && !!tx.blockNumber;
-    };
-    exports.isTransactionConfirmed = isTransactionConfirmed;
-    const registerSendTxEvents = (sendTxEventHandlers) => {
-        const wallet = eth_wallet_2.Wallet.getClientInstance();
-        wallet.registerSendTxEvents({
-            transactionHash: (error, receipt) => {
-                if (sendTxEventHandlers.transactionHash) {
-                    sendTxEventHandlers.transactionHash(error, receipt);
-                }
-            },
-            confirmation: (receipt) => {
-                if (sendTxEventHandlers.confirmation) {
-                    sendTxEventHandlers.confirmation(receipt);
-                }
-            },
-        });
-    };
-    exports.registerSendTxEvents = registerSendTxEvents;
-    const isAddressValid = async (address) => {
-        let wallet = eth_wallet_2.Wallet.getClientInstance();
-        const isValid = wallet.web3.utils.isAddress(address);
-        return isValid;
-    };
-    exports.isAddressValid = isAddressValid;
-});
-define("@scom/oswap-nft-widget/global/index.ts", ["require", "exports", "@scom/oswap-nft-widget/global/helper.ts", "@scom/oswap-nft-widget/global/error.ts", "@scom/oswap-nft-widget/global/common.ts"], function (require, exports, helper_1, error_1, common_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.ERC20MaxAmount = exports.isAddressValid = exports.registerSendTxEvents = exports.isTransactionConfirmed = exports.parseContractError = exports.flatMap = exports.showResultMessage = exports.SITE_ENV = exports.formatPercentNumber = exports.compareDate = exports.getWeekDays = exports.uniqWith = exports.getParamsFromUrl = exports.numberToBytes32 = exports.toWeiInv = exports.isInvalidInput = exports.limitInputNumber = exports.limitDecimals = exports.formatUTCDate = exports.formatDate = exports.DefaultDateFormat = exports.DefaultDateTimeFormat = exports.formatNumberWithSeparators = exports.formatNumber = exports.getAPI = void 0;
-    ;
-    Object.defineProperty(exports, "getAPI", { enumerable: true, get: function () { return helper_1.getAPI; } });
-    Object.defineProperty(exports, "formatNumber", { enumerable: true, get: function () { return helper_1.formatNumber; } });
-    Object.defineProperty(exports, "formatNumberWithSeparators", { enumerable: true, get: function () { return helper_1.formatNumberWithSeparators; } });
-    Object.defineProperty(exports, "DefaultDateTimeFormat", { enumerable: true, get: function () { return helper_1.DefaultDateTimeFormat; } });
-    Object.defineProperty(exports, "DefaultDateFormat", { enumerable: true, get: function () { return helper_1.DefaultDateFormat; } });
-    Object.defineProperty(exports, "formatDate", { enumerable: true, get: function () { return helper_1.formatDate; } });
-    Object.defineProperty(exports, "formatUTCDate", { enumerable: true, get: function () { return helper_1.formatUTCDate; } });
-    Object.defineProperty(exports, "limitDecimals", { enumerable: true, get: function () { return helper_1.limitDecimals; } });
-    Object.defineProperty(exports, "limitInputNumber", { enumerable: true, get: function () { return helper_1.limitInputNumber; } });
-    Object.defineProperty(exports, "isInvalidInput", { enumerable: true, get: function () { return helper_1.isInvalidInput; } });
-    Object.defineProperty(exports, "toWeiInv", { enumerable: true, get: function () { return helper_1.toWeiInv; } });
-    Object.defineProperty(exports, "numberToBytes32", { enumerable: true, get: function () { return helper_1.numberToBytes32; } });
-    Object.defineProperty(exports, "getParamsFromUrl", { enumerable: true, get: function () { return helper_1.getParamsFromUrl; } });
-    Object.defineProperty(exports, "uniqWith", { enumerable: true, get: function () { return helper_1.uniqWith; } });
-    Object.defineProperty(exports, "getWeekDays", { enumerable: true, get: function () { return helper_1.getWeekDays; } });
-    Object.defineProperty(exports, "compareDate", { enumerable: true, get: function () { return helper_1.compareDate; } });
-    Object.defineProperty(exports, "formatPercentNumber", { enumerable: true, get: function () { return helper_1.formatPercentNumber; } });
-    Object.defineProperty(exports, "SITE_ENV", { enumerable: true, get: function () { return helper_1.SITE_ENV; } });
-    Object.defineProperty(exports, "showResultMessage", { enumerable: true, get: function () { return helper_1.showResultMessage; } });
-    Object.defineProperty(exports, "flatMap", { enumerable: true, get: function () { return helper_1.flatMap; } });
-    Object.defineProperty(exports, "parseContractError", { enumerable: true, get: function () { return error_1.parseContractError; } });
-    Object.defineProperty(exports, "isTransactionConfirmed", { enumerable: true, get: function () { return common_1.isTransactionConfirmed; } });
-    Object.defineProperty(exports, "registerSendTxEvents", { enumerable: true, get: function () { return common_1.registerSendTxEvents; } });
-    Object.defineProperty(exports, "isAddressValid", { enumerable: true, get: function () { return common_1.isAddressValid; } });
-    Object.defineProperty(exports, "ERC20MaxAmount", { enumerable: true, get: function () { return common_1.ERC20MaxAmount; } });
-});
-define("@scom/oswap-nft-widget/data.json.ts", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    ///<amd-module name='@scom/oswap-nft-widget/data.json.ts'/> 
-    const InfuraId = "adc596bf88b648e2a8902bc9093930c5";
-    exports.default = {
-        "infuraId": InfuraId,
-        "defaultBuilderData": {
-            "defaultChainId": 97,
-            "networks": [
-                {
-                    "chainId": 43113
-                },
-                {
-                    "chainId": 97
-                }
-            ],
-            "wallets": [
-                {
-                    "name": "metamask"
-                }
-            ],
-            "showHeader": true,
-            "showFooter": true
-        },
-        "supportedNetworks": [
-            {
-                "chainId": 56,
-                "isMainChain": true
-            },
-            {
-                "chainId": 97,
-                "isMainChain": true,
-                "isTestnet": true
-            },
-            // {
-            //   "chainId": 43113,
-            //   "isTestnet": true
-            // },
-            // {
-            //   "chainId": 43114
-            // }
-        ]
-    };
-});
 define("@scom/oswap-nft-widget/store/data/core.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -405,331 +27,6 @@ define("@scom/oswap-nft-widget/store/data/core.ts", ["require", "exports"], func
     exports.TestnetMainChain = 97;
     exports.Mainnets = [56, 43114];
     exports.Testnets = [97, 43113];
-});
-define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/scom-network-list", "@scom/oswap-nft-widget/data.json.ts", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/scom-token-list"], function (require, exports, components_2, eth_wallet_3, scom_network_list_1, data_json_1, core_1, scom_token_list_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.mapRecordNumberAwait = exports.mapRecordNumber = exports.mapRecordAwait = exports.mapRecord = exports.forEachRecordIndex = exports.mapRecordIndex = exports.mapIndexNumber = exports.forEachNumberIndex = exports.forEachNumberIndexAwait = exports.getChainNativeToken = exports.truncateAddress = exports.isClientWalletConnected = exports.getWalletProvider = exports.getTokensDataList = exports.State = exports.getNetworksByType = exports.getNetworkType = exports.NetworkType = exports.WalletPlugin = void 0;
-    var WalletPlugin;
-    (function (WalletPlugin) {
-        WalletPlugin["MetaMask"] = "metamask";
-        WalletPlugin["Coin98"] = "coin98";
-        WalletPlugin["TrustWallet"] = "trustwallet";
-        WalletPlugin["BinanceChainWallet"] = "binancechainwallet";
-        WalletPlugin["ONTOWallet"] = "onto";
-        WalletPlugin["WalletConnect"] = "walletconnect";
-        WalletPlugin["BitKeepWallet"] = "bitkeepwallet";
-        WalletPlugin["FrontierWallet"] = "frontierwallet";
-    })(WalletPlugin = exports.WalletPlugin || (exports.WalletPlugin = {}));
-    var NetworkType;
-    (function (NetworkType) {
-        NetworkType[NetworkType["Mainnet"] = 0] = "Mainnet";
-        NetworkType[NetworkType["Testnet"] = 1] = "Testnet";
-        NetworkType[NetworkType["NotSupported"] = 2] = "NotSupported";
-    })(NetworkType = exports.NetworkType || (exports.NetworkType = {}));
-    function getNetworkType(chainId) {
-        if (core_1.Mainnets.some(network => network === chainId)) {
-            return NetworkType.Mainnet;
-        }
-        if (core_1.Testnets.some(network => network === chainId)) {
-            return NetworkType.Testnet;
-        }
-        return NetworkType.NotSupported;
-    }
-    exports.getNetworkType = getNetworkType;
-    function getNetworksByType(chainId) {
-        switch (getNetworkType(chainId)) {
-            case NetworkType.Mainnet:
-                return core_1.Mainnets;
-            case NetworkType.Testnet:
-                return core_1.Testnets;
-        }
-        return [];
-    }
-    exports.getNetworksByType = getNetworksByType;
-    class State {
-        constructor(options) {
-            this.defaultChainId = 0;
-            this.slippageTolerance = "0.5";
-            this.proxyAddresses = {};
-            this.infuraId = "";
-            this.rpcWalletId = "";
-            this.networkMap = {};
-            this.networkConfig = [];
-            this.getNetworkInfo = (chainId) => {
-                return this.networkMap[chainId];
-            };
-            this.getFilteredNetworks = (filter) => {
-                let networkFullList = Object.values(this.networkMap);
-                return networkFullList.filter(filter);
-            };
-            this.getSiteSupportedNetworks = () => {
-                let networkFullList = Object.values(this.networkMap);
-                let list = networkFullList.filter(network => !this.getNetworkInfo(network.chainId)?.isDisabled);
-                return list;
-            };
-            this.getMatchNetworks = (conditions) => {
-                let networkFullList = Object.values(this.networkMap);
-                let out = matchFilter(networkFullList, conditions);
-                return out;
-            };
-            this.getNetworkExplorerName = (chainId) => {
-                if (this.getNetworkInfo(chainId)) {
-                    return this.getNetworkInfo(chainId).explorerName;
-                }
-                return 'Unknown';
-            };
-            this.viewOnExplorerByTxHash = (chainId, txHash) => {
-                let network = this.getNetworkInfo(chainId);
-                if (network && network.explorerTxUrl) {
-                    let url = `${network.explorerTxUrl}${txHash}`;
-                    window.open(url);
-                }
-            };
-            this.viewOnExplorerByAddress = (chainId, address) => {
-                let network = this.getNetworkInfo(chainId);
-                if (network && network.explorerAddressUrl) {
-                    let url = `${network.explorerAddressUrl}${address}`;
-                    window.open(url);
-                }
-            };
-            this.getSlippageTolerance = () => {
-                return Number(this.slippageTolerance) || 0;
-            };
-            this.setSlippageTolerance = (value) => {
-                this.slippageTolerance = new eth_wallet_3.BigNumber(value).toFixed();
-            };
-            this.setNetworkConfig = (networks) => {
-                this.networkConfig = networks;
-            };
-            this.getNetworkConfig = () => {
-                return this.networkConfig;
-            };
-            this.initData(options);
-        }
-        initRpcWallet(defaultChainId) {
-            this.defaultChainId = defaultChainId;
-            if (this.rpcWalletId) {
-                return this.rpcWalletId;
-            }
-            const clientWallet = eth_wallet_3.Wallet.getClientInstance();
-            const networkList = Object.values(components_2.application.store?.networkMap || []);
-            const instanceId = clientWallet.initRpcWallet({
-                networks: networkList,
-                defaultChainId,
-                infuraId: components_2.application.store?.infuraId,
-                multicalls: components_2.application.store?.multicalls
-            });
-            this.rpcWalletId = instanceId;
-            if (clientWallet.address) {
-                const rpcWallet = eth_wallet_3.Wallet.getRpcWalletInstance(instanceId);
-                rpcWallet.address = clientWallet.address;
-            }
-            const defaultNetworkList = (0, scom_network_list_1.default)();
-            const defaultNetworkMap = defaultNetworkList.reduce((acc, cur) => {
-                acc[cur.chainId] = cur;
-                return acc;
-            }, {});
-            const supportedNetworks = data_json_1.default.supportedNetworks || [];
-            for (let network of networkList) {
-                const networkInfo = defaultNetworkMap[network.chainId];
-                const supportedNetwork = supportedNetworks.find(v => v.chainId == network.chainId);
-                if (!networkInfo || !supportedNetwork)
-                    continue;
-                if (this.infuraId && network.rpcUrls && network.rpcUrls.length > 0) {
-                    for (let i = 0; i < network.rpcUrls.length; i++) {
-                        network.rpcUrls[i] = network.rpcUrls[i].replace(/{InfuraId}/g, this.infuraId);
-                    }
-                }
-                this.networkMap[network.chainId] = {
-                    ...networkInfo,
-                    ...network,
-                    isTestnet: supportedNetwork.isTestnet
-                };
-            }
-            return instanceId;
-        }
-        getRpcWallet() {
-            return this.rpcWalletId ? eth_wallet_3.Wallet.getRpcWalletInstance(this.rpcWalletId) : null;
-        }
-        isRpcWalletConnected() {
-            const wallet = this.getRpcWallet();
-            return wallet?.isConnected;
-        }
-        getProxyAddress(chainId) {
-            const _chainId = chainId || eth_wallet_3.Wallet.getInstance().chainId;
-            const proxyAddresses = this.proxyAddresses;
-            if (proxyAddresses) {
-                return proxyAddresses[_chainId];
-            }
-            return null;
-        }
-        getChainId() {
-            const rpcWallet = this.getRpcWallet();
-            return rpcWallet?.chainId;
-        }
-        initData(options) {
-            if (options.infuraId) {
-                this.infuraId = options.infuraId;
-            }
-            if (options.proxyAddresses) {
-                this.proxyAddresses = options.proxyAddresses;
-            }
-        }
-        async setApprovalModelAction(options, spenderAddress) {
-            const approvalOptions = {
-                ...options,
-                spenderAddress
-            };
-            let wallet = this.getRpcWallet();
-            this.approvalModel = new eth_wallet_3.ERC20ApprovalModel(wallet, approvalOptions);
-            let approvalModelAction = this.approvalModel.getAction();
-            return approvalModelAction;
-        }
-    }
-    exports.State = State;
-    function matchFilter(list, filter) {
-        let filters = Object.keys(filter);
-        return list.filter(item => filters.every(f => {
-            switch (typeof filter[f]) {
-                case 'boolean':
-                    if (filter[f] === false) {
-                        return !item[f];
-                    }
-                // also case for filter[f] === true 
-                case 'string':
-                case 'number':
-                    return filter[f] === item[f];
-                case 'object': // have not implemented yet
-                default:
-                    console.log(`matchFilter do not support ${typeof filter[f]} yet!`);
-                    return false;
-            }
-        }));
-    }
-    const getTokensDataList = async (tokenMapData, tokenBalances) => {
-        let dataList = [];
-        for (let i = 0; i < Object.keys(tokenMapData).length; i++) {
-            let tokenAddress = Object.keys(tokenMapData)[i];
-            let tokenObject = tokenMapData[tokenAddress];
-            if (tokenBalances) {
-                dataList.push({
-                    ...tokenObject,
-                    status: false,
-                    value: tokenBalances[tokenAddress] ? tokenBalances[tokenAddress] : 0,
-                });
-            }
-            else {
-                dataList.push({
-                    ...tokenObject,
-                    status: null,
-                });
-            }
-        }
-        return dataList;
-    };
-    exports.getTokensDataList = getTokensDataList;
-    // wallet
-    function getWalletProvider() {
-        return localStorage.getItem('walletProvider') || '';
-    }
-    exports.getWalletProvider = getWalletProvider;
-    function isClientWalletConnected() {
-        const wallet = eth_wallet_3.Wallet.getClientInstance();
-        return wallet.isConnected;
-    }
-    exports.isClientWalletConnected = isClientWalletConnected;
-    const truncateAddress = (address) => {
-        if (address === undefined || address === null)
-            return '';
-        return address.substr(0, 6) + '...' + address.substr(-4);
-    };
-    exports.truncateAddress = truncateAddress;
-    const getChainNativeToken = (chainId) => {
-        return scom_token_list_1.ChainNativeTokenByChainId[chainId];
-    };
-    exports.getChainNativeToken = getChainNativeToken;
-    //custom loop
-    async function forEachNumberIndexAwait(list, callbackFn) {
-        for (const chainId in list) {
-            if (Object.prototype.hasOwnProperty.call(list, chainId)
-                && new eth_wallet_3.BigNumber(chainId).isInteger())
-                await callbackFn(list[chainId], Number(chainId));
-        }
-    }
-    exports.forEachNumberIndexAwait = forEachNumberIndexAwait;
-    function forEachNumberIndex(list, callbackFn) {
-        for (const chainId in list) {
-            if (Object.prototype.hasOwnProperty.call(list, chainId)
-                && new eth_wallet_3.BigNumber(chainId).isInteger())
-                callbackFn(list[chainId], Number(chainId));
-        }
-    }
-    exports.forEachNumberIndex = forEachNumberIndex;
-    function mapIndexNumber(list, callbackFn) {
-        let out = [];
-        for (const chainId in list) {
-            if (Object.prototype.hasOwnProperty.call(list, chainId)
-                && new eth_wallet_3.BigNumber(chainId).isInteger())
-                out.push(callbackFn(list[chainId], Number(chainId)));
-        }
-        return out;
-    }
-    exports.mapIndexNumber = mapIndexNumber;
-    function mapRecordIndex(list, callbackFn) {
-        let out = [];
-        for (const index in list) {
-            if (Object.prototype.hasOwnProperty.call(list, index))
-                out.push(callbackFn(list[index], index, list));
-        }
-        return out;
-    }
-    exports.mapRecordIndex = mapRecordIndex;
-    function forEachRecordIndex(list, callbackFn) {
-        for (const index in list) {
-            if (Object.prototype.hasOwnProperty.call(list, index))
-                callbackFn(list[index], index, list);
-        }
-    }
-    exports.forEachRecordIndex = forEachRecordIndex;
-    function mapRecord(list, callbackFn) {
-        let out = {};
-        for (const index in list) {
-            if (Object.prototype.hasOwnProperty.call(list, index))
-                out[index] = callbackFn(list[index], index, list);
-        }
-        return out;
-    }
-    exports.mapRecord = mapRecord;
-    async function mapRecordAwait(list, callbackFn) {
-        let out = {};
-        for (const index in list) {
-            if (Object.prototype.hasOwnProperty.call(list, index))
-                out[index] = await callbackFn(list[index], index, list);
-        }
-        return out;
-    }
-    exports.mapRecordAwait = mapRecordAwait;
-    function mapRecordNumber(list, callbackFn) {
-        let out = {};
-        for (const key in list) {
-            if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
-                out[+key] = callbackFn(list[key], +key, list);
-            }
-        }
-        return out;
-    }
-    exports.mapRecordNumber = mapRecordNumber;
-    async function mapRecordNumberAwait(list, callbackFn) {
-        let out = {};
-        for (const key in list) {
-            if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
-                out[+key] = await callbackFn(list[key], +key, list);
-            }
-        }
-        return out;
-    }
-    exports.mapRecordNumberAwait = mapRecordNumberAwait;
 });
 define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -840,74 +137,404 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
         },
     };
 });
-define("@scom/oswap-nft-widget/store/data/index.ts", ["require", "exports", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/oswap-nft-widget/store/data/nft.ts"], function (require, exports, core_2, nft_1) {
+define("@scom/oswap-nft-widget/store/data/index.ts", ["require", "exports", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/oswap-nft-widget/store/data/nft.ts"], function (require, exports, core_1, nft_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     ///<amd-module name='@scom/oswap-nft-widget/store/data/index.ts'/> 
-    __exportStar(core_2, exports);
+    __exportStar(core_1, exports);
     __exportStar(nft_1, exports);
 });
-define("@scom/oswap-nft-widget/store/index.ts", ["require", "exports", "@scom/scom-token-list", "@scom/oswap-nft-widget/store/utils.ts", "@scom/oswap-nft-widget/store/data/index.ts", "@scom/oswap-nft-widget/store/utils.ts"], function (require, exports, scom_token_list_2, utils_1, index_1, utils_2) {
+define("@scom/oswap-nft-widget/global/helper.ts", ["require", "exports", "@ijstech/eth-wallet"], function (require, exports, eth_wallet_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.getNetworkImg = exports.tokenName = exports.tokenSymbol = exports.getTokenIcon = exports.nullAddress = void 0;
-    __exportStar(index_1, exports);
-    exports.nullAddress = "0x0000000000000000000000000000000000000000";
-    const getTokenIcon = (address, chainId) => {
-        if (!address)
-            return '';
-        const tokenMap = scom_token_list_2.tokenStore.getTokenMapByChainId(chainId);
-        let ChainNativeToken;
-        let tokenObject;
-        if ((0, utils_1.isClientWalletConnected)()) {
-            ChainNativeToken = (0, utils_1.getChainNativeToken)(chainId);
-            tokenObject = address == ChainNativeToken.symbol ? ChainNativeToken : tokenMap[address.toLowerCase()];
+    exports.showResultMessage = exports.formatNumberWithSeparators = exports.formatNumber = exports.DefaultDateFormat = exports.DefaultDateTimeFormat = exports.SITE_ENV = void 0;
+    var SITE_ENV;
+    (function (SITE_ENV) {
+        SITE_ENV["DEV"] = "dev";
+        SITE_ENV["TESTNET"] = "testnet";
+        SITE_ENV["MAINNET"] = "mainnet";
+    })(SITE_ENV = exports.SITE_ENV || (exports.SITE_ENV = {}));
+    exports.DefaultDateTimeFormat = 'DD/MM/YYYY HH:mm:ss';
+    exports.DefaultDateFormat = 'DD/MM/YYYY';
+    const formatNumber = (value, decimals, options) => {
+        let val = value;
+        const { min = '0.0000001', sign = '' } = options || {};
+        const minValue = min;
+        if (typeof value === 'string') {
+            val = new eth_wallet_1.BigNumber(value).toNumber();
+        }
+        else if (typeof value === 'object') {
+            val = value.toNumber();
+        }
+        if (val != 0 && new eth_wallet_1.BigNumber(val).lt(minValue)) {
+            return `< ${sign}${minValue}`;
+        }
+        return `${sign}${(0, exports.formatNumberWithSeparators)(val, decimals || 4)}`;
+    };
+    exports.formatNumber = formatNumber;
+    const formatNumberWithSeparators = (value, precision) => {
+        if (!value)
+            value = 0;
+        if (precision) {
+            let outputStr = '';
+            if (value >= 1) {
+                const unit = Math.pow(10, precision);
+                const rounded = Math.floor(value * unit) / unit;
+                outputStr = rounded.toLocaleString('en-US', { maximumFractionDigits: precision });
+            }
+            else {
+                outputStr = value.toLocaleString('en-US', { maximumSignificantDigits: precision });
+            }
+            if (outputStr.length > 18) {
+                outputStr = outputStr.substring(0, 18) + '...';
+            }
+            return outputStr;
+        }
+        return value.toLocaleString('en-US');
+    };
+    exports.formatNumberWithSeparators = formatNumberWithSeparators;
+    const showResultMessage = (result, status, content) => {
+        if (!result)
+            return;
+        let params = { status };
+        if (status === 'success') {
+            params.txtHash = content;
         }
         else {
-            tokenObject = tokenMap[address.toLowerCase()];
+            params.content = content;
         }
-        return scom_token_list_2.assets.tokenPath(tokenObject, chainId);
+        result.message = { ...params };
+        result.showModal();
     };
-    exports.getTokenIcon = getTokenIcon;
-    const tokenSymbol = (address, chainId) => {
-        const tokenMap = scom_token_list_2.tokenStore.getTokenMapByChainId(chainId);
-        if (!address || !tokenMap)
-            return '';
-        const nativeToken = (0, utils_1.getChainNativeToken)(chainId);
-        let tokenObject = nativeToken.symbol.toLowerCase() === address.toLowerCase() ? nativeToken : tokenMap[address.toLowerCase()];
-        if (!tokenObject)
-            tokenObject = tokenMap[address];
-        return tokenObject ? tokenObject.symbol : '';
-    };
-    exports.tokenSymbol = tokenSymbol;
-    const tokenName = (address, chainId) => {
-        const tokenMap = scom_token_list_2.tokenStore.getTokenMapByChainId(chainId);
-        if (!address || !tokenMap)
-            return '';
-        const nativeToken = (0, utils_1.getChainNativeToken)(chainId);
-        let tokenObject = nativeToken.symbol.toLowerCase() === address.toLowerCase() ? nativeToken : tokenMap[address.toLowerCase()];
-        if (!tokenObject)
-            tokenObject = tokenMap[address];
-        return tokenObject?.name || '';
-    };
-    exports.tokenName = tokenName;
-    const getNetworkImg = (state, chainId) => {
-        try {
-            const network = state.getNetworkInfo(chainId);
-            if (network) {
-                return network.image;
-            }
-        }
-        catch { }
-        return scom_token_list_2.assets.fallbackUrl;
-    };
-    exports.getNetworkImg = getNetworkImg;
-    __exportStar(utils_2, exports);
+    exports.showResultMessage = showResultMessage;
 });
-define("@scom/oswap-nft-widget/assets.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_3) {
+define("@scom/oswap-nft-widget/global/common.ts", ["require", "exports", "@ijstech/eth-wallet"], function (require, exports, eth_wallet_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    let moduleDir = components_3.application.currentModuleDir;
+    exports.registerSendTxEvents = void 0;
+    const registerSendTxEvents = (sendTxEventHandlers) => {
+        const wallet = eth_wallet_2.Wallet.getClientInstance();
+        wallet.registerSendTxEvents({
+            transactionHash: (error, receipt) => {
+                if (sendTxEventHandlers.transactionHash) {
+                    sendTxEventHandlers.transactionHash(error, receipt);
+                }
+            },
+            confirmation: (receipt) => {
+                if (sendTxEventHandlers.confirmation) {
+                    sendTxEventHandlers.confirmation(receipt);
+                }
+            },
+        });
+    };
+    exports.registerSendTxEvents = registerSendTxEvents;
+});
+define("@scom/oswap-nft-widget/global/index.ts", ["require", "exports", "@scom/oswap-nft-widget/global/helper.ts", "@scom/oswap-nft-widget/global/common.ts"], function (require, exports, helper_1, common_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.registerSendTxEvents = exports.showResultMessage = exports.SITE_ENV = exports.DefaultDateFormat = exports.DefaultDateTimeFormat = exports.formatNumberWithSeparators = exports.formatNumber = void 0;
+    ;
+    Object.defineProperty(exports, "formatNumber", { enumerable: true, get: function () { return helper_1.formatNumber; } });
+    Object.defineProperty(exports, "formatNumberWithSeparators", { enumerable: true, get: function () { return helper_1.formatNumberWithSeparators; } });
+    Object.defineProperty(exports, "DefaultDateTimeFormat", { enumerable: true, get: function () { return helper_1.DefaultDateTimeFormat; } });
+    Object.defineProperty(exports, "DefaultDateFormat", { enumerable: true, get: function () { return helper_1.DefaultDateFormat; } });
+    Object.defineProperty(exports, "SITE_ENV", { enumerable: true, get: function () { return helper_1.SITE_ENV; } });
+    Object.defineProperty(exports, "showResultMessage", { enumerable: true, get: function () { return helper_1.showResultMessage; } });
+    Object.defineProperty(exports, "registerSendTxEvents", { enumerable: true, get: function () { return common_1.registerSendTxEvents; } });
+});
+define("@scom/oswap-nft-widget/data.json.ts", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    ///<amd-module name='@scom/oswap-nft-widget/data.json.ts'/> 
+    const InfuraId = "adc596bf88b648e2a8902bc9093930c5";
+    exports.default = {
+        "infuraId": InfuraId,
+        "defaultBuilderData": {
+            "defaultChainId": 97,
+            "networks": [
+                {
+                    "chainId": 56
+                },
+                {
+                    "chainId": 97
+                }
+            ],
+            "wallets": [
+                {
+                    "name": "metamask"
+                }
+            ],
+            "showHeader": true,
+            "showFooter": true
+        },
+        "supportedNetworks": [
+            {
+                "chainId": 56,
+                "isMainChain": true
+            },
+            {
+                "chainId": 97,
+                "isMainChain": true,
+                "isTestnet": true
+            }
+        ]
+    };
+});
+define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/scom-network-list", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/scom-token-list"], function (require, exports, components_1, eth_wallet_3, scom_network_list_1, core_2, scom_token_list_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.mapRecordNumberAwait = exports.mapRecordNumber = exports.mapRecordAwait = exports.mapRecord = exports.forEachRecordIndex = exports.mapRecordIndex = exports.mapIndexNumber = exports.forEachNumberIndex = exports.forEachNumberIndexAwait = exports.getChainNativeToken = exports.isClientWalletConnected = exports.getWalletProvider = exports.State = exports.getNetworksByType = exports.getNetworkType = exports.NetworkType = exports.WalletPlugin = void 0;
+    var WalletPlugin;
+    (function (WalletPlugin) {
+        WalletPlugin["MetaMask"] = "metamask";
+        WalletPlugin["Coin98"] = "coin98";
+        WalletPlugin["TrustWallet"] = "trustwallet";
+        WalletPlugin["BinanceChainWallet"] = "binancechainwallet";
+        WalletPlugin["ONTOWallet"] = "onto";
+        WalletPlugin["WalletConnect"] = "walletconnect";
+        WalletPlugin["BitKeepWallet"] = "bitkeepwallet";
+        WalletPlugin["FrontierWallet"] = "frontierwallet";
+    })(WalletPlugin = exports.WalletPlugin || (exports.WalletPlugin = {}));
+    var NetworkType;
+    (function (NetworkType) {
+        NetworkType[NetworkType["Mainnet"] = 0] = "Mainnet";
+        NetworkType[NetworkType["Testnet"] = 1] = "Testnet";
+        NetworkType[NetworkType["NotSupported"] = 2] = "NotSupported";
+    })(NetworkType = exports.NetworkType || (exports.NetworkType = {}));
+    function getNetworkType(chainId) {
+        if (core_2.Mainnets.some(network => network === chainId)) {
+            return NetworkType.Mainnet;
+        }
+        if (core_2.Testnets.some(network => network === chainId)) {
+            return NetworkType.Testnet;
+        }
+        return NetworkType.NotSupported;
+    }
+    exports.getNetworkType = getNetworkType;
+    function getNetworksByType(chainId) {
+        switch (getNetworkType(chainId)) {
+            case NetworkType.Mainnet:
+                return core_2.Mainnets;
+            case NetworkType.Testnet:
+                return core_2.Testnets;
+        }
+        return [];
+    }
+    exports.getNetworksByType = getNetworksByType;
+    class State {
+        constructor(options) {
+            this.defaultChainId = 0;
+            this.proxyAddresses = {};
+            this.infuraId = "";
+            this.rpcWalletId = "";
+            this.networkMap = {};
+            this.networkConfig = [];
+            this.getNetworkInfo = (chainId) => {
+                return this.networkMap[chainId];
+            };
+            this.viewOnExplorerByAddress = (chainId, address) => {
+                let network = this.getNetworkInfo(chainId);
+                if (network && network.explorerAddressUrl) {
+                    let url = `${network.explorerAddressUrl}${address}`;
+                    window.open(url);
+                }
+            };
+            this.setNetworkConfig = (networks) => {
+                this.networkConfig = networks;
+            };
+            this.getNetworkConfig = () => {
+                return this.networkConfig;
+            };
+            this.initData(options);
+        }
+        initRpcWallet(defaultChainId) {
+            this.defaultChainId = defaultChainId;
+            if (this.rpcWalletId) {
+                return this.rpcWalletId;
+            }
+            const clientWallet = eth_wallet_3.Wallet.getClientInstance();
+            const networkList = Object.values(components_1.application.store?.networkMap || []);
+            const instanceId = clientWallet.initRpcWallet({
+                networks: networkList,
+                defaultChainId,
+                infuraId: components_1.application.store?.infuraId,
+                multicalls: components_1.application.store?.multicalls
+            });
+            this.rpcWalletId = instanceId;
+            if (clientWallet.address) {
+                const rpcWallet = eth_wallet_3.Wallet.getRpcWalletInstance(instanceId);
+                rpcWallet.address = clientWallet.address;
+            }
+            const defaultNetworkList = (0, scom_network_list_1.default)();
+            const defaultNetworkMap = defaultNetworkList.reduce((acc, cur) => {
+                acc[cur.chainId] = cur;
+                return acc;
+            }, {});
+            // const supportedNetworks = ConfigData.supportedNetworks || [];
+            for (let network of networkList) {
+                const networkInfo = defaultNetworkMap[network.chainId];
+                // const supportedNetwork = supportedNetworks.find(v => v.chainId == network.chainId);
+                // if (!networkInfo || !supportedNetwork) continue;
+                if (!networkInfo)
+                    continue;
+                if (this.infuraId && network.rpcUrls && network.rpcUrls.length > 0) {
+                    for (let i = 0; i < network.rpcUrls.length; i++) {
+                        network.rpcUrls[i] = network.rpcUrls[i].replace(/{InfuraId}/g, this.infuraId);
+                    }
+                }
+                this.networkMap[network.chainId] = {
+                    ...networkInfo,
+                    ...network
+                };
+            }
+            return instanceId;
+        }
+        getRpcWallet() {
+            return this.rpcWalletId ? eth_wallet_3.Wallet.getRpcWalletInstance(this.rpcWalletId) : null;
+        }
+        isRpcWalletConnected() {
+            const wallet = this.getRpcWallet();
+            return wallet?.isConnected;
+        }
+        getProxyAddress(chainId) {
+            const _chainId = chainId || eth_wallet_3.Wallet.getInstance().chainId;
+            const proxyAddresses = this.proxyAddresses;
+            if (proxyAddresses) {
+                return proxyAddresses[_chainId];
+            }
+            return null;
+        }
+        getChainId() {
+            const rpcWallet = this.getRpcWallet();
+            return rpcWallet?.chainId;
+        }
+        initData(options) {
+            if (options.infuraId) {
+                this.infuraId = options.infuraId;
+            }
+            if (options.proxyAddresses) {
+                this.proxyAddresses = options.proxyAddresses;
+            }
+        }
+        async setApprovalModelAction(options, spenderAddress) {
+            const approvalOptions = {
+                ...options,
+                spenderAddress
+            };
+            let wallet = this.getRpcWallet();
+            this.approvalModel = new eth_wallet_3.ERC20ApprovalModel(wallet, approvalOptions);
+            let approvalModelAction = this.approvalModel.getAction();
+            return approvalModelAction;
+        }
+    }
+    exports.State = State;
+    // wallet
+    function getWalletProvider() {
+        return localStorage.getItem('walletProvider') || '';
+    }
+    exports.getWalletProvider = getWalletProvider;
+    function isClientWalletConnected() {
+        const wallet = eth_wallet_3.Wallet.getClientInstance();
+        return wallet.isConnected;
+    }
+    exports.isClientWalletConnected = isClientWalletConnected;
+    const getChainNativeToken = (chainId) => {
+        return scom_token_list_1.ChainNativeTokenByChainId[chainId];
+    };
+    exports.getChainNativeToken = getChainNativeToken;
+    //custom loop
+    async function forEachNumberIndexAwait(list, callbackFn) {
+        for (const chainId in list) {
+            if (Object.prototype.hasOwnProperty.call(list, chainId)
+                && new eth_wallet_3.BigNumber(chainId).isInteger())
+                await callbackFn(list[chainId], Number(chainId));
+        }
+    }
+    exports.forEachNumberIndexAwait = forEachNumberIndexAwait;
+    function forEachNumberIndex(list, callbackFn) {
+        for (const chainId in list) {
+            if (Object.prototype.hasOwnProperty.call(list, chainId)
+                && new eth_wallet_3.BigNumber(chainId).isInteger())
+                callbackFn(list[chainId], Number(chainId));
+        }
+    }
+    exports.forEachNumberIndex = forEachNumberIndex;
+    function mapIndexNumber(list, callbackFn) {
+        let out = [];
+        for (const chainId in list) {
+            if (Object.prototype.hasOwnProperty.call(list, chainId)
+                && new eth_wallet_3.BigNumber(chainId).isInteger())
+                out.push(callbackFn(list[chainId], Number(chainId)));
+        }
+        return out;
+    }
+    exports.mapIndexNumber = mapIndexNumber;
+    function mapRecordIndex(list, callbackFn) {
+        let out = [];
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                out.push(callbackFn(list[index], index, list));
+        }
+        return out;
+    }
+    exports.mapRecordIndex = mapRecordIndex;
+    function forEachRecordIndex(list, callbackFn) {
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                callbackFn(list[index], index, list);
+        }
+    }
+    exports.forEachRecordIndex = forEachRecordIndex;
+    function mapRecord(list, callbackFn) {
+        let out = {};
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                out[index] = callbackFn(list[index], index, list);
+        }
+        return out;
+    }
+    exports.mapRecord = mapRecord;
+    async function mapRecordAwait(list, callbackFn) {
+        let out = {};
+        for (const index in list) {
+            if (Object.prototype.hasOwnProperty.call(list, index))
+                out[index] = await callbackFn(list[index], index, list);
+        }
+        return out;
+    }
+    exports.mapRecordAwait = mapRecordAwait;
+    function mapRecordNumber(list, callbackFn) {
+        let out = {};
+        for (const key in list) {
+            if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
+                out[+key] = callbackFn(list[key], +key, list);
+            }
+        }
+        return out;
+    }
+    exports.mapRecordNumber = mapRecordNumber;
+    async function mapRecordNumberAwait(list, callbackFn) {
+        let out = {};
+        for (const key in list) {
+            if (Object.prototype.hasOwnProperty.call(list, key) && !isNaN(+key)) {
+                out[+key] = await callbackFn(list[key], +key, list);
+            }
+        }
+        return out;
+    }
+    exports.mapRecordNumberAwait = mapRecordNumberAwait;
+});
+define("@scom/oswap-nft-widget/store/index.ts", ["require", "exports", "@scom/oswap-nft-widget/store/data/index.ts", "@scom/oswap-nft-widget/store/utils.ts"], function (require, exports, index_1, utils_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    ///<amd-module name='@scom/oswap-nft-widget/store/index.ts'/> 
+    __exportStar(index_1, exports);
+    __exportStar(utils_1, exports);
+});
+define("@scom/oswap-nft-widget/assets.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    let moduleDir = components_2.application.currentModuleDir;
     function fullPath(path) {
         return `${moduleDir}/${path}`;
     }
@@ -915,11 +542,11 @@ define("@scom/oswap-nft-widget/assets.ts", ["require", "exports", "@ijstech/comp
         fullPath
     };
 });
-define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_4, assets_1) {
+define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_3, assets_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.cardStyle = void 0;
-    exports.cardStyle = components_4.Styles.style({
+    exports.cardStyle = components_3.Styles.style({
         $nest: {
             '.display-none': {
                 display: 'none'
@@ -1106,11 +733,11 @@ define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@
         },
     });
 });
-define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_5) {
+define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.myCardStyle = void 0;
-    exports.myCardStyle = components_5.Styles.style({
+    exports.myCardStyle = components_4.Styles.style({
         $nest: {
             '.bg-flip': {
                 backgroundColor: 'transparent',
@@ -1206,11 +833,11 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
         },
     });
 });
-define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts"], function (require, exports, components_6, myCard_css_1) {
+define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts"], function (require, exports, components_5, myCard_css_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NftMyCard = void 0;
-    let NftMyCard = class NftMyCard extends components_6.Module {
+    let NftMyCard = class NftMyCard extends components_5.Module {
         constructor(parent, options) {
             super(parent, options);
         }
@@ -1222,7 +849,7 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
             this.renderCard();
         }
         async renderStar() {
-            let icon = await components_6.Icon.create();
+            let icon = await components_5.Icon.create();
             icon.name = 'star';
             icon.fill = '#fff';
             icon.width = 20;
@@ -1252,7 +879,7 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
                 }
             }
             if (this.trollImage) {
-                const img1 = new components_6.Image();
+                const img1 = new components_5.Image();
                 img1.url = value.image;
                 this.trollImage.appendChild(img1);
             }
@@ -1319,27 +946,18 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
         }
     };
     NftMyCard = __decorate([
-        (0, components_6.customElements)('nft-my-card')
+        (0, components_5.customElements)('nft-my-card')
     ], NftMyCard);
     exports.NftMyCard = NftMyCard;
 });
-define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts", "@scom/oswap-nft-widget/nft-utils/myCard.tsx"], function (require, exports, components_7, assets_2, index_2, card_css_1, myCard_1) {
+define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts", "@scom/oswap-nft-widget/nft-utils/myCard.tsx"], function (require, exports, components_6, assets_2, index_2, card_css_1, myCard_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NftCard = void 0;
-    let NftCard = class NftCard extends components_7.Module {
+    let NftCard = class NftCard extends components_6.Module {
         constructor(state, parent, options) {
             super(parent, options);
-            this.clientEvents = [];
             this.state = state;
-            this.$eventBus = components_7.application.EventBus;
-            this.registerEvent();
-        }
-        onHide() {
-            for (let event of this.clientEvents) {
-                event.unregister();
-            }
-            this.clientEvents = [];
         }
         get state() {
             return this._state;
@@ -1380,7 +998,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
                 this.lbCount.caption = `${count} ${count === 1 ? 'NFT' : 'NFTs'}`;
             if (count) {
                 if (!this.carouselSlider) {
-                    this.carouselSlider = await components_7.CarouselSlider.create({
+                    this.carouselSlider = await components_6.CarouselSlider.create({
                         width: '100%',
                         height: '100%',
                         overflow: 'inherit',
@@ -1396,7 +1014,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
                 this.trollImage.appendChild(this.carouselSlider);
                 const items = [];
                 for (const nft of value.userNFTs) {
-                    const pnl = await components_7.Panel.create({ padding: { left: 5, right: 5 }, margin: { bottom: 0 } });
+                    const pnl = await components_6.Panel.create({ padding: { left: 5, right: 5 }, margin: { bottom: 0 } });
                     pnl.classList.add('nft-card-column');
                     const card = await myCard_1.NftMyCard.create();
                     pnl.appendChild(card);
@@ -1414,12 +1032,12 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
             else {
                 this.trollImage.classList.add('troll-img');
                 this.trollImage.classList.remove('os-slider');
-                const img1 = new components_7.Image();
-                const img2 = new components_7.Image();
-                const img3 = new components_7.Image();
-                const img4 = new components_7.Image();
-                const img5 = new components_7.Image();
-                const trollText = new components_7.Label();
+                const img1 = new components_6.Image();
+                const img2 = new components_6.Image();
+                const img3 = new components_6.Image();
+                const img4 = new components_6.Image();
+                const img5 = new components_6.Image();
+                const trollText = new components_6.Label();
                 const trollType = this.capitalizeFirstLetter(value.tier);
                 img1.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Skin.svg`);
                 img2.url = assets_2.default.fullPath(`img/nft/${trollType}-Troll-01-Horn.svg`);
@@ -1448,10 +1066,6 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
                 this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
                 this.btnHandleStake.enabled = !isSoldedOut;
             }
-        }
-        registerEvent() {
-            this.clientEvents.push(this.$eventBus.register(this, "isWalletConnected" /* EventId.IsWalletConnected */, this.updateBtn));
-            this.clientEvents.push(this.$eventBus.register(this, "IsWalletDisconnected" /* EventId.IsWalletDisconnected */, this.updateBtn));
         }
         handleStake() {
             this.onStake();
@@ -1501,7 +1115,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
         }
     };
     NftCard = __decorate([
-        (0, components_7.customElements)('nft-card')
+        (0, components_6.customElements)('nft-card')
     ], NftCard);
     exports.NftCard = NftCard;
 });
@@ -1598,72 +1212,67 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     async function fetchAllNftInfo(state) {
         const chainId = state.getChainId();
         if (!(chainId in index_3.SupportedNetworkId))
-            throw new Error(`chain id ${chainId} is not suppported`);
+            return false;
         let wallet = state.getRpcWallet();
         nftInfoMap[chainId] = await (0, index_3.mapRecordAwait)(nftInfoMap[chainId], info => fetchNftInfo(state, wallet, info));
         return nftInfoMap[chainId];
     }
     exports.fetchAllNftInfo = fetchAllNftInfo;
     async function fetchNftInfo(state, wallet, nftInfo) {
+        if (wallet.chainId !== nftInfo.chainId)
+            throw new Error("chain id do not match");
+        let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
+        let calls = [
+            {
+                contract: trollNFT,
+                methodName: 'minimumStake',
+                params: [],
+                to: nftInfo.address
+            },
+            {
+                contract: trollNFT,
+                methodName: 'cap',
+                params: [],
+                to: nftInfo.address
+            },
+            {
+                contract: trollNFT,
+                methodName: 'totalSupply',
+                params: [],
+                to: nftInfo.address
+            },
+            {
+                contract: trollNFT,
+                methodName: 'protocolFee',
+                params: [],
+                to: nftInfo.address
+            },
+        ];
         try {
-            if (wallet.chainId !== nftInfo.chainId)
-                throw new Error("chain id do not match");
-            let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
-            let calls = [
-                {
-                    contract: trollNFT,
-                    methodName: 'minimumStake',
-                    params: [],
-                    to: nftInfo.address
-                },
-                {
-                    contract: trollNFT,
-                    methodName: 'cap',
-                    params: [],
-                    to: nftInfo.address
-                },
-                {
-                    contract: trollNFT,
-                    methodName: 'totalSupply',
-                    params: [],
-                    to: nftInfo.address
-                },
-                {
-                    contract: trollNFT,
-                    methodName: 'protocolFee',
-                    params: [],
-                    to: nftInfo.address
-                },
-            ];
-            try {
-                let [minimumStake, cap, totalSupply, protocolFee] = await wallet.doMulticall(calls) || [];
-                let userNfts = await fetchUserNft(state, nftInfo) || [];
-                let out = {
-                    ...nftInfo,
-                    minimumStake: new eth_wallet_4.BigNumber(minimumStake).shiftedBy(-nftInfo.token.decimals),
-                    cap: new eth_wallet_4.BigNumber(cap),
-                    totalSupply: new eth_wallet_4.BigNumber(totalSupply),
-                    protocolFee: new eth_wallet_4.BigNumber(protocolFee).shiftedBy(-nftInfo.token.decimals),
-                    userNfts,
-                };
-                nftInfoMap[nftInfo.chainId][out.name] = out;
-                return out;
-            }
-            catch (error) {
-                console.log("fetchNftInfo", nftInfo.chainId, nftInfo.address, error);
-            }
-            return {
+            let [minimumStake, cap, totalSupply, protocolFee] = await wallet.doMulticall(calls) || [];
+            let userNfts = await fetchUserNft(state, nftInfo) || [];
+            let out = {
                 ...nftInfo,
-                minimumStake: new eth_wallet_4.BigNumber(0),
-                cap: new eth_wallet_4.BigNumber(0),
-                totalSupply: new eth_wallet_4.BigNumber(0),
-                protocolFee: new eth_wallet_4.BigNumber(0),
-                userNfts: [],
+                minimumStake: new eth_wallet_4.BigNumber(minimumStake).shiftedBy(-nftInfo.token.decimals),
+                cap: new eth_wallet_4.BigNumber(cap),
+                totalSupply: new eth_wallet_4.BigNumber(totalSupply),
+                protocolFee: new eth_wallet_4.BigNumber(protocolFee).shiftedBy(-nftInfo.token.decimals),
+                userNfts,
             };
+            nftInfoMap[nftInfo.chainId][out.name] = out;
+            return out;
         }
-        catch (e) {
-            console.log(e);
+        catch (error) {
+            console.log("fetchNftInfo", nftInfo.chainId, nftInfo.address, error);
         }
+        return {
+            ...nftInfo,
+            minimumStake: new eth_wallet_4.BigNumber(0),
+            cap: new eth_wallet_4.BigNumber(0),
+            totalSupply: new eth_wallet_4.BigNumber(0),
+            protocolFee: new eth_wallet_4.BigNumber(0),
+            userNfts: [],
+        };
     }
     async function fetchUserNft(state, nftInfo) {
         if (!(0, index_3.isClientWalletConnected)())
@@ -1772,11 +1381,11 @@ define("@scom/oswap-nft-widget/nft-utils/index.ts", ["require", "exports", "@sco
     Object.defineProperty(exports, "burnNFT", { enumerable: true, get: function () { return nftAPI_1.burnNFT; } });
     Object.defineProperty(exports, "getNFTObject", { enumerable: true, get: function () { return nftAPI_1.getNFTObject; } });
 });
-define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/scom-network-picker", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, scom_network_picker_1, data_json_2) {
+define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/scom-network-picker", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, scom_network_picker_1, data_json_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getProjectOwnerSchema = exports.getBuilderSchema = void 0;
-    const chainIds = data_json_2.default.supportedNetworks || [];
+    const chainIds = data_json_1.default.supportedNetworks || [];
     const networks = chainIds.map(v => { return { chainId: v.chainId }; });
     const theme = {
         type: 'object',
@@ -2052,11 +1661,11 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
     }
     exports.getProjectOwnerSchema = getProjectOwnerSchema;
 });
-define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_8, assets_3) {
+define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_7, assets_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.listMediaStyles = exports.nftStyle_360 = exports.nftStyle_480 = exports.nftStyle_767 = exports.nftStyle_1100 = exports.nftDefaultStyle = exports.nftStyle = void 0;
-    exports.nftStyle = components_8.Styles.style({
+    exports.nftStyle = components_7.Styles.style({
         minHeight: '600px',
         paddingTop: '1rem',
         $nest: {
@@ -2223,28 +1832,28 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
             },
         }
     });
-    exports.nftDefaultStyle = components_8.Styles.style({
+    exports.nftDefaultStyle = components_7.Styles.style({
         $nest: {
             '.custom-card-column': {
                 width: 'calc(25% - 30px)'
             }
         }
     });
-    exports.nftStyle_1100 = components_8.Styles.style({
+    exports.nftStyle_1100 = components_7.Styles.style({
         $nest: {
             '.custom-card-column, .new-card-column': {
                 width: 'calc(50% - 30px)'
             }
         }
     });
-    exports.nftStyle_767 = components_8.Styles.style({
+    exports.nftStyle_767 = components_7.Styles.style({
         $nest: {
             '.custom-card-column, .new-card-column': {
                 margin: '0 auto 1.5rem'
             }
         }
     });
-    exports.nftStyle_480 = components_8.Styles.style({
+    exports.nftStyle_480 = components_7.Styles.style({
         $nest: {
             '.custom-card-column': {
                 width: '100% !important',
@@ -2258,7 +1867,7 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
             }
         }
     });
-    exports.nftStyle_360 = components_8.Styles.style({
+    exports.nftStyle_360 = components_7.Styles.style({
         $nest: {
             '.os-slider': {
                 $nest: {
@@ -2287,11 +1896,11 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
         1100: exports.nftStyle_1100
     };
 });
-define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, components_9, eth_wallet_5, index_4, index_5, assets_4, scom_commission_fee_setup_1, scom_token_list_3, index_6, formSchema_1, index_css_1, data_json_3) {
+define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, components_8, eth_wallet_5, index_4, index_5, assets_4, scom_commission_fee_setup_1, scom_token_list_2, index_6, formSchema_1, index_css_1, data_json_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    const Theme = components_9.Styles.Theme.ThemeVars;
-    let ScomOswapNftWidget = class ScomOswapNftWidget extends components_9.Module {
+    const Theme = components_8.Styles.Theme.ThemeVars;
+    let OswapNftWidget = class OswapNftWidget extends components_8.Module {
         constructor(parent, options) {
             super(parent, options);
             this._data = {
@@ -2320,7 +1929,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             };
             this.onChainChange = async () => {
                 this.chainId = this.state.getChainId();
-                scom_token_list_3.tokenStore.updateTokenMapData(this.chainId);
+                scom_token_list_2.tokenStore.updateTokenMapData(this.chainId);
                 this.initializeWidgetConfig();
             };
             this.deferReadyCallback = true;
@@ -2409,17 +2018,17 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     },
                     customUI: {
                         render: async (data, onConfirm) => {
-                            const vstack = new components_9.VStack();
+                            const vstack = new components_8.VStack();
                             await self.loadCommissionFee();
                             const config = new scom_commission_fee_setup_1.default(null, {
                                 commissions: self._data.commissions || [],
                                 fee: self.state.embedderCommissionFee,
                                 networks: self._data.networks
                             });
-                            const hstack = new components_9.HStack(null, {
+                            const hstack = new components_8.HStack(null, {
                                 verticalAlignment: 'center',
                             });
-                            const button = new components_9.Button(hstack, {
+                            const button = new components_8.Button(hstack, {
                                 caption: 'Confirm',
                                 width: '100%',
                                 height: 40,
@@ -2532,7 +2141,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     },
                     getData: this.getData.bind(this),
                     setData: async (value) => {
-                        const defaultData = data_json_3.default.defaultBuilderData;
+                        const defaultData = data_json_2.default.defaultBuilderData;
                         this.setData({ ...defaultData, ...value });
                     },
                     getTag: this.getTag.bind(this),
@@ -2619,7 +2228,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this._data = value;
             this.state.setNetworkConfig(value.networks);
             for (let network of this._data.networks) {
-                scom_token_list_3.tokenStore.updateTokenMapData(network.chainId);
+                scom_token_list_2.tokenStore.updateTokenMapData(network.chainId);
             }
             await this.resetRpcWallet();
             await this.refreshUI();
@@ -2675,7 +2284,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         async init() {
             super.init();
-            this.state = new index_4.State(data_json_3.default);
+            this.state = new index_4.State(data_json_2.default);
             this.chainId = this.state.getChainId();
             const lazyLoad = this.getAttribute('lazyLoad', true, false);
             if (!lazyLoad) {
@@ -2739,7 +2348,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 onToBeApproved: async (token) => {
                     this.btnApprove.visible = true;
                     this.btnMint.visible = false;
-                    this.btnApprove.caption = `Approve ${token.symbol}`;
+                    this.btnApprove.caption = (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
                     this.btnApprove.enabled = true;
                     this.btnMint.enabled = false;
                 },
@@ -2782,40 +2391,55 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             }, item.address);
         }
         async updateBalances() {
-            await scom_token_list_3.tokenStore.updateTokenBalancesByChainId(this.state.getChainId());
+            await scom_token_list_2.tokenStore.updateTokenBalancesByChainId(this.state.getChainId());
         }
         async switchNetworkByWallet() {
             if (this.mdWallet) {
-                await components_9.application.loadPackage('@scom/scom-wallet-modal', '*');
+                await components_8.application.loadPackage('@scom/scom-wallet-modal', '*');
                 this.mdWallet.networks = this.networks;
                 this.mdWallet.wallets = this.wallets;
                 this.mdWallet.showModal();
             }
         }
-        renderEmpty(elm, _msg) {
+        renderEmpty(elm, msg) {
             if (!elm)
                 return;
-            let msg = (0, index_4.isClientWalletConnected)() ? 'Your very own NFT is getting ready!' : 'Please connect with you wallet!';
             elm.clearInnerHTML();
             elm.appendChild(this.$render("i-panel", { width: "100%" },
                 this.$render("i-hstack", { gap: "32px" },
                     this.$render("i-panel", { border: { radius: '12px' }, background: { color: "#ffffff33" }, width: "100%", height: "auto" },
                         this.$render("i-vstack", { padding: { top: 30, bottom: 30 }, horizontalAlignment: "center" },
                             this.$render("i-panel", { class: "text-center", width: "100%" },
-                                this.$render("i-image", { url: assets_4.default.fullPath('img/nft/TrollEgg.svg'), width: 200, height: "auto" })),
+                                this.$render("i-image", { url: assets_4.default.fullPath('img/nft/TrollEgg.svg'), width: 200, height: "auto", display: "block", margin: { left: 'auto', right: 'auto' } })),
                             this.$render("i-label", { class: "text-center", width: "100%", margin: { top: 20 }, caption: msg, font: { color: 'white', size: '1.5rem' } }))))));
         }
-        ;
         async renderData() {
             this.updateButtons();
+            const currentChainId = this.state.getChainId();
+            const isConnected = (0, index_4.isClientWalletConnected)();
+            const { chainId, connected, fetching } = this.initializedState || {};
+            if (chainId === currentChainId && connected === isConnected && fetching === true)
+                return;
+            this.initializedState = {
+                chainId: currentChainId,
+                connected: isConnected,
+                fetching: true
+            };
             await this.renderCards();
+            this.updateButtons();
+            this.initializedState.fetching = false;
         }
         async renderCards() {
             this.pnlLoading.visible = true;
             this.cardRow.visible = false;
             const info = await (0, index_6.fetchAllNftInfo)(this.state);
+            const chainId = this.state.getChainId();
+            if (this.initializedState.chainId !== chainId)
+                return;
             if (!info || !Object.keys(info).length) {
-                this.renderEmpty(this.cardRow, 'Your very own NFT is getting ready!');
+                const network = this.state.getNetworkInfo(chainId);
+                const msg = info === false ? `${network ? `${network.chainName} (${chainId})` : `Chain ID ${chainId}`} is not supported!` : 'Your very own NFT is getting ready!';
+                this.renderEmpty(this.cardRow, msg);
                 this.pnlLoading.visible = false;
                 this.cardRow.visible = true;
                 return;
@@ -2838,7 +2462,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                         stakeToken: token,
                         stakeAmount: v.stakeBalance,
                         stakeAmountText: `${(0, index_5.formatNumber)(v.stakeBalance)} ${token?.symbol || ''}`,
-                        birthday: components_9.moment.unix(v.birthday).format(index_5.DefaultDateFormat),
+                        birthday: components_8.moment.unix(v.birthday).format(index_5.DefaultDateFormat),
                         rarity: v.rarity,
                         image: v.image
                     };
@@ -2861,7 +2485,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.dataCards = cards;
             this.cardRow.clearInnerHTML();
             for (const item of this.dataCards) {
-                const column = await components_9.VStack.create();
+                const column = await components_8.VStack.create();
                 column.classList.add('nft-card-column', 'new-card-column');
                 column.stack = { basis: '0%', shrink: '1', grow: '1' };
                 const nftCard = await index_6.NftCard.create();
@@ -2905,7 +2529,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 this.btnMint.caption = 'Switch Network';
             }
             else {
-                this.btnApprove.caption = 'Approve';
+                this.btnApprove.caption = `Approve ${this.currentDataCard?.stakeToken?.symbol || ''}`;
                 this.btnBurn.caption = 'Burn';
                 this.btnMint.caption = 'Stake';
             }
@@ -2926,10 +2550,10 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             if (item.flashSales) {
                 this.lbMintFlashSales.caption = item.flashSales;
             }
-            let tokenBalances = scom_token_list_3.tokenStore.getTokenBalancesByChainId(this.chainId) || {};
+            let tokenBalances = scom_token_list_2.tokenStore.getTokenBalancesByChainId(this.chainId) || {};
             let tokenBalance = tokenBalances[item.stakeToken.address.toLowerCase()];
             this.lbTokenBalance.caption = (0, index_5.formatNumber)(tokenBalance, 4);
-            this.ImageMintStakeToken.url = scom_token_list_3.assets.tokenPath(item.stakeToken, this.chainId);
+            this.ImageMintStakeToken.url = scom_token_list_2.assets.tokenPath(item.stakeToken, this.chainId);
             this.lbMintStakeToken.caption = stakeTokenSymbol;
             this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${item.stakeAmount} of ${stakeTokenSymbol}.`;
             this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
@@ -3015,7 +2639,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                 this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
                                     this.$render("i-icon", { class: "i-loading-spinner_icon", cursor: "default", image: { url: assets_4.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
                                     this.$render("i-label", { caption: "Loading...", font: { color: '#FD4A4C', size: '1.5em' }, class: "i-loading-spinner_text" }))),
-                            this.$render("i-hstack", { gap: "2rem", id: "cardRow", wrap: "wrap" }))),
+                            this.$render("i-hstack", { gap: "2rem", id: "cardRow", maxWidth: 1440, margin: { left: 'auto', right: 'auto' }, wrap: "wrap" }))),
                     this.$render("i-hstack", { id: "minting", visible: false, gap: "30px", horizontalAlignment: "center" },
                         this.$render("i-vstack", { class: "nft-card-stake" },
                             this.$render("i-panel", { class: "card-widget" },
@@ -3058,14 +2682,14 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                                     } })),
                                             this.$render("i-label", { id: "lbMintFee", caption: "", font: { color: '#f7d063', size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "section-1" },
-                                            this.$render("i-hstack", { class: "mb-1", verticalAlignment: 'center', horizontalAlignment: 'space-between' },
+                                            this.$render("i-hstack", { gap: 4, margin: { bottom: '0.75rem' }, verticalAlignment: "center", horizontalAlignment: "space-between" },
                                                 this.$render("i-label", { caption: "Stake Amount" }),
-                                                this.$render("i-hstack", { verticalAlignment: 'center', horizontalAlignment: 'end' },
-                                                    this.$render("i-label", { font: { color: '#f7d063', size: '1.2rem' }, margin: { right: 4 }, caption: "Balance: " }),
-                                                    this.$render("i-label", { id: "lbTokenBalance", font: { color: '#f7d063', size: '1.2rem' }, caption: "10000" }))),
-                                            this.$render("i-hstack", { verticalAlignment: 'center', horizontalAlignment: 'space-between' },
-                                                this.$render("i-label", { id: "lbMintStakeAmount", font: { color: '#f7d063', size: '1.2rem' }, caption: "50000" }),
-                                                this.$render("i-hstack", { verticalAlignment: 'center', horizontalAlignment: 'end' },
+                                                this.$render("i-hstack", { gap: 4, verticalAlignment: "center", horizontalAlignment: "end" },
+                                                    this.$render("i-label", { font: { color: '#f7d063', size: '1rem' }, caption: "Balance: " }),
+                                                    this.$render("i-label", { id: "lbTokenBalance", font: { color: '#f7d063', size: '1rem' } }))),
+                                            this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "space-between" },
+                                                this.$render("i-label", { id: "lbMintStakeAmount", font: { color: '#f7d063', size: '1.2rem' } }),
+                                                this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "end" },
                                                     this.$render("i-image", { id: "ImageMintStakeToken", width: 20, class: "flex", margin: { right: 4 }, url: assets_4.default.fullPath('img/swap/openswap.png') }),
                                                     this.$render("i-label", { id: "lbMintStakeToken", caption: "OSWAP" })))),
                                         this.$render("i-panel", { class: "section-2" },
@@ -3093,12 +2717,13 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                             this.$render("i-image", { url: assets_4.default.fullPath('img/nft/TrollCry.png'), margin: { right: 4 }, width: 40, height: "auto", class: "flex" }),
                                             this.$render("i-label", { class: "note-burn", caption: "This is NFT Will Be Gone Forever" })),
                                         this.$render("i-button", { id: "btnBurn", height: 40, class: "btn-stake btn-os", caption: 'Burn', rightIcon: { spin: true, visible: false }, onClick: () => this.onSubmit() }))))))),
+                this.$render("i-scom-tx-status-modal", { id: "txStatusModal" }),
                 this.$render("i-scom-wallet-modal", { id: "mdWallet", wallets: [] })));
         }
     };
-    ScomOswapNftWidget = __decorate([
-        components_9.customModule,
-        (0, components_9.customElements)('i-scom-oswap-nft-widget')
-    ], ScomOswapNftWidget);
-    exports.default = ScomOswapNftWidget;
+    OswapNftWidget = __decorate([
+        components_8.customModule,
+        (0, components_8.customElements)('i-oswap-nft-widget')
+    ], OswapNftWidget);
+    exports.default = OswapNftWidget;
 });

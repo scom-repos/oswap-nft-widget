@@ -1,4 +1,4 @@
-import { Wallet, BigNumber, Utils, TransactionReceipt, IWallet, IRpcWallet, IMulticallContractCall } from "@ijstech/eth-wallet";
+import { Wallet, BigNumber, Utils, TransactionReceipt, IRpcWallet, IMulticallContractCall } from "@ijstech/eth-wallet";
 import { Contracts, Contracts as TrollNFTContracts } from '@scom/oswap-troll-nft-contract';
 
 import {
@@ -15,7 +15,6 @@ import {
   UserNftInfo,
   isClientWalletConnected,
 } from "../store/index";
-import { tokenStore } from '@scom/scom-token-list';
 import { ITokenObject } from "@scom/scom-token-list";
 import { ContractUtils as ProxyContractUtils } from '@scom/scom-commission-proxy-contract';
 
@@ -115,7 +114,7 @@ const distributeByProbability = (index: BigNumber, base: number, power: number, 
 
 async function fetchAllNftInfo(state: State) {
   const chainId = state.getChainId();
-  if (!(chainId in SupportedNetworkId)) throw new Error(`chain id ${chainId} is not suppported`);
+  if (!(chainId in SupportedNetworkId)) return false;
   let wallet = state.getRpcWallet();
   nftInfoMap[chainId as SupportedNetworkId] = await mapRecordAwait(
     nftInfoMap[chainId as SupportedNetworkId],
