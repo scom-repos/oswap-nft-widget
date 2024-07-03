@@ -1135,8 +1135,8 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     }
     function initNftInfo() {
         let out;
-        out = (0, index_3.mapRecordNumber)(index_3.nftInfoStoreMap, (nfts, chainId, o1) => {
-            return (0, index_3.mapRecord)(nfts, (nft, tier, o2) => {
+        out = (0, index_3.mapRecordNumber)(index_3.nftInfoStoreMap, nfts => {
+            return (0, index_3.mapRecord)(nfts, (nft) => {
                 return {
                     ...nft,
                     minimumStake: new eth_wallet_4.BigNumber("0"),
@@ -1206,7 +1206,6 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
                 break;
             }
         }
-        ;
         return output;
     };
     async function fetchAllNftInfo(state) {
@@ -1348,16 +1347,10 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
         return userNfts;
     }
     const mintNFT = async (contractAddress, token, amount) => {
-        let receipt;
-        try {
-            let wallet = eth_wallet_4.Wallet.getClientInstance();
-            let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, contractAddress);
-            let tokenAmount = eth_wallet_4.Utils.toDecimals(amount, token.decimals);
-            receipt = await trollNFT.stake(tokenAmount);
-        }
-        catch (e) {
-            console.log(e);
-        }
+        let wallet = eth_wallet_4.Wallet.getClientInstance();
+        let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, contractAddress);
+        let tokenAmount = eth_wallet_4.Utils.toDecimals(amount, token.decimals);
+        let receipt = await trollNFT.stake(tokenAmount);
         return receipt;
     };
     exports.mintNFT = mintNFT;
@@ -2632,8 +2625,6 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             return (this.$render("i-scom-dapp-container", { id: "dappContainer" },
                 this.$render("i-panel", { class: index_css_1.nftStyle },
                     this.$render("i-panel", { id: "mint", class: "widget" },
-                        this.$render("i-panel", { class: "current-nft" },
-                            this.$render("i-label", { caption: "oswap" })),
                         this.$render("i-panel", { padding: { left: '1rem', right: '1rem' } },
                             this.$render("i-panel", { id: "pnlLoading", minHeight: 300, class: "i-loading-overlay" },
                                 this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },

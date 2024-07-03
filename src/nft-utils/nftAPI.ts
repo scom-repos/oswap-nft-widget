@@ -38,8 +38,8 @@ function convToken(t: ITokenObject): TokenConstant {
 
 function initNftInfo() {
   let out: Record<SupportedNetworkId, Record<OswapNfts, NftInfo>>;
-  out = mapRecordNumber(nftInfoStoreMap, (nfts, chainId, o1) => {
-    return mapRecord(nfts, (nft, tier, o2): NftInfo => {
+  out = mapRecordNumber(nftInfoStoreMap, nfts => {
+    return mapRecord(nfts, (nft): NftInfo => {
       return {
         ...nft,
         minimumStake: new BigNumber("0"),
@@ -108,7 +108,7 @@ const distributeByProbability = (index: BigNumber, base: number, power: number, 
       output = new BigNumber(i).plus(1).toFixed();
       break;
     }
-  };
+  }
   return output;
 }
 
@@ -260,13 +260,10 @@ async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore): Prom
 }
 
 const mintNFT = async (contractAddress: string, token: TokenConstant, amount: string) => {
-  let receipt: TransactionReceipt;
-  try {
-    let wallet = Wallet.getClientInstance();
-    let trollNFT = new TrollNFTContracts.TrollNFT(wallet, contractAddress);
-    let tokenAmount = Utils.toDecimals(amount, token.decimals);
-    receipt = await trollNFT.stake(tokenAmount);
-  } catch (e) { console.log(e); }
+  let wallet = Wallet.getClientInstance();
+  let trollNFT = new TrollNFTContracts.TrollNFT(wallet, contractAddress);
+  let tokenAmount = Utils.toDecimals(amount, token.decimals);
+  let receipt = await trollNFT.stake(tokenAmount);
   return receipt;
 }
 

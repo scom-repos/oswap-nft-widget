@@ -362,7 +362,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
 }
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/nftAPI.ts" />
 declare module "@scom/oswap-nft-widget/nft-utils/nftAPI.ts" {
-    import { BigNumber, TransactionReceipt } from "@ijstech/eth-wallet";
+    import { BigNumber } from "@ijstech/eth-wallet";
     import { State, NftInfoStore, OswapNfts, SupportedNetworkId, TokenConstant, UserNftInfo } from "@scom/oswap-nft-widget/store/index.ts";
     interface NftInfo extends NftInfoStore {
         minimumStake: BigNumber;
@@ -375,7 +375,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/nftAPI.ts" {
     const getCommissionRate: (state: State, campaignId: number) => Promise<string>;
     const getNFTObject: (trollAPI: string, nft: string, tokenId?: number, owner?: string) => Promise<any>;
     function fetchAllNftInfo(state: State): Promise<false | Record<OswapNfts, NftInfo>>;
-    const mintNFT: (contractAddress: string, token: TokenConstant, amount: string) => Promise<TransactionReceipt>;
+    const mintNFT: (contractAddress: string, token: TokenConstant, amount: string) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
     const burnNFT: (contractAddress: string, tokenID: number) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
     export { NftInfo, nftInfoMap, getCommissionRate, fetchAllNftInfo, mintNFT, burnNFT, getNFTObject };
 }

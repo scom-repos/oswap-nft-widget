@@ -892,9 +892,6 @@ export default class OswapNftWidget extends Module {
       <i-scom-dapp-container id="dappContainer">
         <i-panel class={nftStyle}>
           <i-panel id="mint" class="widget">
-            <i-panel class="current-nft">
-              <i-label caption="oswap" />
-            </i-panel>
             <i-panel padding={{ left: '1rem', right: '1rem' }}>
               <i-panel id="pnlLoading" minHeight={300} class="i-loading-overlay">
                 <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
