@@ -137,10 +137,10 @@ async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: NftInfo |
     let userNfts = await fetchUserNft(state,nftInfo) || [];
     let out: NftInfo = {
       ...nftInfo,
-      minimumStake,
+      minimumStake:minimumStake.shiftedBy(-nftInfo.token.decimals),
       cap,
       totalSupply,
-      protocolFee,
+      protocolFee:protocolFee.shiftedBy(-nftInfo.token.decimals),
       userNfts,
     }
     nftInfoMap[nftInfo.chainId][out.name] = out;
@@ -237,7 +237,7 @@ const mintNFT = async (contractAddress: string, token: TokenConstant, amount: st
     let trollNFT = new TrollNFTContracts.TrollNFT(wallet, contractAddress);
     let tokenAmount = Utils.toDecimals(amount, token.decimals);
     receipt = await trollNFT.stake(tokenAmount);
-  } catch { }
+  } catch(e) {console.log(e);}
   return receipt;
 }
 

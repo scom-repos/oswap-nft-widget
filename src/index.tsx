@@ -710,9 +710,9 @@ export default class ScomOswapNftWidget extends Module {
         rewardsBoost: `${item.rewards}%`,
         tier: type,
         slot: item.cap.minus(item.totalSupply).toNumber(),
-        stakeAmount: item.minimumStake.shiftedBy(-(token?.decimals || 18)).toFixed(),
+        stakeAmount: item.minimumStake.toFixed(),
         stakeToken: item.token,
-        stakeAmountText: `${formatNumber(item.minimumStake.shiftedBy(-(token?.decimals || 18)))} ${item.token?.symbol || ''}`,
+        stakeAmountText: `${formatNumber(item.minimumStake)} ${item.token?.symbol || ''}`,
         protocolFee: item.protocolFee.toFixed(),
         totalPayAmount,
         userNFTs: _userNfts

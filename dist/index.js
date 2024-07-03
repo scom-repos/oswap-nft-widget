@@ -1618,10 +1618,10 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             let userNfts = await fetchUserNft(state, nftInfo) || [];
             let out = {
                 ...nftInfo,
-                minimumStake,
+                minimumStake: minimumStake.shiftedBy(-nftInfo.token.decimals),
                 cap,
                 totalSupply,
-                protocolFee,
+                protocolFee: protocolFee.shiftedBy(-nftInfo.token.decimals),
                 userNfts,
             };
             nftInfoMap[nftInfo.chainId][out.name] = out;
@@ -1712,7 +1712,9 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             let tokenAmount = eth_wallet_4.Utils.toDecimals(amount, token.decimals);
             receipt = await trollNFT.stake(tokenAmount);
         }
-        catch { }
+        catch (e) {
+            console.log(e);
+        }
         return receipt;
     };
     exports.mintNFT = mintNFT;
@@ -2814,9 +2816,9 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     rewardsBoost: `${item.rewards}%`,
                     tier: type,
                     slot: item.cap.minus(item.totalSupply).toNumber(),
-                    stakeAmount: item.minimumStake.shiftedBy(-(token?.decimals || 18)).toFixed(),
+                    stakeAmount: item.minimumStake.toFixed(),
                     stakeToken: item.token,
-                    stakeAmountText: `${(0, index_5.formatNumber)(item.minimumStake.shiftedBy(-(token?.decimals || 18)))} ${item.token?.symbol || ''}`,
+                    stakeAmountText: `${(0, index_5.formatNumber)(item.minimumStake)} ${item.token?.symbol || ''}`,
                     protocolFee: item.protocolFee.toFixed(),
                     totalPayAmount,
                     userNFTs: _userNfts
