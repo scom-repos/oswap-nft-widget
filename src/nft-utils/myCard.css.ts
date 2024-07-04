@@ -1,4 +1,5 @@
-import { Styles } from '@ijstech/components'
+import { Styles } from '@ijstech/components';
+const Theme = Styles.Theme.ThemeVars;
 
 export const myCardStyle = Styles.style({
   $nest: {
@@ -12,20 +13,12 @@ export const myCardStyle = Styles.style({
       transformStyle: 'preserve-3d',
       overflow: 'visible',
     },
-    '.invisible': {
-      opacity: '0 !important'
-    },
-    '.text-yellow *': {
-      color: '#f7d063',
-    },
-    'i-icon': {
-      display: 'inline-block',
-    },
     '.btn-burn': {
       width: '100%',
       height: '50px',
       border: 'none',
       padding: '0.375rem 0.5rem',
+      color: Theme.colors.primary.contrastText
     },
     '.card-section': {
       borderRadius: '12px',
@@ -47,7 +40,7 @@ export const myCardStyle = Styles.style({
     '.section-my-card': {
       padding: '0.5rem 0.75rem',
       backgroundColor: '#ffffff33',
-      color: 'white',
+      color: Theme.text.primary,
       transform: 'rotateY(180deg)',
       position: 'absolute',
       borderRadius: '12px',

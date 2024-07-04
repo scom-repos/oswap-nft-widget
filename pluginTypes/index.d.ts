@@ -417,22 +417,6 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                             type: string;
                             format: string;
                         };
-                        inputBackgroundColor: {
-                            type: string;
-                            format: string;
-                        };
-                        inputFontColor: {
-                            type: string;
-                            format: string;
-                        };
-                        maxButtonBackground: {
-                            type: string;
-                            format: string;
-                        };
-                        maxButtonHoverBackground: {
-                            type: string;
-                            format: string;
-                        };
                         primaryButtonBackground: {
                             type: string;
                             format: string;
@@ -455,22 +439,6 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                             format: string;
                         };
                         fontColor: {
-                            type: string;
-                            format: string;
-                        };
-                        inputBackgroundColor: {
-                            type: string;
-                            format: string;
-                        };
-                        inputFontColor: {
-                            type: string;
-                            format: string;
-                        };
-                        maxButtonBackground: {
-                            type: string;
-                            format: string;
-                        };
-                        maxButtonHoverBackground: {
                             type: string;
                             format: string;
                         };

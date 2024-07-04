@@ -7,13 +7,15 @@ import {
   Panel,
   Image,
   Button,
-  CarouselSlider
+  CarouselSlider,
+  Styles
 } from '@ijstech/components'
 import { BigNumber } from '@ijstech/eth-wallet';
 import Assets from '../assets';
 import { IDataCard, IDataMyCard, isClientWalletConnected, State } from '../store/index';
 import { cardStyle } from './card.css';
 import { NftMyCard } from './myCard';
+const Theme = Styles.Theme.ThemeVars;
 
 declare global {
   namespace JSX {
@@ -69,11 +71,11 @@ export class NftCard extends Module {
     const value = this.cardData;
     this.trollImage.clearInnerHTML();
     // this.pnlSlots.clearInnerHTML();
-    // this.pnlSlots.append(<i-label caption="Available Slots" class="label"></i-label>);
+    // this.pnlSlots.append(<i-label caption="Available Slots" class="label" />);
     // let slotText: string = new BigNumber(value.slot).lt(10) ? ('0' + value.slot) : value.slot;
     // let slotArr = slotText.split('');
     // for (let text of slotArr) {
-    //   this.pnlSlots.append(<i-label caption={text} class="box box-left"></i-label>);
+    //   this.pnlSlots.append(<i-label caption={text} class="box box-left" />);
     // }
     const count = value.userNFTs?.length || 0;
     if (this.stakeAmountText) this.stakeAmountText.caption = value.stakeAmountText;
@@ -173,66 +175,66 @@ export class NftCard extends Module {
       <i-panel class="card-widget">
         <i-panel class="bg-img">
           {/* <i-panel id="pnlSlots" class="available-box">
-            <i-label caption="Available Slots" class="label"></i-label>
-            <i-label id="caption1" caption="0" class="box box-left"></i-label>
-            <i-label id="caption2" caption="0" class="box box-right"></i-label>
+            <i-label caption="Available Slots" class="label" />
+            <i-label id="caption1" caption="0" class="box box-left" />
+            <i-label id="caption2" caption="0" class="box box-right" />
           </i-panel> */}
 
           <i-panel id="trollImage" />
           <i-panel class="section">
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Stake Amount"></i-label>
+                <i-label caption="Stake Amount" />
               </i-panel>
-              <i-label id="stakeAmountText" caption="50,000 OSWAP" class="value"></i-label>
+              <i-label id="stakeAmountText" caption="50,000 OSWAP" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Rewards Boost"></i-label>
+                <i-label caption="Rewards Boost" />
                 <i-icon
                   name="question-circle"
-                  fill="#fff"
+                  fill={Theme.text.primary}
                   tooltip={{
                     content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
                     placement: 'right'
                   }}
-                ></i-icon>
+                />
               </i-panel>
-              <i-label id="reward" caption="5%" class="value"></i-label>
+              <i-label id="reward" caption="5%" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Monthly Reward"></i-label>
+                <i-label caption="Monthly Reward" />
                 <i-icon
                   name="question-circle"
-                  fill="#fff"
+                  fill={Theme.text.primary}
                   tooltip={{ content: 'The Monthly Reward will be distributed at the end of each month.', placement: 'right' }}
-                ></i-icon>
+                />
               </i-panel>
-              <i-label id="monthlyReward" caption="5%" class="value"></i-label>
+              <i-label id="monthlyReward" caption="5%" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Flash Sales Inclusion"></i-label>
+                <i-label caption="Flash Sales Inclusion" />
               </i-panel>
-              <i-label id="flashSales" caption="Periodic" class="value"></i-label>
+              <i-label id="flashSales" caption="Periodic" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Owned"></i-label>
+                <i-label caption="Owned" />
               </i-panel>
-              <i-label id="lbCount" caption="0" class="value"></i-label>
+              <i-label id="lbCount" caption="0" class="value" />
             </i-panel>
 
             <i-button id="btnHandleStake" height="auto" class="btn-stake btn-os" caption="Stake" onClick={this.handleStake} />
 
             <i-hstack horizontalAlignment="start" verticalAlignment="center" margin={{ top: '0.25rem', bottom: '0.25rem' }}>
               <i-label caption="View contract" onClick={this.openLink} margin={{ right: '0.5rem' }} class="text-yellow pointer" />
-              <i-icon name="external-link-alt" onClick={this.openLink} fill="#f7d063" width={15} height={15} class="text-yellow pointer" />
+              <i-icon name="external-link-alt" onClick={this.openLink} fill={Theme.colors.primary.main} width={15} height={15} class="text-yellow pointer" />
             </i-hstack>
           </i-panel>
 

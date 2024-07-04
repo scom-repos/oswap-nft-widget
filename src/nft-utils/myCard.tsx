@@ -7,10 +7,12 @@ import {
   Panel,
   Image,
   Icon,
-  Container
+  Container,
+  Styles
 } from '@ijstech/components';
 import { myCardStyle } from './myCard.css';
 import { IDataMyCard } from '../store/index';
+const Theme = Styles.Theme.ThemeVars;
 
 declare global {
   namespace JSX {
@@ -48,7 +50,7 @@ export class NftMyCard extends Module {
   private async renderStar() {
     let icon = await Icon.create();
     icon.name = 'star';
-    icon.fill = '#fff';
+    icon.fill = Theme.text.primary;
     icon.width = 20;
     icon.height = 20;
     this.rarity.appendChild(icon);
@@ -97,79 +99,78 @@ export class NftMyCard extends Module {
     return (
       <i-panel class="card-section" id="panel1" onClick={(control, e) => this.handleFlipCard(control, e)}>
         <i-panel class="bg-flip">
-          <i-panel id="trollImage" class="mycard-img">
-          </i-panel>
+          <i-panel id="trollImage" class="mycard-img" />
           <i-vstack verticalAlignment='space-between' class="section-my-card">
             <i-panel margin={{ top: 10 }} class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Birthday"></i-label>
+                <i-label caption="Birthday" />
               </i-panel>
-              <i-label id="birthday" caption="50,000 OSWAP" class="value"></i-label>
+              <i-label id="birthday" caption="50,000 OSWAP" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Rarity"></i-label>
+                <i-label caption="Rarity" />
               </i-panel>
-              <i-panel id="rarity"></i-panel>
+              <i-panel id="rarity" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Value"></i-label>
+                <i-label caption="Value" />
               </i-panel>
-              <i-label id="stakeAmount" caption="50,000 OSWAP" class="value"></i-label>
+              <i-label id="stakeAmount" caption="50,000 OSWAP" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Rewards Boost"></i-label>
+                <i-label caption="Rewards Boost" />
                 <i-icon
                   name="question-circle"
-                  fill="#fff"
+                  fill={Theme.text.primary}
                   tooltip={{
                     content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
                     placement: 'right'
                   }}
-                ></i-icon>
+                />
               </i-panel>
-              <i-label id="reward" caption="5%" class="value"></i-label>
+              <i-label id="reward" caption="5%" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Monthly Reward"></i-label>
+                <i-label caption="Monthly Reward" />
                 <i-icon
                   name="question-circle"
-                  fill="#fff"
+                  fill={Theme.text.primary}
                   tooltip={{
                     content: "The Monthly Reward will be distributed at the end of each month.",
                     placement: 'right'
                   }}
-                ></i-icon>
+                />
               </i-panel>
-              <i-label id="monthlyReward" caption="5%" class="value"></i-label>
+              <i-label id="monthlyReward" caption="5%" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Flash Sales Inclusion"></i-label>
+                <i-label caption="Flash Sales Inclusion" />
               </i-panel>
-              <i-label id="flashSales" caption="Periodic" class="value"></i-label>
+              <i-label id="flashSales" caption="Periodic" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Bridge Transaction Validate"></i-label>
+                <i-label caption="Bridge Transaction Validate" />
               </i-panel>
-              <i-label id="bridge" caption="-" class="value"></i-label>
+              <i-label id="bridge" caption="-" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Bridge Fee Earn"></i-label>
+                <i-label caption="Bridge Fee Earn" />
               </i-panel>
-              <i-label id="fee" caption="-" class="value"></i-label>
+              <i-label id="fee" caption="-" class="value" />
             </i-panel>
 
             <i-button id="btnHandleBurn" margin={{ bottom: 10, top: 10 }} height="auto" class="btn-burn btn-os" caption="Burn" />

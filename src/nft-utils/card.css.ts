@@ -1,48 +1,9 @@
 import { Styles } from '@ijstech/components'
 import Assets from '../assets';
+const Theme = Styles.Theme.ThemeVars;
 
 export const cardStyle = Styles.style({
   $nest: {
-    '.display-none': {
-      display: 'none'
-    },
-    '.invisible': {
-      opacity: '0 !important'
-    },
-    '.text-yellow *': {
-      color: '#f7d063',
-    },
-    'i-icon': {
-      display: 'inline-block',
-    },
-    '.btn-stake': {
-      marginTop: '1.5rem',
-      width: '100%',
-      height: '50px',
-      border: 'none',
-      padding: '0.375rem 0.5rem',
-    },
-    '.card-widget': {
-      position: 'relative',
-      flex: '1 1 0%',
-      borderRadius: '15px',
-      background: '#252a48',
-      color: '#fff',
-    },
-
-    '.bg-img': {
-      width: '100%',
-      height: '100%',
-      padding: '2rem',
-      backgroundSize: '100% 100%',
-      backgroundRepeat: 'no-repeat',
-      backgroundImage: `url(${Assets.fullPath('img/nft/TrollBorder.png')})`
-    },
-    '.bg-img-collection': {
-      width: '100%',
-      height: '100%',
-      padding: '1rem',
-    },
     '.available-box': {
       display: 'flex',
       alignItems: 'center',
@@ -56,7 +17,7 @@ export const cardStyle = Styles.style({
 
           $nest: {
             '*': {
-              color: '#f15e61',
+              color: Theme.colors.primary.main,
               fontSize: '1rem',
             },
           },
