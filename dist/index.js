@@ -1391,32 +1391,6 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
                                 elements: [
                                     {
                                         type: 'Control',
-                                        scope: '#/properties/dark/properties/inputBackgroundColor'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/inputFontColor'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/maxButtonBackground'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/maxButtonHoverBackground'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
                                         scope: '#/properties/dark/properties/primaryButtonBackground'
                                     },
                                     {
@@ -1450,32 +1424,6 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
                                     {
                                         type: 'Control',
                                         scope: '#/properties/light/properties/fontColor'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/inputBackgroundColor'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/inputFontColor'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/maxButtonBackground'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/maxButtonHoverBackground'
                                     }
                                 ]
                             },
