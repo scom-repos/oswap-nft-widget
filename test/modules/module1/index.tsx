@@ -53,7 +53,6 @@ export default class Module1 extends Module {
   async init() {
     super.init();
     this.nftWidget.style.width = '100%';
-    this.nftWidget.style.maxWidth = '1440px';
     const dapp: any = this.nftWidget.querySelector('i-scom-dapp-container');
     if (dapp) {
       dapp.style.setProperty('--background-default', Theme.background.default);
@@ -66,7 +65,6 @@ export default class Module1 extends Module {
         <i-hstack
           id="mainStack"
           margin={{ top: '1rem', left: '1rem' }}
-          gap="2rem"
           justifyContent="center"
           width="100%"
         >
