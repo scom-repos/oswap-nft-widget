@@ -400,15 +400,7 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                         properties: {
                             chainId: {
                                 type: string;
-                                enum: ({
-                                    chainId: number;
-                                    isMainChain: boolean;
-                                    isTestnet?: undefined;
-                                } | {
-                                    chainId: number;
-                                    isMainChain: boolean;
-                                    isTestnet: boolean;
-                                })[];
+                                enum: number[];
                                 required: boolean;
                             };
                         };
@@ -524,19 +516,12 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                     type: string;
                     elements: {
                         type: string;
-                        elements: {
-                            type: string;
-                            label: string;
-                            elements: {
+                        scope: string;
+                        options: {
+                            detail: {
                                 type: string;
-                                scope: string;
-                                options: {
-                                    detail: {
-                                        type: string;
-                                    };
-                                };
-                            }[];
-                        }[];
+                            };
+                        };
                     }[];
                 }[];
             })[];

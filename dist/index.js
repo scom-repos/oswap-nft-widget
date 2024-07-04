@@ -1378,8 +1378,8 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getProjectOwnerSchema = exports.getBuilderSchema = void 0;
-    const chainIds = data_json_1.default.supportedNetworks || [];
-    const networks = chainIds.map(v => { return { chainId: v.chainId }; });
+    const chainIds = (data_json_1.default.supportedNetworks || []).map(v => v.chainId);
+    const networks = chainIds.map(v => { return { chainId: v }; });
     const theme = {
         type: 'object',
         properties: {
@@ -1600,24 +1600,13 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
                                 type: 'HorizontalLayout',
                                 elements: [
                                     {
-                                        type: 'Categorization',
-                                        elements: [
-                                            {
-                                                type: 'Category',
-                                                label: 'Networks',
-                                                elements: [
-                                                    {
-                                                        type: 'Control',
-                                                        scope: '#/properties/networks',
-                                                        options: {
-                                                            detail: {
-                                                                type: 'VerticalLayout'
-                                                            }
-                                                        }
-                                                    }
-                                                ]
+                                        type: 'Control',
+                                        scope: '#/properties/networks',
+                                        options: {
+                                            detail: {
+                                                type: 'VerticalLayout'
                                             }
-                                        ]
+                                        }
                                     }
                                 ]
                             }

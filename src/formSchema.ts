@@ -1,8 +1,8 @@
 import ScomNetworkPicker from '@scom/scom-network-picker';
 import Config from './data.json';
 
-const chainIds = Config.supportedNetworks || [];
-const networks = chainIds.map(v => { return { chainId: v.chainId } });
+const chainIds = (Config.supportedNetworks || []).map(v => v.chainId);
+const networks = chainIds.map(v => { return { chainId: v } });
 
 const theme = {
     type: 'object',
@@ -226,24 +226,13 @@ export function getBuilderSchema() {
                             type: 'HorizontalLayout',
                             elements: [
                                 {
-                                    type: 'Categorization',
-                                    elements: [
-                                        {
-                                            type: 'Category',
-                                            label: 'Networks',
-                                            elements: [
-                                                {
-                                                    type: 'Control',
-                                                    scope: '#/properties/networks',
-                                                    options: {
-                                                        detail: {
-                                                            type: 'VerticalLayout'
-                                                        }
-                                                    }
-                                                }
-                                            ]
+                                    type: 'Control',
+                                    scope: '#/properties/networks',
+                                    options: {
+                                        detail: {
+                                            type: 'VerticalLayout'
                                         }
-                                    ]
+                                    }
                                 }
                             ]
                         }
