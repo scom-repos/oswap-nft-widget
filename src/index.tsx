@@ -479,14 +479,10 @@ export default class OswapNftWidget extends Module {
     const themeVar = this.dappContainer?.theme || 'light';
     this.updateStyle('--text-primary', this.tag[themeVar]?.fontColor);
     this.updateStyle('--background-main', this.tag[themeVar]?.backgroundColor);
-    this.updateStyle('--input-font_color', this.tag[themeVar]?.inputFontColor);
-    this.updateStyle('--input-background', this.tag[themeVar]?.inputBackgroundColor);
     //FIXME: temporary solution
     this.updateStyle('--primary-button-background', this.tag[themeVar]?.primaryButtonBackground || 'transparent linear-gradient(90deg, #AC1D78 0%, #E04862 100%) 0% 0% no-repeat padding-box');
     this.updateStyle('--primary-button-hover-background', this.tag[themeVar]?.primaryButtonHoverBackground || 'linear-gradient(255deg,#f15e61,#b52082)');
     this.updateStyle('--primary-button-disabled-background', this.tag[themeVar]?.primaryButtonDisabledBackground || 'transparent linear-gradient(270deg,#351f52,#552a42) 0% 0% no-repeat padding-box');
-    this.updateStyle('--max-button-background', this.tag[themeVar]?.maxButtonBackground || 'transparent linear-gradient(255deg,#e75b66,#b52082) 0% 0% no-repeat padding-box');
-    this.updateStyle('--max-button-hover-background', this.tag[themeVar]?.maxButtonHoverBackground || 'linear-gradient(255deg,#f15e61,#b52082)');
   }
 
   private async refreshUI() {
@@ -657,7 +653,7 @@ export default class OswapNftWidget extends Module {
             <i-panel class="text-center" width="100%">
               <i-image url={Assets.fullPath('img/nft/TrollEgg.svg')} width={200} height="auto" display="block" margin={{ left: 'auto', right: 'auto' }} />
             </i-panel>
-            <i-label class="text-center" width="100%" margin={{ top: 20 }} caption={msg} font={{ color: 'white', size: '1.5rem' }} />
+            <i-label class="text-center" width="100%" margin={{ top: 20 }} caption={msg} font={{ color: Theme.text.primary, size: '1.5rem' }} />
           </i-vstack>
         </i-panel>
       </i-hstack>
@@ -901,12 +897,12 @@ export default class OswapNftWidget extends Module {
                     image={{ url: Assets.fullPath('img/loading.svg'), width: 36, height: 36 }}
                   />
                   <i-label
-                    caption="Loading..." font={{ color: '#FD4A4C', size: '1.5em' }}
+                    caption="Loading..." font={{ color: Theme.colors.primary.main, size: '1.5em' }}
                     class="i-loading-spinner_text"
                   />
                 </i-vstack>
               </i-panel>
-              <i-hstack gap="2rem" id="cardRow" maxWidth={1440} margin={{ left: 'auto', right: 'auto' }} wrap="wrap" />
+              <i-hstack gap="2rem" id="cardRow" maxWidth={1280} margin={{ left: 'auto', right: 'auto' }} wrap="wrap" />
             </i-panel>
           </i-panel>
           <i-hstack id="minting" visible={false} gap="30px" horizontalAlignment="center">
@@ -914,80 +910,80 @@ export default class OswapNftWidget extends Module {
               <i-panel class="card-widget">
                 <i-panel class="bg-img">
                   <i-panel class="title-box">
-                    <i-icon class='icon-back pointer' height={20} width={20} name='arrow-left' fill='#fff' onClick={this.handleBack}></i-icon>
-                    <i-label id="lbMintTitle" font={{ color: '#f7d063', size: '1.4rem', bold: true }}></i-label>
+                    <i-icon class="icon-back pointer" height={20} width={20} name="arrow-left" fill={Theme.text.primary} onClick={this.handleBack} />
+                    <i-label id="lbMintTitle" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                   </i-panel>
-                  <i-panel class="line-middle"></i-panel>
+                  <i-panel class="line-middle" />
                   <i-panel class="section">
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Stake Amount"></i-label>
+                        <i-label caption="Stake Amount" />
                       </i-panel>
-                      <i-label id="lbMintStakeAmountText" caption="50,000 OSWAP" font={{ color: '#f7d063', size: '1.4rem', bold: true }}></i-label>
+                      <i-label id="lbMintStakeAmountText" caption="50,000 OSWAP" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                     </i-panel>
 
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Rewards Boost"></i-label>
+                        <i-label caption="Rewards Boost" />
                         <i-icon
                           name="question-circle"
-                          fill="#fff"
+                          fill={Theme.text.primary}
                           height={15} width={15}
                           tooltip={{
                             content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
                             placement: 'right'
                           }}
-                        ></i-icon>
+                        />
                       </i-panel>
-                      <i-label id="lbMintRewardsBoost" caption="5%" font={{ color: '#f7d063', size: '1.4rem', bold: true }}></i-label>
+                      <i-label id="lbMintRewardsBoost" caption="5%" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                     </i-panel>
 
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Monthly Reward"></i-label>
+                        <i-label caption="Monthly Reward" />
                         <i-icon
                           name="question-circle"
-                          fill="#fff"
+                          fill={Theme.text.primary}
                           height={15} width={15}
                           tooltip={{
                             content: 'The Monthly Reward will be distributed at the end of each month.',
                             placement: 'right'
                           }}
-                        ></i-icon>
+                        />
                       </i-panel>
-                      <i-label id="lbMintMonthlyReward" caption="5%" font={{ color: '#f7d063', size: '1.4rem', bold: true }}></i-label>
+                      <i-label id="lbMintMonthlyReward" caption="5%" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                     </i-panel>
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Flash Sales Inclusion"></i-label>
+                        <i-label caption="Flash Sales Inclusion" />
                       </i-panel>
-                      <i-label id="lbMintFlashSales" caption="Periodic" font={{ color: '#f7d063', size: '1.4rem', bold: true }}></i-label>
+                      <i-label id="lbMintFlashSales" caption="Periodic" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                     </i-panel>
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Mint Fee"></i-label>
+                        <i-label caption="Mint Fee" />
                         <i-icon
                           name="question-circle"
-                          fill="#fff"
+                          fill={Theme.text.primary}
                           height={15} width={15}
                           tooltip={{
                             content: 'The mint fee covers the transaction cost on using Chainlink Verifiable Random Function.',
                             placement: 'right'
                           }}
-                        ></i-icon>
+                        />
                       </i-panel>
-                      <i-label id="lbMintFee" caption="" font={{ color: '#f7d063', size: '1.4rem', bold: true }}></i-label>
+                      <i-label id="lbMintFee" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                     </i-panel>
                     <i-panel class="section-1">
                       <i-hstack gap={4} margin={{ bottom: '0.75rem' }} verticalAlignment="center" horizontalAlignment="space-between">
                         <i-label caption="Stake Amount" />
                         <i-hstack gap={4} verticalAlignment="center" horizontalAlignment="end">
-                          <i-label font={{ color: '#f7d063', size: '1rem' }} caption="Balance: " />
-                          <i-label id="lbTokenBalance" font={{ color: '#f7d063', size: '1rem' }} />
+                          <i-label font={{ color: Theme.colors.primary.main, size: '1rem' }} caption="Balance: " />
+                          <i-label id="lbTokenBalance" font={{ color: Theme.colors.primary.main, size: '1rem' }} />
                         </i-hstack>
                       </i-hstack>
                       <i-hstack verticalAlignment="center" horizontalAlignment="space-between">
-                        <i-label id="lbMintStakeAmount" font={{ color: '#f7d063', size: '1.2rem' }} />
+                        <i-label id="lbMintStakeAmount" font={{ color: Theme.colors.primary.main, size: '1.2rem' }} />
                         <i-hstack verticalAlignment="center" horizontalAlignment="end">
                           <i-image
                             id="ImageMintStakeToken"
@@ -995,17 +991,17 @@ export default class OswapNftWidget extends Module {
                             class="flex"
                             margin={{ right: 4 }}
                             url={Assets.fullPath('img/swap/openswap.png')}
-                          ></i-image>
+                          />
                           <i-label id="lbMintStakeToken" caption="OSWAP" />
                         </i-hstack>
                       </i-hstack>
                     </i-panel>
                     <i-panel class="section-2">
                       <i-panel>
-                        <i-label id="lbMintMessage1" caption="Please confirm you would like to mint a NFT by staking of 50000 of OSWAP."></i-label>
+                        <i-label id="lbMintMessage1" caption="Please confirm you would like to mint a NFT by staking of 50000 of OSWAP." />
                       </i-panel>
                       <i-panel>
-                        <i-label id="lbMintMessage2" caption="You can unstake OSWAP by the burning the NFT."></i-label>
+                        <i-label id="lbMintMessage2" caption="You can unstake OSWAP by the burning the NFT." />
                       </i-panel>
                     </i-panel>
                     <i-button
@@ -1019,7 +1015,7 @@ export default class OswapNftWidget extends Module {
                       onClick={this.clickApprove}
                     />
                     <i-button
-                      id="btnMint" height={40} class="btn-stake" caption='Stake'
+                      id="btnMint" height={40} class="btn-stake" caption="Stake"
                       rightIcon={{ spin: true, visible: false }}
                       onClick={() => this.onSubmit(true)}
                     />
@@ -1028,30 +1024,30 @@ export default class OswapNftWidget extends Module {
               </i-panel>
             </i-vstack>
           </i-hstack>
-          <i-hstack id="burning" visible={false} gap="30px" horizontalAlignment='center'>
+          <i-hstack id="burning" visible={false} gap="30px" horizontalAlignment="center">
             <i-vstack class="nft-burn-stake" width={500} maxWidth='100%' padding={{ left: 15, right: 15 }} margin={{ bottom: 30 }}>
               <i-panel class="card-widget">
                 <i-panel class="bg-img">
                   <i-panel class="title-box">
-                    <i-icon class='icon-back pointer' height={20} width={20} name='arrow-left' fill='#fff' onClick={this.handleBurnBack}></i-icon>
-                    <i-label caption="Confim Burn" font={{ color: '#f7d063', size: '1.4rem', bold: true }} ></i-label>
+                    <i-icon class="icon-back pointer" height={20} width={20} name="arrow-left" fill={Theme.text.primary} onClick={this.handleBurnBack} />
+                    <i-label caption="Confim Burn" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                   </i-panel>
-                  <i-panel class="line-middle"></i-panel>
+                  <i-panel class="line-middle" />
                   <i-panel class="section">
                     <i-panel class="section-2" margin={{ bottom: 30 }}>
                       <i-panel>
-                        <i-label id="lbBurnMessage" class="text-center" caption="By confirmimg the transaction, you will burn NFT and receive 75,000OSWAP"></i-label>
+                        <i-label id="lbBurnMessage" class="text-center" caption="By confirmimg the transaction, you will burn NFT and receive 75,000OSWAP" />
                       </i-panel>
                     </i-panel>
-                    <i-hstack horizontalAlignment='center' margin={{ bottom: 20 }}>
-                      <i-image id="ImageBurn" class="text-center" width='100%' height='auto'></i-image>
+                    <i-hstack horizontalAlignment="center" margin={{ bottom: 20 }}>
+                      <i-image id="ImageBurn" class="text-center" width="100%" height="auto" />
                     </i-hstack>
-                    <i-hstack verticalAlignment='center' horizontalAlignment='center'>
+                    <i-hstack verticalAlignment="center" horizontalAlignment="center">
                       <i-image url={Assets.fullPath('img/nft/TrollCry.png')} margin={{ right: 4 }} width={40} height="auto" class="flex" />
                       <i-label class="note-burn" caption="This is NFT Will Be Gone Forever" />
                     </i-hstack>
                     <i-button
-                      id="btnBurn" height={40} class="btn-stake btn-os" caption='Burn'
+                      id="btnBurn" height={40} class="btn-stake btn-os" caption="Burn"
                       rightIcon={{ spin: true, visible: false }}
                       onClick={() => this.onSubmit()}
                     />

@@ -15,22 +15,6 @@ const theme = {
             type: 'string',
             format: 'color'
         },
-        inputBackgroundColor: {
-            type: 'string',
-            format: 'color'
-        },
-        inputFontColor: {
-            type: 'string',
-            format: 'color'
-        },
-        maxButtonBackground: {
-            type: 'string',
-            format: 'color'
-        },
-        maxButtonHoverBackground: {
-            type: 'string',
-            format: 'color'
-        },
         primaryButtonBackground: {
             type: 'string',
             format: 'color'
@@ -75,32 +59,6 @@ const themeUISchema = {
                             elements: [
                                 {
                                     type: 'Control',
-                                    scope: '#/properties/dark/properties/inputBackgroundColor'
-                                },
-                                {
-                                    type: 'Control',
-                                    scope: '#/properties/dark/properties/inputFontColor'
-                                }
-                            ]
-                        },
-                        {
-                            type: 'HorizontalLayout',
-                            elements: [
-                                {
-                                    type: 'Control',
-                                    scope: '#/properties/dark/properties/maxButtonBackground'
-                                },
-                                {
-                                    type: 'Control',
-                                    scope: '#/properties/dark/properties/maxButtonHoverBackground'
-                                }
-                            ]
-                        },
-                        {
-                            type: 'HorizontalLayout',
-                            elements: [
-                                {
-                                    type: 'Control',
                                     scope: '#/properties/dark/properties/primaryButtonBackground'
                                 },
                                 {
@@ -134,32 +92,6 @@ const themeUISchema = {
                                 {
                                     type: 'Control',
                                     scope: '#/properties/light/properties/fontColor'
-                                }
-                            ]
-                        },
-                        {
-                            type: 'HorizontalLayout',
-                            elements: [
-                                {
-                                    type: 'Control',
-                                    scope: '#/properties/light/properties/inputBackgroundColor'
-                                },
-                                {
-                                    type: 'Control',
-                                    scope: '#/properties/light/properties/inputFontColor'
-                                }
-                            ]
-                        },
-                        {
-                            type: 'HorizontalLayout',
-                            elements: [
-                                {
-                                    type: 'Control',
-                                    scope: '#/properties/light/properties/maxButtonBackground'
-                                },
-                                {
-                                    type: 'Control',
-                                    scope: '#/properties/light/properties/maxButtonHoverBackground'
                                 }
                             ]
                         },

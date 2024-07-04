@@ -1,5 +1,6 @@
 import { Styles } from '@ijstech/components';
 import Assets from './assets';
+const Theme = Styles.Theme.ThemeVars;
 
 export const nftStyle = Styles.style({
   minHeight: '600px',
@@ -20,29 +21,6 @@ export const nftStyle = Styles.style({
         },
         '.i-loading-spinner': {
           marginTop: '2rem',
-        },
-      },
-    },
-    '.current-nft': {
-      // position: 'absolute',
-      // right: 'calc(1rem - 5px)',
-      width: 'fit-content',
-      margin: '0 auto 20px',
-      display: 'block',
-      borderRadius: '12px',
-      background: '#252a48',
-      border: '2px solid #f15e61',
-      padding: '0.35rem 2rem',
-      $nest: {
-        'i-label': {
-          $nest: {
-            '*': {
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: '#fff',
-              textTransform: 'uppercase',
-            },
-          },
         },
       },
     },
@@ -83,8 +61,8 @@ export const nftStyle = Styles.style({
       position: 'relative',
       flex: '1 1 0%',
       borderRadius: '15px',
-      background: '#252a48',
-      color: '#fff',
+      background: Theme.background.main,
+      color: Theme.text.primary,
       $nest: {
         '.title-icon': {
           position: 'relative',
@@ -99,22 +77,23 @@ export const nftStyle = Styles.style({
       backgroundRepeat: 'no-repeat',
       backgroundImage: `url(${Assets.fullPath('img/nft/TrollBorder.png')})`
     },
-    '.bg-img-collection': {
-      width: '100%',
-      height: '100%',
-      padding: '1rem',
-    },
     '.btn-stake': {
       marginTop: '1.5rem',
       width: '100%',
       height: '50px',
-      background: 'transparent linear-gradient(90deg, #AF2175 0%, #D4626A 100%) 0% 0% no-repeat padding-box',
+      background: Theme.colors.primary.main,
+      color: Theme.colors.primary.contrastText,
       border: 'none',
       padding: '0.375rem 0.5rem',
-      marginBottom: '1rem'
+      marginBottom: '1rem',
+      $nest: {
+        '&.disabled': {
+          opacity: 0.6
+        }
+      }
     },
     '.text-yellow *': {
-      color: '#f7d063',
+      color: Theme.colors.primary.main,
     },
     'i-icon': {
       display: 'inline-block',
@@ -141,14 +120,14 @@ export const nftStyle = Styles.style({
     '.stake-caption *': {
       fontSize: '1.4rem !important',
       fontWeight: 'bold',
-      color: '#f7d063'
+      color: Theme.colors.primary.main
     },
     '.line-middle': {
       margin: '20px 0',
-      borderTop: '1px solid #f15e61',
+      borderTop: `1px solid ${Theme.text.hint}`,
     },
     '.section-1': {
-      border: '1px solid #fff',
+      border: `1px solid ${Theme.text.primary}`,
       borderRadius: '12px',
       padding: '0.5rem 1rem',
       opacity: '0.75',
@@ -157,7 +136,7 @@ export const nftStyle = Styles.style({
     '.section-2': {
       padding: '5px',
       borderRadius: '12px',
-      background: 'transparent linear-gradient(90deg, #D4626A 0%, #AF2175 100%) 0% 0% no-repeat padding-box',
+      background: Theme.background.gradient,
     },
     '.caption-big': {
       fontSize: '1.2rem'
@@ -165,7 +144,7 @@ export const nftStyle = Styles.style({
     '.note-burn *': {
       fontSize: '1.25rem',
       fontWeight: 'bold',
-      color: '#f7d063',
+      color: Theme.colors.primary.main,
     },
   }
 })
