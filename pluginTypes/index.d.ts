@@ -378,7 +378,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/nftAPI.ts" {
     let nftInfoMap: Record<SupportedNetworkId, Record<OswapNfts, NftInfo>>;
     const getCommissionRate: (state: State, campaignId: number) => Promise<string>;
     const getNFTObject: (trollAPI: string, nft: string, tokenId?: number, owner?: string) => Promise<any>;
-    function fetchNftInfoByTier(state: State, tier: OswapNftsType): Promise<false | NftInfo>;
+    function fetchNftInfoByTier(state: State, tier: OswapNfts | OswapNftsType): Promise<false | NftInfo>;
     function fetchAllNftInfo(state: State): Promise<false | Record<OswapNfts, NftInfo>>;
     const mintNFT: (contractAddress: string, token: TokenConstant, amount: string) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
     const burnNFT: (contractAddress: string, tokenID: number) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;

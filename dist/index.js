@@ -1225,7 +1225,66 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             userNfts: [],
         };
     }
+    //fetchUserNftOnChain
     async function fetchUserNft(state, nftInfo) {
+        if (!(0, index_3.isClientWalletConnected)())
+            return [];
+        let wallet = state.getRpcWallet();
+        const trollAPI = index_3.trollAPIUrl[wallet.chainId];
+        let userNfts = [];
+        let nftContract = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
+        let token = nftInfo.token;
+        let userNftCount = (await nftContract.balanceOf(wallet.address)).toNumber();
+        let IdCalls = [];
+        for (let i = 0; i < userNftCount; i++) {
+            IdCalls.push({
+                contract: nftContract,
+                methodName: 'tokenOfOwnerByIndex',
+                params: [wallet.address, i],
+                to: nftInfo.address
+            });
+        }
+        let ids = (await wallet.doMulticall(IdCalls).catch(error => {
+            console.log("fetchUserNft IdCalls", error);
+            return [];
+        })).map(id => new eth_wallet_4.BigNumber(id)).filter(id => id.isInteger() && id.gte(0)).map(id => id.toNumber());
+        if (userNftCount > ids.length)
+            console.log("some id is invalid");
+        let nftCalls = [];
+        ids.forEach(id => nftCalls.push({
+            contract: nftContract,
+            methodName: 'stakingBalance',
+            params: [id],
+            to: nftInfo.address
+        }, {
+            contract: nftContract,
+            methodName: 'creationTime',
+            params: [id],
+            to: nftInfo.address
+        }));
+        let mixedResult = await wallet.doMulticall(nftCalls).catch(error => {
+            console.log("fetchUserNft nftCalls", error);
+            return [];
+        });
+        for (let i = 0; i < ids.length; i++) {
+            let stakeBalance = mixedResult[i * 4];
+            let creationTime = mixedResult[i * 4 + 1];
+            //let attributes:string[] = ar(mixedResult[i * 4 + 2]);
+            let attributes = await getAttributes2(nftContract, ids[i], nftInfo.attributes.base, nftInfo.attributes.digits, nftInfo.attributes.probability);
+            console.log(attributes);
+            let obj = await getNFTObject(trollAPI, `${nftInfo.name}-troll`, ids[i]);
+            userNfts.push({
+                tokenId: ids[i],
+                stakeBalance: eth_wallet_4.Utils.fromDecimals(stakeBalance, token.decimals).toFixed(),
+                attributes,
+                rarity: new eth_wallet_4.BigNumber(attributes[nftInfo.attributes.rarityIndex]).toNumber(),
+                birthday: new eth_wallet_4.BigNumber(creationTime).toNumber(),
+                image: obj.image ? obj.image : undefined,
+            });
+        }
+        return userNfts;
+    }
+    async function fetchUserNft2(state, nftInfo) {
         if (!(0, index_3.isClientWalletConnected)())
             return [];
         let wallet = state.getRpcWallet();
@@ -1242,9 +1301,8 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
                 owner: wallet.address,
                 index: i
             })).toNumber();
-            let stakingBalance = (await trollNFT.stakingBalance(tokenId)).toFixed();
-            let birthday;
-            birthday = (await trollNFT.creationTime(tokenId)).toNumber();
+            let stakeBalance = (await trollNFT.stakingBalance(tokenId)).toFixed();
+            let birthday = (await trollNFT.creationTime(tokenId)).toNumber();
             let attributes = await getAttributes2(trollNFT, tokenId, info.attributes.base, info.attributes.digits, info.attributes.probability);
             let rarity = 0;
             if (!rarity && attributes) {
@@ -1253,7 +1311,7 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             let obj = await getNFTObject(trollAPI, `${info.name}-troll`, tokenId);
             userNfts.push({
                 tokenId,
-                stakeBalance: eth_wallet_4.Utils.fromDecimals(stakingBalance, token.decimals).toFixed(),
+                stakeBalance: eth_wallet_4.Utils.fromDecimals(stakeBalance, token.decimals).toFixed(),
                 attributes,
                 rarity,
                 birthday,

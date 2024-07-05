@@ -113,7 +113,7 @@ const distributeByProbability = (index: BigNumber, base: number, power: number, 
   return output;
 }
 
-async function fetchNftInfoByTier(state: State, tier: OswapNftsType) {
+async function fetchNftInfoByTier(state: State, tier: OswapNfts | OswapNftsType) {
   const chainId = state.getChainId();
   if (!(chainId in SupportedNetworkId)) return false;
   let wallet = state.getRpcWallet();
@@ -133,62 +133,133 @@ async function fetchAllNftInfo(state: State) {
 }
 
 async function fetchNftInfo(state: State, wallet: IRpcWallet, nftInfo: NftInfo | NftInfoStore): Promise<NftInfo> {
-    if (wallet.chainId !== nftInfo.chainId) throw new Error("chain id do not match");
-    let trollNFT = new TrollNFTContracts.TrollNFT(wallet, nftInfo.address);
-    let calls: IMulticallContractCall[] = [
-      {
-        contract: trollNFT,
-        methodName: 'minimumStake',
-        params: [],
-        to: nftInfo.address
-      },
-      {
-        contract: trollNFT,
-        methodName: 'cap',
-        params: [],
-        to: nftInfo.address
-      },
-      {
-        contract: trollNFT,
-        methodName: 'totalSupply',
-        params: [],
-        to: nftInfo.address
-      },
-      {
-        contract: trollNFT,
-        methodName: 'protocolFee',
-        params: [],
-        to: nftInfo.address
-      },
-    ];
+  if (wallet.chainId !== nftInfo.chainId) throw new Error("chain id do not match");
+  let trollNFT = new TrollNFTContracts.TrollNFT(wallet, nftInfo.address);
+  let calls: IMulticallContractCall[] = [
+    {
+      contract: trollNFT,
+      methodName: 'minimumStake',
+      params: [],
+      to: nftInfo.address
+    },
+    {
+      contract: trollNFT,
+      methodName: 'cap',
+      params: [],
+      to: nftInfo.address
+    },
+    {
+      contract: trollNFT,
+      methodName: 'totalSupply',
+      params: [],
+      to: nftInfo.address
+    },
+    {
+      contract: trollNFT,
+      methodName: 'protocolFee',
+      params: [],
+      to: nftInfo.address
+    },
+  ];
 
-    try {
-      let [minimumStake, cap, totalSupply, protocolFee] = await wallet.doMulticall(calls) || [];
-      let userNfts = await fetchUserNft(state, nftInfo) || [];
-      let out: NftInfo = {
-        ...nftInfo,
-        minimumStake: new BigNumber(minimumStake).shiftedBy(-nftInfo.token.decimals),
-        cap: new BigNumber(cap),
-        totalSupply: new BigNumber(totalSupply),
-        protocolFee: new BigNumber(protocolFee).shiftedBy(-nftInfo.token.decimals),
-        userNfts,
-      }
-      nftInfoMap[nftInfo.chainId][out.name] = out;
-      return out;
-    } catch (error) {
-      console.log("fetchNftInfo",nftInfo.chainId,nftInfo.address, error);
-    }
-    return {
+  try {
+    let [minimumStake, cap, totalSupply, protocolFee] = await wallet.doMulticall(calls) || [];
+    let userNfts = await fetchUserNft(state, nftInfo) || [];
+    let out: NftInfo = {
       ...nftInfo,
-      minimumStake: new BigNumber(0),
-      cap: new BigNumber(0),
-      totalSupply: new BigNumber(0),
-      protocolFee: new BigNumber(0),
-      userNfts:[],
+      minimumStake: new BigNumber(minimumStake).shiftedBy(-nftInfo.token.decimals),
+      cap: new BigNumber(cap),
+      totalSupply: new BigNumber(totalSupply),
+      protocolFee: new BigNumber(protocolFee).shiftedBy(-nftInfo.token.decimals),
+      userNfts,
     }
+    nftInfoMap[nftInfo.chainId][out.name] = out;
+    return out;
+  } catch (error) {
+    console.log("fetchNftInfo", nftInfo.chainId, nftInfo.address, error);
+  }
+  return {
+    ...nftInfo,
+    minimumStake: new BigNumber(0),
+    cap: new BigNumber(0),
+    totalSupply: new BigNumber(0),
+    protocolFee: new BigNumber(0),
+    userNfts: [],
+  }
 }
 
+//fetchUserNftOnChain
 async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore): Promise<UserNftInfo[]> { //only get user nft on current chain
+  if (!isClientWalletConnected()) return [];
+  let wallet = state.getRpcWallet();
+  const trollAPI = trollAPIUrl[wallet.chainId];
+  let userNfts: UserNftInfo[] = [];
+  let nftContract = new Contracts.TrollNFT(wallet, nftInfo.address);
+  let token = nftInfo.token;
+  let userNftCount = (await nftContract.balanceOf(wallet.address)).toNumber();
+  let IdCalls: IMulticallContractCall[] = [];
+  for (let i = 0; i < userNftCount; i++) {
+    IdCalls.push({
+      contract: nftContract,
+      methodName: 'tokenOfOwnerByIndex',
+      params: [wallet.address, i],
+      to: nftInfo.address
+    });
+  }
+  let ids = (await wallet.doMulticall(IdCalls).catch(error=>{
+    console.log("fetchUserNft IdCalls", error);
+    return[];
+  })).map(id => new BigNumber(id)).filter(id => id.isInteger() && id.gte(0)).map(id=>id.toNumber());
+  if (userNftCount > ids.length) console.log("some id is invalid");
+  let nftCalls: IMulticallContractCall[] = [];
+  ids.forEach(id => nftCalls.push({
+    contract: nftContract,
+    methodName: 'stakingBalance',
+    params: [id],
+    to: nftInfo.address
+  },
+  {
+    contract: nftContract,
+    methodName: 'creationTime',
+    params: [id],
+    to: nftInfo.address
+  },
+  /** 
+  {
+    contract: nftContract,
+    methodName: 'getAttributes2',
+    params: [id,nftInfo.attributes.base,nftInfo.attributes.digits],
+    to: nftInfo.address
+  }*/
+ ));
+  
+  let mixedResult=await wallet.doMulticall(nftCalls).catch(error=>{
+    console.log("fetchUserNft nftCalls",error);
+    return[];
+  });
+
+  for (let i = 0; i < ids.length; i++) {
+    let stakeBalance:string = mixedResult[i * 4];
+    let creationTime:string = mixedResult[i * 4 + 1];
+    //let attributes:string[] = ar(mixedResult[i * 4 + 2]);
+    
+    let attributes = await getAttributes2(nftContract, ids[i], nftInfo.attributes.base, nftInfo.attributes.digits, nftInfo.attributes.probability)
+    console.log(attributes);
+    let obj = await getNFTObject(trollAPI, `${nftInfo.name}-troll`, ids[i]);
+    userNfts.push({
+      tokenId: ids[i],
+      stakeBalance: Utils.fromDecimals(stakeBalance, token.decimals).toFixed(),
+      attributes,
+      rarity:new BigNumber(attributes[nftInfo.attributes.rarityIndex]).toNumber(),
+      birthday:new BigNumber(creationTime).toNumber(),
+      image: obj.image ? obj.image : undefined,
+    });
+  }
+  
+  return userNfts;
+}
+
+async function fetchUserNft2(state: State, nftInfo: NftInfo | NftInfoStore): Promise<UserNftInfo[]> { //only get user nft on current chain
   if (!isClientWalletConnected()) return [];
   let wallet = state.getRpcWallet();
   let chainId = wallet.chainId;
@@ -207,10 +278,8 @@ async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore): Prom
       owner: wallet.address,
       index: i
     })).toNumber();
-    let stakingBalance = (await trollNFT.stakingBalance(tokenId)).toFixed();
-    let birthday: number;
-    birthday = (await trollNFT.creationTime(tokenId)).toNumber();
-
+    let stakeBalance = (await trollNFT.stakingBalance(tokenId)).toFixed();
+    let birthday = (await trollNFT.creationTime(tokenId)).toNumber();
     let attributes = await getAttributes2(trollNFT, tokenId, info.attributes.base, info.attributes.digits, info.attributes.probability);
     let rarity = 0;
     if (!rarity && attributes) {
@@ -220,7 +289,7 @@ async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore): Prom
 
     userNfts.push({
       tokenId,
-      stakeBalance: Utils.fromDecimals(stakingBalance, token.decimals).toFixed(),
+      stakeBalance: Utils.fromDecimals(stakeBalance, token.decimals).toFixed(),
       attributes,
       rarity,
       birthday,
