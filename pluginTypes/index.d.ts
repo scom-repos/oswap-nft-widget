@@ -35,6 +35,7 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
         monthlyReward: string;
         rewardsBoost: string;
         tier?: string;
+        fullName: string;
         slot: number;
         stakeAmount: string;
         stakeToken: TokenConstant;
@@ -87,6 +88,7 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
         tier2 = "happy",
         tier3 = "hunny"
     }
+    export type OswapNftsType = "hungry" | "happy" | "hunny";
     export const stakeTokenMap: Record<SupportedNetworkId, TokenConstant>;
     export const nftInfoStoreMap: Record<SupportedNetworkId, Record<OswapNfts, NftInfoStore>>;
 }
@@ -145,6 +147,7 @@ declare module "@scom/oswap-nft-widget/data.json.ts" {
             networks: {
                 chainId: number;
             }[];
+            tier: string;
             wallets: {
                 name: string;
             }[];
@@ -341,6 +344,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         private monthlyReward;
         private flashSales;
         private lbCount;
+        private lbViewContract;
         private btnHandleStake;
         private carouselSlider;
         onStake: () => void;
@@ -363,7 +367,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/nftAPI.ts" />
 declare module "@scom/oswap-nft-widget/nft-utils/nftAPI.ts" {
     import { BigNumber } from "@ijstech/eth-wallet";
-    import { State, NftInfoStore, OswapNfts, SupportedNetworkId, TokenConstant, UserNftInfo } from "@scom/oswap-nft-widget/store/index.ts";
+    import { State, NftInfoStore, OswapNfts, SupportedNetworkId, TokenConstant, UserNftInfo, OswapNftsType } from "@scom/oswap-nft-widget/store/index.ts";
     interface NftInfo extends NftInfoStore {
         minimumStake: BigNumber;
         cap: BigNumber;
@@ -374,24 +378,31 @@ declare module "@scom/oswap-nft-widget/nft-utils/nftAPI.ts" {
     let nftInfoMap: Record<SupportedNetworkId, Record<OswapNfts, NftInfo>>;
     const getCommissionRate: (state: State, campaignId: number) => Promise<string>;
     const getNFTObject: (trollAPI: string, nft: string, tokenId?: number, owner?: string) => Promise<any>;
+    function fetchNftInfoByTier(state: State, tier: OswapNftsType): Promise<false | NftInfo>;
     function fetchAllNftInfo(state: State): Promise<false | Record<OswapNfts, NftInfo>>;
     const mintNFT: (contractAddress: string, token: TokenConstant, amount: string) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
     const burnNFT: (contractAddress: string, tokenID: number) => Promise<import("@ijstech/eth-contract").TransactionReceipt>;
-    export { NftInfo, nftInfoMap, getCommissionRate, fetchAllNftInfo, mintNFT, burnNFT, getNFTObject };
+    export { NftInfo, nftInfoMap, getCommissionRate, fetchAllNftInfo, fetchNftInfoByTier, mintNFT, burnNFT, getNFTObject };
 }
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/index.ts" />
 declare module "@scom/oswap-nft-widget/nft-utils/index.ts" {
     export { NftCard } from "@scom/oswap-nft-widget/nft-utils/card.tsx";
     export { NftMyCard } from "@scom/oswap-nft-widget/nft-utils/myCard.tsx";
-    export { NftInfo, getCommissionRate, fetchAllNftInfo, mintNFT, burnNFT, getNFTObject } from "@scom/oswap-nft-widget/nft-utils/nftAPI.ts";
+    export { NftInfo, getCommissionRate, fetchAllNftInfo, fetchNftInfoByTier, mintNFT, burnNFT, getNFTObject } from "@scom/oswap-nft-widget/nft-utils/nftAPI.ts";
 }
 /// <amd-module name="@scom/oswap-nft-widget/formSchema.ts" />
 declare module "@scom/oswap-nft-widget/formSchema.ts" {
     import ScomNetworkPicker from '@scom/scom-network-picker';
+    import { OswapNfts } from "@scom/oswap-nft-widget/store/index.ts";
     export function getBuilderSchema(): {
         dataSchema: {
             type: string;
             properties: {
+                tier: {
+                    type: string;
+                    required: boolean;
+                    enum: OswapNfts[];
+                };
                 networks: {
                     type: string;
                     required: boolean;
@@ -482,7 +493,11 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                 label: string;
                 elements: {
                     type: string;
-                    elements: {
+                    elements: ({
+                        type: string;
+                        scope: string;
+                        options?: undefined;
+                    } | {
                         type: string;
                         scope: string;
                         options: {
@@ -490,7 +505,7 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                                 type: string;
                             };
                         };
-                    }[];
+                    })[];
                 }[];
             })[];
         };
@@ -522,6 +537,7 @@ declare module "@scom/oswap-nft-widget/index.css.ts" {
 /// <amd-module name="@scom/oswap-nft-widget" />
 declare module "@scom/oswap-nft-widget" {
     import { Module, Container, ControlElement } from '@ijstech/components';
+    import { OswapNftsType } from "@scom/oswap-nft-widget/store/index.ts";
     import ScomCommissionFeeSetup from '@scom/scom-commission-fee-setup';
     import { IWalletPlugin } from '@scom/scom-wallet-modal';
     interface ICommissionInfo {
@@ -535,6 +551,7 @@ declare module "@scom/oswap-nft-widget" {
     interface OswapNftWidgetElement extends ControlElement {
         lazyLoad?: boolean;
         campaignId?: number;
+        tier: OswapNftsType;
         defaultChainId: number;
         networks: INetworkConfig[];
         wallets: IWalletPlugin[];
@@ -547,6 +564,7 @@ declare module "@scom/oswap-nft-widget" {
         defaultChainId: number;
         wallets: IWalletPlugin[];
         networks: INetworkConfig[];
+        tier: OswapNftsType;
         showHeader?: boolean;
     }
     global {
@@ -601,6 +619,8 @@ declare module "@scom/oswap-nft-widget" {
         set wallets(value: IWalletPlugin[]);
         get networks(): INetworkConfig[];
         set networks(value: INetworkConfig[]);
+        get tier(): OswapNftsType;
+        set tier(value: OswapNftsType);
         get showHeader(): boolean;
         set showHeader(value: boolean);
         set width(value: string | number);
@@ -623,6 +643,7 @@ declare module "@scom/oswap-nft-widget" {
                 defaultChainId: number;
                 wallets: IWalletPlugin[];
                 networks: INetworkConfig[];
+                tier: OswapNftsType;
                 showHeader?: boolean;
             }>;
             setData: (properties: IOswapNftWidgetData, linkParams?: Record<string, any>) => Promise<void>;

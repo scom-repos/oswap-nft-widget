@@ -26,6 +26,7 @@ export interface IDataCard {
   monthlyReward: string;
   rewardsBoost: string;
   tier?: string;
+  fullName: string;
   slot: number;
   stakeAmount: string;
   stakeToken: TokenConstant;
@@ -95,6 +96,7 @@ export enum OswapNfts {
   tier2="happy",
   tier3="hunny"
 }
+export type OswapNftsType = "hungry" | "happy" | "hunny";
 
 export const stakeTokenMap: Record<SupportedNetworkId, TokenConstant> = {
   56: {address:"0xb32aC3C79A94aC1eb258f3C830bBDbc676483c93",decimals:18,name:"OpenSwap",symbol:"OSWAP"},

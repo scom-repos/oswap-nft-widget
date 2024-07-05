@@ -70,6 +70,7 @@ export default class Module1 extends Module {
         >
           <i-oswap-nft-widget
             id="nftWidget"
+            tier="hungry"
             defaultChainId={97}
             networks={[
               {

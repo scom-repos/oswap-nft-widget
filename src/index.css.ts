@@ -35,7 +35,7 @@ export const nftStyle = Styles.style({
     },
     '.new-card-column': {
       width: 'calc(33% - 30px)',
-      minWidth: '320px',
+      minWidth: '300px',
       maxWidth: '400px',
     },
     '.nft-card-stake': {
@@ -72,10 +72,12 @@ export const nftStyle = Styles.style({
     '.bg-img': {
       width: '100%',
       height: '100%',
-      padding: '2rem',
+      padding: '1rem',
       backgroundSize: '100% 100%',
       backgroundRepeat: 'no-repeat',
-      backgroundImage: `url(${Assets.fullPath('img/nft/TrollBorder.png')})`
+      // backgroundImage: `url(${Assets.fullPath('img/nft/TrollBorder.png')})`,
+      borderRadius: '1rem',
+      boxShadow: 'rgba(0, 0, 0, 0.16) 0px 1px 4px'
     },
     '.btn-stake': {
       marginTop: '1.5rem',

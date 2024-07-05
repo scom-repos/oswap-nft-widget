@@ -20,6 +20,8 @@ import {
   State,
   IDataCard,
   IDataMyCard,
+  OswapNfts,
+  OswapNftsType,
 } from './store/index';
 import {
   formatNumber,
@@ -33,7 +35,7 @@ import ScomTxStatusModal from '@scom/scom-tx-status-modal';
 import ScomDappContainer from '@scom/scom-dapp-container'
 import { tokenStore, assets as tokenAssets, ITokenObject } from '@scom/scom-token-list';
 import ScomWalletModal, { IWalletPlugin } from '@scom/scom-wallet-modal';
-import { NftCard, fetchAllNftInfo, mintNFT, burnNFT, getCommissionRate, NftInfo } from './nft-utils/index';
+import { NftCard, fetchNftInfoByTier, mintNFT, burnNFT, getCommissionRate, NftInfo } from './nft-utils/index';
 import { getBuilderSchema, getProjectOwnerSchema } from './formSchema';
 import { nftStyle, listMediaStyles, nftDefaultStyle } from './index.css';
 import configData from './data.json';
@@ -53,6 +55,7 @@ interface INetworkConfig {
 interface OswapNftWidgetElement extends ControlElement {
   lazyLoad?: boolean;
   campaignId?: number;
+  tier: OswapNftsType;
   defaultChainId: number;
   networks: INetworkConfig[];
   wallets: IWalletPlugin[];
@@ -66,6 +69,7 @@ export interface IOswapNftWidgetData {
   defaultChainId: number;
   wallets: IWalletPlugin[];
   networks: INetworkConfig[];
+  tier: OswapNftsType;
   showHeader?: boolean;
 }
 
@@ -119,7 +123,8 @@ export default class OswapNftWidget extends Module {
   private _data: IOswapNftWidgetData = {
     defaultChainId: 0,
     wallets: [],
-    networks: []
+    networks: [],
+    tier: OswapNfts.tier1
   };
   tag: any = {};
 
@@ -162,6 +167,14 @@ export default class OswapNftWidget extends Module {
     this._data.networks = value;
   }
 
+  get tier() {
+    return this._data.tier;
+  }
+
+  set tier(value: OswapNftsType) {
+    this._data.tier = value;
+  }
+
   get showHeader() {
     return this._data.showHeader ?? true;
   }
@@ -202,7 +215,8 @@ export default class OswapNftWidget extends Module {
           let _oldData: IOswapNftWidgetData = {
             defaultChainId: 0,
             wallets: [],
-            networks: []
+            networks: [],
+            tier: OswapNfts.tier1
           }
           return {
             execute: async () => {
@@ -253,10 +267,11 @@ export default class OswapNftWidget extends Module {
         name: 'Edit',
         icon: 'edit',
         command: (builder: any, userInputData: any) => {
-          let oldData: any = {
+          let oldData: IOswapNftWidgetData = {
             defaultChainId: 0,
             wallets: [],
-            networks: []
+            networks: [],
+            tier: OswapNfts.tier1
           };
           let oldTag = {};
           return {
@@ -264,15 +279,16 @@ export default class OswapNftWidget extends Module {
               oldData = JSON.parse(JSON.stringify(this._data));
               const {
                 networks,
-                tokens,
+                tier,
                 ...themeSettings
               } = userInputData;
 
               const generalSettings = {
                 networks,
-                tokens
+                tier
               };
 
+              this._data.tier = generalSettings.tier;
               this._data.networks = generalSettings.networks;
               this._data.defaultChainId = this._data.networks[0].chainId;
               await this.resetRpcWallet();
@@ -502,6 +518,7 @@ export default class OswapNftWidget extends Module {
       const campaignId = this.getAttribute('campaignId', true);
       const commissions = this.getAttribute('commissions', true, []);
       const defaultChainId = this.getAttribute('defaultChainId', true);
+      const tier = this.getAttribute('tier', true, OswapNfts.tier1);
       const networks = this.getAttribute('networks', true);
       const wallets = this.getAttribute('wallets', true);
       const showHeader = this.getAttribute('showHeader', true);
@@ -510,6 +527,7 @@ export default class OswapNftWidget extends Module {
         commissions,
         defaultChainId,
         networks,
+        tier,
         wallets,
         showHeader
       };
@@ -582,6 +600,7 @@ export default class OswapNftWidget extends Module {
     this.approvalModelAction = await this.state.setApprovalModelAction({
       sender: this,
       payAction: async () => {
+        showResultMessage(this.txStatusModal, 'warning', 'Minting...');
         mintNFT(item.address, item.stakeToken, item.totalPayAmount);
       },
       onToBeApproved: async (token: ITokenObject) => {
@@ -679,10 +698,11 @@ export default class OswapNftWidget extends Module {
   private async renderCards() {
     this.pnlLoading.visible = true;
     this.cardRow.visible = false;
-    const info = await fetchAllNftInfo(this.state);
+    const tier = this.tier;
+    const info = await fetchNftInfoByTier(this.state, tier);
     const chainId = this.state.getChainId();
     if (this.initializedState.chainId !== chainId) return;
-    if (!info || !Object.keys(info).length) {
+    if (!info) {
       const network = this.state.getNetworkInfo(chainId);
       const msg = info === false ? `${network ? `${network.chainName} (${chainId})` : `Chain ID ${chainId}`} is not supported!` : 'Your very own NFT is getting ready!';
       this.renderEmpty(this.cardRow, msg);
@@ -691,10 +711,11 @@ export default class OswapNftWidget extends Module {
       return;
     }
 
-    const types = Object.keys(info);
+    // const types = Object.keys(info);
+    const types = [tier];
     const cards: IDataCard[] = [];
     for (let type of types) {
-      const item: NftInfo = info[type];
+      const item: NftInfo = info;
       const { address, flashSales, apr, rewards, token, protocolFee, minimumStake, userNfts } = item;
       const totalPayAmount = new BigNumber(minimumStake).plus(protocolFee).toFixed();
       const _userNfts: IDataMyCard[] = userNfts.map(v => {
@@ -720,6 +741,7 @@ export default class OswapNftWidget extends Module {
         monthlyReward: `${item.apr}% APR`,
         rewardsBoost: `${item.rewards}%`,
         tier: type,
+        fullName: item.fullName,
         slot: item.cap.minus(item.totalSupply).toNumber(),
         stakeAmount: item.minimumStake.toFixed(),
         stakeToken: item.token,
@@ -1039,7 +1061,7 @@ export default class OswapNftWidget extends Module {
                         <i-label id="lbBurnMessage" class="text-center" caption="By confirmimg the transaction, you will burn NFT and receive 75,000OSWAP" />
                       </i-panel>
                     </i-panel>
-                    <i-hstack horizontalAlignment="center" margin={{ bottom: 20 }}>
+                    <i-hstack horizontalAlignment="center" margin={{ bottom: 20 }} padding={{ left: 20, right: 20 }}>
                       <i-image id="ImageBurn" class="text-center" width="100%" height="auto" />
                     </i-hstack>
                     <i-hstack verticalAlignment="center" horizontalAlignment="center">

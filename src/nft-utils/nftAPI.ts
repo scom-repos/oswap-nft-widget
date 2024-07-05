@@ -14,6 +14,7 @@ import {
   TokenConstant,
   UserNftInfo,
   isClientWalletConnected,
+  OswapNftsType,
 } from "../store/index";
 import { ITokenObject } from "@scom/scom-token-list";
 import { ContractUtils as ProxyContractUtils } from '@scom/scom-commission-proxy-contract';
@@ -110,6 +111,14 @@ const distributeByProbability = (index: BigNumber, base: number, power: number, 
     }
   }
   return output;
+}
+
+async function fetchNftInfoByTier(state: State, tier: OswapNftsType) {
+  const chainId = state.getChainId();
+  if (!(chainId in SupportedNetworkId)) return false;
+  let wallet = state.getRpcWallet();
+  nftInfoMap[chainId as SupportedNetworkId][tier] = await fetchNftInfo(state, wallet, nftInfoMap[chainId as SupportedNetworkId][tier]);
+  return nftInfoMap[chainId as SupportedNetworkId][tier];
 }
 
 async function fetchAllNftInfo(state: State) {
@@ -279,6 +288,7 @@ export {
   nftInfoMap,
   getCommissionRate,
   fetchAllNftInfo,
+  fetchNftInfoByTier,
   mintNFT,
   burnNFT,
   getNFTObject

@@ -6,12 +6,13 @@ export default {
     "defaultChainId": 97,
     "networks": [
       {
-        "chainId": 56
+        "chainId": 97
       },
       {
-        "chainId": 97
+        "chainId": 56
       }
     ],
+    "tier": "hungry",
     "wallets": [
       {
         "name": "metamask"
