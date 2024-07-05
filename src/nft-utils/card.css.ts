@@ -49,8 +49,8 @@ export const cardStyle = Styles.style({
     '.os-slider': {
       position: 'relative',
       margin: '25px auto',
-      width: '230px',
-      height: '300px',
+      width: 'calc(90% - 50px)',
+      minWidth: '200px',
       $nest: {
         '.wrapper-slider': {
           $nest: {
@@ -70,13 +70,11 @@ export const cardStyle = Styles.style({
     '.troll-img': {
       position: 'relative',
       margin: '25px auto',
-      width: '220px',
-      height: '300px',
+      width: 'calc(85% - 50px)',
+      minWidth: '200px',
 
       $nest: {
         'i-image': {
-          position: 'absolute',
-
           $nest: {
             img: {
               width: '100%',

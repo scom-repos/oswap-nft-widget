@@ -1,5 +1,6 @@
 import ScomNetworkPicker from '@scom/scom-network-picker';
 import Config from './data.json';
+import { OswapNfts } from './store/index';
 
 const chainIds = (Config.supportedNetworks || []).map(v => v.chainId);
 const networks = chainIds.map(v => { return { chainId: v } });
@@ -129,6 +130,11 @@ export function getBuilderSchema() {
         dataSchema: {
             type: 'object',
             properties: {
+                tier: {
+                    type: 'string',
+                    required: true,
+                    enum: Object.values(OswapNfts)
+                },
                 networks: {
                     type: 'array',
                     required: true,
@@ -155,8 +161,12 @@ export function getBuilderSchema() {
                     label: 'General',
                     elements: [
                         {
-                            type: 'HorizontalLayout',
+                            type: 'VerticalLayout',
                             elements: [
+                                {
+                                    type: 'Control',
+                                    scope: '#/properties/tier'
+                                },
                                 {
                                     type: 'Control',
                                     scope: '#/properties/networks',

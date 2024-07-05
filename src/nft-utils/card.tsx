@@ -35,6 +35,7 @@ export class NftCard extends Module {
   private monthlyReward: Label;
   private flashSales: Label;
   private lbCount: Label;
+  private lbViewContract: Label;
   private btnHandleStake: Button;
   private carouselSlider: CarouselSlider;
   onStake: () => void;
@@ -78,6 +79,7 @@ export class NftCard extends Module {
     //   this.pnlSlots.append(<i-label caption={text} class="box box-left" />);
     // }
     const count = value.userNFTs?.length || 0;
+    if (this.lbViewContract) this.lbViewContract.caption = value.fullName || 'View contract';
     if (this.stakeAmountText) this.stakeAmountText.caption = value.stakeAmountText;
     if (this.reward) this.reward.caption = value.rewardsBoost;
     if (this.monthlyReward) this.monthlyReward.caption = value.monthlyReward;
@@ -119,27 +121,9 @@ export class NftCard extends Module {
     } else {
       this.trollImage.classList.add('troll-img');
       this.trollImage.classList.remove('os-slider');
-      const img1 = new Image();
-      const img2 = new Image();
-      const img3 = new Image();
-      const img4 = new Image();
-      const img5 = new Image();
-      const trollText = new Label();
-      const trollType = this.capitalizeFirstLetter(value.tier);
-      img1.url = Assets.fullPath(`img/nft/${trollType}-Troll-01-Skin.svg`);
-      img2.url = Assets.fullPath(`img/nft/${trollType}-Troll-01-Horn.svg`);
-      img3.url = Assets.fullPath(`img/nft/${trollType}-Troll-01-Mouth.svg`);
-      img4.url = Assets.fullPath(`img/nft/${trollType}-Troll-01-Shirt.svg`);
-      img5.url = Assets.fullPath(`img/nft/${trollType}-Troll-01-Eyes.svg`);
-      this.trollImage.appendChild(<i-image url={Assets.fullPath('img/nft/Background.svg')} class="background" />);
-      this.trollImage.appendChild(<i-image url={Assets.fullPath('img/nft/Frame.svg')} class="frame" />);
-      this.trollImage.appendChild(img1);
-      this.trollImage.appendChild(img2);
-      this.trollImage.appendChild(img3);
-      this.trollImage.appendChild(img4);
-      this.trollImage.appendChild(img5);
-      this.trollImage.appendChild(trollText);
-      trollText.caption = `${trollType} BABY TROLL`;
+      const img = new Image();
+      img.url = Assets.fullPath(`img/nft/${value.tier || 'hungry'}.png`);
+      this.trollImage.appendChild(img);
     }
 
     this.updateBtn();
@@ -174,6 +158,18 @@ export class NftCard extends Module {
     return (
       <i-panel class="card-widget">
         <i-panel class="bg-img">
+          <i-hstack
+            gap="0.5rem"
+            horizontalAlignment="start"
+            verticalAlignment="center"
+            cursor="pointer"
+            width="fit-content"
+            margin={{ top: '0.25rem', bottom: '0.5rem' }}
+            onClick={this.openLink}
+          >
+            <i-label id="lbViewContract" caption="View contract" font={{ transform: 'capitalize', size: '1rem' }} padding={{ left: '0.75rem' }} class="text-yellow" />
+            <i-icon name="external-link-alt" fill={Theme.colors.primary.main} width={16} height={16} class="text-yellow" />
+          </i-hstack>
           {/* <i-panel id="pnlSlots" class="available-box">
             <i-label caption="Available Slots" class="label" />
             <i-label id="caption1" caption="0" class="box box-left" />
@@ -231,11 +227,6 @@ export class NftCard extends Module {
             </i-panel>
 
             <i-button id="btnHandleStake" height="auto" class="btn-stake btn-os" caption="Stake" onClick={this.handleStake} />
-
-            <i-hstack horizontalAlignment="start" verticalAlignment="center" margin={{ top: '0.25rem', bottom: '0.25rem' }}>
-              <i-label caption="View contract" onClick={this.openLink} margin={{ right: '0.5rem' }} class="text-yellow pointer" />
-              <i-icon name="external-link-alt" onClick={this.openLink} fill={Theme.colors.primary.main} width={15} height={15} class="text-yellow pointer" />
-            </i-hstack>
           </i-panel>
 
         </i-panel>

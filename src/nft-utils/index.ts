@@ -4,6 +4,7 @@ export {
   NftInfo,
   getCommissionRate,
   fetchAllNftInfo,
+  fetchNftInfoByTier,
   mintNFT,
   burnNFT,
   getNFTObject
