@@ -31,14 +31,10 @@ define("@scom/oswap-nft-widget/store/data/core.ts", ["require", "exports"], func
 define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.nftInfoStoreMap = exports.stakeTokenMap = exports.OswapNfts = exports.defaultChainId = exports.SupportedNetworkId = exports.attributeDistribution = exports.rewardAddress = exports.trollAPIUrl = void 0;
+    exports.nftInfoStoreMap = exports.stakeTokenMap = exports.OswapNfts = exports.defaultChainId = exports.SupportedNetworkId = exports.attributeDistribution = exports.trollAPIUrl = void 0;
     exports.trollAPIUrl = {
         56: 'https://data.openswap.xyz/nft/v1',
         97: 'https://bsc-test-data.openswap.xyz/nft/v1',
-    };
-    exports.rewardAddress = {
-        56: '0x37c8207975D5B04cc6c2C2570d91425985cF61Df',
-        97: '0x265F91CdFC308275504120E32B6A2B09B066df1a',
     };
     exports.attributeDistribution = {
         base: 10,
@@ -75,6 +71,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
             [OswapNfts.tier1]: {
                 chainId: 56,
                 name: OswapNfts.tier1,
+                fullName: "Hungry Baby Troll",
                 address: '0x1254132567549292388cd699Cb78B47d3101c8A9',
                 token: exports.stakeTokenMap[56],
                 rewards: 5,
@@ -85,6 +82,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
             [OswapNfts.tier2]: {
                 chainId: 56,
                 name: OswapNfts.tier2,
+                fullName: "Happy Baby Troll",
                 address: '0x2d74990f55faeA086A83B9fE176FD36a34bA617b',
                 token: exports.stakeTokenMap[56],
                 rewards: 15,
@@ -95,6 +93,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
             [OswapNfts.tier3]: {
                 chainId: 56,
                 name: OswapNfts.tier3,
+                fullName: "Hunny Baby Troll",
                 address: '0x3E8fb94D9dD7A8f9b2ccF0B4CCdC768628890eeB',
                 token: exports.stakeTokenMap[56],
                 rewards: 40,
@@ -107,6 +106,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
             [OswapNfts.tier1]: {
                 chainId: 97,
                 name: OswapNfts.tier1,
+                fullName: "Hungry Baby Troll",
                 address: '0x946985e7C43Ed2fc7985e89a49A251D52d824122',
                 token: exports.stakeTokenMap[97],
                 rewards: 5,
@@ -117,6 +117,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
             [OswapNfts.tier2]: {
                 chainId: 97,
                 name: OswapNfts.tier2,
+                fullName: "Happy Baby Troll",
                 address: '0x157538c2d508CDb1A6cf48B8336E4e56350A97C8',
                 token: exports.stakeTokenMap[97],
                 rewards: 15,
@@ -127,6 +128,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
             [OswapNfts.tier3]: {
                 chainId: 97,
                 name: OswapNfts.tier3,
+                fullName: "Hunny Baby Troll",
                 address: '0xB9425ddFB534CA87B73613283F4fB0073B63F31D',
                 token: exports.stakeTokenMap[97],
                 rewards: 40,
@@ -1266,6 +1268,7 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             });
         };
         const fetchInfoByAPI = async (info, obj, token) => {
+            console.log("fetchInfoByAPI", info.name, obj);
             let rarity = 0;
             if (obj.attributes) {
                 rarity = new eth_wallet_4.BigNumber(obj.attributes[info.attributes.rarityIndex].value).toNumber();

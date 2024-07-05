@@ -59,7 +59,6 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
         image: string;
     }
     export const trollAPIUrl: Record<SupportedNetworkId, string>;
-    export const rewardAddress: Record<SupportedNetworkId, string>;
     export interface AttributeDistribution {
         base: number;
         digits: number[];
@@ -70,6 +69,7 @@ declare module "@scom/oswap-nft-widget/store/data/nft.ts" {
     export interface NftInfoStore {
         chainId: SupportedNetworkId;
         name: OswapNfts;
+        fullName: string;
         address: string;
         token: TokenConstant;
         rewards: number;
