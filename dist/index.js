@@ -1249,11 +1249,10 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
             return [];
         });
         for (let i = 0; i < ids.length; i++) {
-            let stakeBalance = mixedResult[i * 4];
-            let creationTime = mixedResult[i * 4 + 1];
-            //let attributes:string[] = ar(mixedResult[i * 4 + 2]);
+            let stakeBalance = mixedResult[i * 2];
+            let creationTime = mixedResult[i * 2 + 1];
+            //let attributes:string[] = ar(mixedResult[i * 3 + 2]);
             let attributes = await getAttributes2(nftContract, ids[i], nftInfo.attributes.base, nftInfo.attributes.digits, nftInfo.attributes.probability);
-            console.log(attributes);
             let obj = await getNFTObject(trollAPI, `${nftInfo.name}-troll`, ids[i]);
             userNfts.push({
                 tokenId: ids[i],
@@ -1264,78 +1263,6 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
                 image: obj.image ? obj.image : undefined,
             });
         }
-        return userNfts;
-    }
-    async function fetchUserNft2(state, nftInfo) {
-        if (!(0, index_4.isClientWalletConnected)())
-            return [];
-        let wallet = state.getRpcWallet();
-        let chainId = wallet.chainId;
-        //console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
-        let userNfts = [];
-        const trollAPI = index_4.trollAPIUrl[chainId];
-        let nftContract = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
-        let tier = nftInfo.name;
-        let token = nftInfo.token;
-        const fetchInfoByDapp = async (info, contractAddress, token, i) => {
-            let trollNFT = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, contractAddress);
-            let tokenId = (await trollNFT.tokenOfOwnerByIndex({
-                owner: wallet.address,
-                index: i
-            })).toNumber();
-            let stakeBalance = (await trollNFT.stakingBalance(tokenId)).toFixed();
-            let birthday = (await trollNFT.creationTime(tokenId)).toNumber();
-            let attributes = await getAttributes2(trollNFT, tokenId, info.attributes.base, info.attributes.digits, info.attributes.probability);
-            let rarity = 0;
-            if (!rarity && attributes) {
-                rarity = new eth_wallet_4.BigNumber(attributes[info.attributes.rarityIndex]).toNumber();
-            }
-            let obj = await getNFTObject(trollAPI, `${info.name}-troll`, tokenId);
-            userNfts.push({
-                tokenId,
-                stakeBalance: eth_wallet_4.Utils.fromDecimals(stakeBalance, token.decimals).toFixed(),
-                attributes,
-                rarity,
-                birthday,
-                image: obj.image ? obj.image : undefined,
-            });
-        };
-        const fetchInfoByAPI = async (info, obj, token) => {
-            let rarity = 0;
-            if (obj.attributes) {
-                rarity = new eth_wallet_4.BigNumber(obj.attributes[info.attributes.rarityIndex].value).toNumber();
-            }
-            else if (obj.attritubes) { //handle the spelling problem on api temporarily
-                rarity = new eth_wallet_4.BigNumber(obj.attritubes[info.attributes.rarityIndex].value).toNumber();
-            }
-            let stakeBalance = obj.staking_balance ? eth_wallet_4.Utils.fromDecimals(obj.staking_balance, token.decimals).toFixed() : '0';
-            userNfts.push({
-                tokenId: obj.id,
-                stakeBalance,
-                attributes: obj.attritubes,
-                rarity,
-                birthday: obj.creation_time,
-                image: obj.image,
-            });
-        };
-        let promises = [];
-        let AllUserNftByApi = await getNFTObject(trollAPI, `${tier}-troll`, undefined, wallet.address);
-        let userOwnNftCount = (await nftContract.balanceOf(wallet.address)).toNumber();
-        if (!AllUserNftByApi.length || AllUserNftByApi.length != userOwnNftCount) { //API Fail: The count is difference right after mint/burn
-            if (userOwnNftCount > 0) {
-                for (let i = 0; i < userOwnNftCount; i++) {
-                    promises.push(fetchInfoByDapp(nftInfo, nftInfo.address, token, i));
-                }
-            }
-        }
-        else { //API success
-            if (AllUserNftByApi.length > 0) {
-                for (let i = 0; i < AllUserNftByApi.length; i++) {
-                    promises.push(fetchInfoByAPI(nftInfo, AllUserNftByApi[i], token));
-                }
-            }
-        }
-        await Promise.all(promises);
         return userNfts;
     }
     const mintNFT = async (contractAddress, token, amount) => {
