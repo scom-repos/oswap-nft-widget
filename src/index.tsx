@@ -22,6 +22,7 @@ import {
   IDataMyCard,
   OswapNfts,
   OswapNftsType,
+  nftImagePlaceHolder,
 } from './store/index';
 import {
   formatNumber,
@@ -1062,7 +1063,7 @@ export default class OswapNftWidget extends Module {
                       </i-panel>
                     </i-panel>
                     <i-hstack horizontalAlignment="center" margin={{ bottom: 20 }} padding={{ left: 20, right: 20 }}>
-                      <i-image id="ImageBurn" class="text-center" width="100%" height="auto" />
+                      <i-image id="ImageBurn" class="text-center" width="100%" height="auto" fallbackUrl={nftImagePlaceHolder} />
                     </i-hstack>
                     <i-hstack verticalAlignment="center" horizontalAlignment="center">
                       <i-image url={Assets.fullPath('img/nft/TrollCry.png')} margin={{ right: 4 }} width={40} height="auto" class="flex" />

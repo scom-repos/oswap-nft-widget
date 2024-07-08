@@ -166,12 +166,21 @@ declare module "@scom/oswap-nft-widget/data.json.ts" {
     };
     export default _default;
 }
+/// <amd-module name="@scom/oswap-nft-widget/assets.ts" />
+declare module "@scom/oswap-nft-widget/assets.ts" {
+    function fullPath(path: string): string;
+    const _default_1: {
+        fullPath: typeof fullPath;
+    };
+    export default _default_1;
+}
 /// <amd-module name="@scom/oswap-nft-widget/store/utils.ts" />
 declare module "@scom/oswap-nft-widget/store/utils.ts" {
     import { ERC20ApprovalModel, IERC20ApprovalEventOptions } from '@ijstech/eth-wallet';
     import { IExtendedNetwork } from "@scom/oswap-nft-widget/global/index.ts";
     import { ITokenObject } from '@scom/scom-token-list';
     import { INetworkConfig } from '@scom/scom-network-picker';
+    export const nftImagePlaceHolder: string;
     export interface IWalletConnectMetadata {
         name: string;
         description: string;
@@ -277,14 +286,6 @@ declare module "@scom/oswap-nft-widget/store/index.ts" {
     export * from "@scom/oswap-nft-widget/store/data/index.ts";
     export * from "@scom/oswap-nft-widget/store/utils.ts";
 }
-/// <amd-module name="@scom/oswap-nft-widget/assets.ts" />
-declare module "@scom/oswap-nft-widget/assets.ts" {
-    function fullPath(path: string): string;
-    const _default_1: {
-        fullPath: typeof fullPath;
-    };
-    export default _default_1;
-}
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/card.css.ts" />
 declare module "@scom/oswap-nft-widget/nft-utils/card.css.ts" {
     export const cardStyle: string;
@@ -306,11 +307,9 @@ declare module "@scom/oswap-nft-widget/nft-utils/myCard.tsx" {
     }
     export class NftMyCard extends Module {
         private _cardData;
+        private nftImage;
         private stakeAmount;
-        private trollImage;
-        private reward;
-        private monthlyReward;
-        private flashSales;
+        private lbNftID;
         private birthday;
         private rarity;
         onBurn: () => void;
@@ -337,7 +336,6 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
     }
     export class NftCard extends Module {
         private _cardData;
-        private pnlSlots;
         private stakeAmountText;
         private trollImage;
         private reward;

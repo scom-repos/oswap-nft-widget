@@ -283,10 +283,22 @@ define("@scom/oswap-nft-widget/data.json.ts", ["require", "exports"], function (
         ]
     };
 });
-define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/scom-network-list", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/scom-token-list"], function (require, exports, components_1, eth_wallet_3, scom_network_list_1, core_2, scom_token_list_1) {
+define("@scom/oswap-nft-widget/assets.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.mapRecordNumberAwait = exports.mapRecordNumber = exports.mapRecordAwait = exports.mapRecord = exports.forEachRecordIndex = exports.mapRecordIndex = exports.mapIndexNumber = exports.forEachNumberIndex = exports.forEachNumberIndexAwait = exports.getChainNativeToken = exports.isClientWalletConnected = exports.getWalletProvider = exports.State = exports.getNetworksByType = exports.getNetworkType = exports.NetworkType = exports.WalletPlugin = void 0;
+    let moduleDir = components_1.application.currentModuleDir;
+    function fullPath(path) {
+        return `${moduleDir}/${path}`;
+    }
+    exports.default = {
+        fullPath
+    };
+});
+define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/scom-network-list", "@scom/oswap-nft-widget/store/data/core.ts", "@scom/scom-token-list", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_2, eth_wallet_3, scom_network_list_1, core_2, scom_token_list_1, assets_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.mapRecordNumberAwait = exports.mapRecordNumber = exports.mapRecordAwait = exports.mapRecord = exports.forEachRecordIndex = exports.mapRecordIndex = exports.mapIndexNumber = exports.forEachNumberIndex = exports.forEachNumberIndexAwait = exports.getChainNativeToken = exports.isClientWalletConnected = exports.getWalletProvider = exports.State = exports.getNetworksByType = exports.getNetworkType = exports.NetworkType = exports.WalletPlugin = exports.nftImagePlaceHolder = void 0;
+    exports.nftImagePlaceHolder = assets_1.default.fullPath('img/nft/TrollEgg.svg');
     var WalletPlugin;
     (function (WalletPlugin) {
         WalletPlugin["MetaMask"] = "metamask";
@@ -356,12 +368,12 @@ define("@scom/oswap-nft-widget/store/utils.ts", ["require", "exports", "@ijstech
                 return this.rpcWalletId;
             }
             const clientWallet = eth_wallet_3.Wallet.getClientInstance();
-            const networkList = Object.values(components_1.application.store?.networkMap || []);
+            const networkList = Object.values(components_2.application.store?.networkMap || []);
             const instanceId = clientWallet.initRpcWallet({
                 networks: networkList,
                 defaultChainId,
-                infuraId: components_1.application.store?.infuraId,
-                multicalls: components_1.application.store?.multicalls
+                infuraId: components_2.application.store?.infuraId,
+                multicalls: components_2.application.store?.multicalls
             });
             this.rpcWalletId = instanceId;
             if (clientWallet.address) {
@@ -534,18 +546,7 @@ define("@scom/oswap-nft-widget/store/index.ts", ["require", "exports", "@scom/os
     __exportStar(index_1, exports);
     __exportStar(utils_1, exports);
 });
-define("@scom/oswap-nft-widget/assets.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_2) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    let moduleDir = components_2.application.currentModuleDir;
-    function fullPath(path) {
-        return `${moduleDir}/${path}`;
-    }
-    exports.default = {
-        fullPath
-    };
-});
-define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_3, assets_1) {
+define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts"], function (require, exports, components_3, assets_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.cardStyle = void 0;
@@ -579,10 +580,10 @@ define("@scom/oswap-nft-widget/nft-utils/card.css.ts", ["require", "exports", "@
                         $nest: {
                             '&.box-left': {
                                 marginRight: '0.5rem',
-                                backgroundImage: `url(${assets_1.default.fullPath('img/nft/LeftBox.svg')})`
+                                backgroundImage: `url(${assets_2.default.fullPath('img/nft/LeftBox.svg')})`
                             },
                             '&.box-right': {
-                                backgroundImage: `url(${assets_1.default.fullPath('img/nft/RightBox.svg')})`
+                                backgroundImage: `url(${assets_2.default.fullPath('img/nft/RightBox.svg')})`
                             },
                         },
                     },
@@ -748,8 +749,11 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
                 top: 0,
                 flexDirection: 'column',
                 flexWrap: 'nowrap',
-                display: 'flex',
-                justifyContent: 'space-between'
+                justifyContent: 'start',
+                gap: '0.75rem'
+            },
+            '.mycard-img img': {
+                minHeight: 280
             },
             '.mycard-img, .section-my-card': {
                 width: '100%',
@@ -762,16 +766,10 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
                 alignItems: 'flex-start',
                 justifyContent: 'space-between',
                 padding: '2px 0',
+                textAlign: 'left',
                 $nest: {
                     '.title-icon': {
                         position: 'relative',
-                    },
-                    'i-label': {
-                        $nest: {
-                            '*': {
-                                fontSize: '0.75rem',
-                            },
-                        },
                     },
                     '.title-icon i-icon': {
                         position: 'absolute',
@@ -790,7 +788,7 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
         },
     });
 });
-define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts"], function (require, exports, components_5, myCard_css_1) {
+define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts", "@scom/oswap-nft-widget/store/index.ts"], function (require, exports, components_5, myCard_css_1, index_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NftMyCard = void 0;
@@ -807,27 +805,28 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
             this.renderCard();
         }
         async renderStar() {
-            let icon = await components_5.Icon.create();
-            icon.name = 'star';
-            icon.fill = Theme.text.primary;
-            icon.width = 20;
-            icon.height = 20;
+            let icon = await components_5.Icon.create({
+                name: 'star',
+                width: 20,
+                height: 20,
+                fill: Theme.text.primary
+            });
             this.rarity.appendChild(icon);
         }
         async renderCard() {
             const value = this.cardData;
+            if (!this.lbNftID.isConnected)
+                await this.lbNftID.ready();
+            this.lbNftID.caption = `${value.trollNumber || '-'}`;
             if (!this.stakeAmount.isConnected)
                 await this.stakeAmount.ready();
             this.stakeAmount.caption = value.stakeAmountText;
-            if (this.reward)
-                await this.reward.ready();
-            this.reward.caption = value.rewardsBoost;
-            if (this.monthlyReward)
-                await this.monthlyReward.ready();
-            this.monthlyReward.caption = value.monthlyRewardText;
-            if (this.flashSales)
-                await this.flashSales.ready();
-            this.flashSales.caption = value.flashSales;
+            // if (this.reward) await this.reward.ready();
+            // this.reward.caption = value.rewardsBoost;
+            // if (this.monthlyReward) await this.monthlyReward.ready();
+            // this.monthlyReward.caption = value.monthlyRewardText;
+            // if (this.flashSales) await this.flashSales.ready();
+            // this.flashSales.caption = value.flashSales;
             if (this.birthday)
                 await this.birthday.ready();
             this.birthday.caption = value.birthday;
@@ -836,10 +835,8 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
                     this.renderStar();
                 }
             }
-            if (this.trollImage) {
-                const img1 = new components_5.Image();
-                img1.url = value.image;
-                this.trollImage.appendChild(img1);
+            if (this.nftImage) {
+                this.nftImage.url = value.image;
             }
         }
         handleFlipCard(sender, event) {
@@ -858,9 +855,14 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
         async render() {
             return (this.$render("i-panel", { class: "card-section", id: "panel1", onClick: (control, e) => this.handleFlipCard(control, e) },
                 this.$render("i-panel", { class: "bg-flip" },
-                    this.$render("i-panel", { id: "trollImage", class: "mycard-img" }),
-                    this.$render("i-vstack", { verticalAlignment: 'space-between', class: "section-my-card" },
+                    this.$render("i-panel", { class: "mycard-img" },
+                        this.$render("i-image", { id: "nftImage", fallbackUrl: index_2.nftImagePlaceHolder })),
+                    this.$render("i-vstack", { verticalAlignment: "space-between", class: "section-my-card" },
                         this.$render("i-panel", { margin: { top: 10 }, class: "row-item" },
+                            this.$render("i-panel", { class: "title-icon" },
+                                this.$render("i-label", { caption: "ID" })),
+                            this.$render("i-label", { id: "lbNftID", class: "value" })),
+                        this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
                                 this.$render("i-label", { caption: "Birthday" })),
                             this.$render("i-label", { id: "birthday", caption: "50,000 OSWAP", class: "value" })),
@@ -874,33 +876,13 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
                             this.$render("i-label", { id: "stakeAmount", caption: "50,000 OSWAP", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Rewards Boost" }),
-                                this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, tooltip: {
-                                        content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
-                                        placement: 'right'
-                                    } })),
-                            this.$render("i-label", { id: "reward", caption: "5%", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Monthly Reward" }),
-                                this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, tooltip: {
-                                        content: "The Monthly Reward will be distributed at the end of each month.",
-                                        placement: 'right'
-                                    } })),
-                            this.$render("i-label", { id: "monthlyReward", caption: "5%", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Flash Sales Inclusion" })),
-                            this.$render("i-label", { id: "flashSales", caption: "Periodic", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
                                 this.$render("i-label", { caption: "Bridge Transaction Validate" })),
                             this.$render("i-label", { id: "bridge", caption: "-", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
                                 this.$render("i-label", { caption: "Bridge Fee Earn" })),
                             this.$render("i-label", { id: "fee", caption: "-", class: "value" })),
-                        this.$render("i-button", { id: "btnHandleBurn", margin: { bottom: 10, top: 10 }, height: "auto", class: "btn-burn btn-os", caption: "Burn" })))));
+                        this.$render("i-button", { id: "btnHandleBurn", margin: { bottom: 10, top: 'auto' }, height: "auto", class: "btn-burn btn-os", caption: "Burn" })))));
         }
     };
     NftMyCard = __decorate([
@@ -908,7 +890,7 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
     ], NftMyCard);
     exports.NftMyCard = NftMyCard;
 });
-define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts", "@scom/oswap-nft-widget/nft-utils/myCard.tsx"], function (require, exports, components_6, assets_2, index_2, card_css_1, myCard_1) {
+define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts", "@scom/oswap-nft-widget/nft-utils/myCard.tsx"], function (require, exports, components_6, assets_3, index_3, card_css_1, myCard_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NftCard = void 0;
@@ -994,13 +976,13 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
                 this.trollImage.classList.add('troll-img');
                 this.trollImage.classList.remove('os-slider');
                 const img = new components_6.Image();
-                img.url = assets_2.default.fullPath(`img/nft/${value.tier || 'hungry'}.png`);
+                img.url = assets_3.default.fullPath(`img/nft/${value.tier || 'hungry'}.png`);
                 this.trollImage.appendChild(img);
             }
             this.updateBtn();
         }
         updateBtn() {
-            if (!(0, index_2.isClientWalletConnected)()) {
+            if (!(0, index_3.isClientWalletConnected)()) {
                 this.btnHandleStake.caption = 'No Wallet';
                 this.btnHandleStake.enabled = false;
             }
@@ -1062,7 +1044,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
     ], NftCard);
     exports.NftCard = NftCard;
 });
-define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ijstech/eth-wallet", "@scom/oswap-troll-nft-contract", "@scom/oswap-nft-widget/store/index.ts", "@scom/scom-commission-proxy-contract"], function (require, exports, eth_wallet_4, oswap_troll_nft_contract_1, index_3, scom_commission_proxy_contract_1) {
+define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ijstech/eth-wallet", "@scom/oswap-troll-nft-contract", "@scom/oswap-nft-widget/store/index.ts", "@scom/scom-commission-proxy-contract"], function (require, exports, eth_wallet_4, oswap_troll_nft_contract_1, index_4, scom_commission_proxy_contract_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getNFTObject = exports.burnNFT = exports.mintNFT = exports.fetchNftInfoByTier = exports.fetchAllNftInfo = exports.getCommissionRate = exports.nftInfoMap = void 0;
@@ -1078,8 +1060,8 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     }
     function initNftInfo() {
         let out;
-        out = (0, index_3.mapRecordNumber)(index_3.nftInfoStoreMap, nfts => {
-            return (0, index_3.mapRecord)(nfts, (nft) => {
+        out = (0, index_4.mapRecordNumber)(index_4.nftInfoStoreMap, nfts => {
+            return (0, index_4.mapRecord)(nfts, (nft) => {
                 return {
                     ...nft,
                     minimumStake: new eth_wallet_4.BigNumber("0"),
@@ -1153,7 +1135,7 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     };
     async function fetchNftInfoByTier(state, tier) {
         const chainId = state.getChainId();
-        if (!(chainId in index_3.SupportedNetworkId))
+        if (!(chainId in index_4.SupportedNetworkId))
             return false;
         let wallet = state.getRpcWallet();
         nftInfoMap[chainId][tier] = await fetchNftInfo(state, wallet, nftInfoMap[chainId][tier]);
@@ -1162,10 +1144,10 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     exports.fetchNftInfoByTier = fetchNftInfoByTier;
     async function fetchAllNftInfo(state) {
         const chainId = state.getChainId();
-        if (!(chainId in index_3.SupportedNetworkId))
+        if (!(chainId in index_4.SupportedNetworkId))
             return false;
         let wallet = state.getRpcWallet();
-        nftInfoMap[chainId] = await (0, index_3.mapRecordAwait)(nftInfoMap[chainId], info => fetchNftInfo(state, wallet, info));
+        nftInfoMap[chainId] = await (0, index_4.mapRecordAwait)(nftInfoMap[chainId], info => fetchNftInfo(state, wallet, info));
         return nftInfoMap[chainId];
     }
     exports.fetchAllNftInfo = fetchAllNftInfo;
@@ -1227,10 +1209,10 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
     }
     //fetchUserNftOnChain
     async function fetchUserNft(state, nftInfo) {
-        if (!(0, index_3.isClientWalletConnected)())
+        if (!(0, index_4.isClientWalletConnected)())
             return [];
         let wallet = state.getRpcWallet();
-        const trollAPI = index_3.trollAPIUrl[wallet.chainId];
+        const trollAPI = index_4.trollAPIUrl[wallet.chainId];
         let userNfts = [];
         let nftContract = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
         let token = nftInfo.token;
@@ -1285,13 +1267,13 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
         return userNfts;
     }
     async function fetchUserNft2(state, nftInfo) {
-        if (!(0, index_3.isClientWalletConnected)())
+        if (!(0, index_4.isClientWalletConnected)())
             return [];
         let wallet = state.getRpcWallet();
         let chainId = wallet.chainId;
         //console.log("fetchUserNft", chainId, wallet.address, nftInfo.name);
         let userNfts = [];
-        const trollAPI = index_3.trollAPIUrl[chainId];
+        const trollAPI = index_4.trollAPIUrl[chainId];
         let nftContract = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
         let tier = nftInfo.name;
         let token = nftInfo.token;
@@ -1385,7 +1367,7 @@ define("@scom/oswap-nft-widget/nft-utils/index.ts", ["require", "exports", "@sco
     Object.defineProperty(exports, "burnNFT", { enumerable: true, get: function () { return nftAPI_1.burnNFT; } });
     Object.defineProperty(exports, "getNFTObject", { enumerable: true, get: function () { return nftAPI_1.getNFTObject; } });
 });
-define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/scom-network-picker", "@scom/oswap-nft-widget/data.json.ts", "@scom/oswap-nft-widget/store/index.ts"], function (require, exports, scom_network_picker_1, data_json_1, index_4) {
+define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/scom-network-picker", "@scom/oswap-nft-widget/data.json.ts", "@scom/oswap-nft-widget/store/index.ts"], function (require, exports, scom_network_picker_1, data_json_1, index_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getProjectOwnerSchema = exports.getBuilderSchema = void 0;
@@ -1517,7 +1499,7 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
                     tier: {
                         type: 'string',
                         required: true,
-                        enum: Object.values(index_4.OswapNfts)
+                        enum: Object.values(index_5.OswapNfts)
                     },
                     networks: {
                         type: 'array',
@@ -1811,7 +1793,7 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
         1100: exports.nftStyle_1100
     };
 });
-define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, components_8, eth_wallet_5, index_5, index_6, assets_3, scom_commission_fee_setup_1, scom_token_list_2, index_7, formSchema_1, index_css_1, data_json_2) {
+define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, components_8, eth_wallet_5, index_6, index_7, assets_4, scom_commission_fee_setup_1, scom_token_list_2, index_8, formSchema_1, index_css_1, data_json_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = components_8.Styles.Theme.ThemeVars;
@@ -1822,7 +1804,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 defaultChainId: 0,
                 wallets: [],
                 networks: [],
-                tier: index_5.OswapNfts.tier1
+                tier: index_6.OswapNfts.tier1
             };
             this.tag = {};
             this.initWallet = async () => {
@@ -1900,7 +1882,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         async loadCommissionFee() {
             if (this._data.campaignId && this.state.embedderCommissionFee === undefined) {
-                const commissionRate = await (0, index_7.getCommissionRate)(this.state, this._data.campaignId);
+                const commissionRate = await (0, index_8.getCommissionRate)(this.state, this._data.campaignId);
                 this.state.embedderCommissionFee = commissionRate;
             }
         }
@@ -1919,7 +1901,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                             defaultChainId: 0,
                             wallets: [],
                             networks: [],
-                            tier: index_5.OswapNfts.tier1
+                            tier: index_6.OswapNfts.tier1
                         };
                         return {
                             execute: async () => {
@@ -1978,7 +1960,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                             defaultChainId: 0,
                             wallets: [],
                             networks: [],
-                            tier: index_5.OswapNfts.tier1
+                            tier: index_6.OswapNfts.tier1
                         };
                         let oldTag = {};
                         return {
@@ -2205,14 +2187,14 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         async init() {
             super.init();
-            this.state = new index_5.State(data_json_2.default);
+            this.state = new index_6.State(data_json_2.default);
             this.chainId = this.state.getChainId();
             const lazyLoad = this.getAttribute('lazyLoad', true, false);
             if (!lazyLoad) {
                 const campaignId = this.getAttribute('campaignId', true);
                 const commissions = this.getAttribute('commissions', true, []);
                 const defaultChainId = this.getAttribute('defaultChainId', true);
-                const tier = this.getAttribute('tier', true, index_5.OswapNfts.tier1);
+                const tier = this.getAttribute('tier', true, index_6.OswapNfts.tier1);
                 const networks = this.getAttribute('networks', true);
                 const wallets = this.getAttribute('wallets', true);
                 const showHeader = this.getAttribute('showHeader', true);
@@ -2266,8 +2248,8 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.approvalModelAction = await this.state.setApprovalModelAction({
                 sender: this,
                 payAction: async () => {
-                    (0, index_6.showResultMessage)(this.txStatusModal, 'warning', 'Minting...');
-                    (0, index_7.mintNFT)(item.address, item.stakeToken, item.totalPayAmount);
+                    (0, index_7.showResultMessage)(this.txStatusModal, 'warning', 'Minting...');
+                    (0, index_8.mintNFT)(item.address, item.stakeToken, item.totalPayAmount);
                 },
                 onToBeApproved: async (token) => {
                     this.btnApprove.visible = true;
@@ -2286,18 +2268,18 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     this.btnApprove.enabled = false;
                     this.btnApprove.caption = `Approving ${token.symbol}`;
                     if (receipt) {
-                        (0, index_6.showResultMessage)(this.txStatusModal, 'success', receipt);
+                        (0, index_7.showResultMessage)(this.txStatusModal, 'success', receipt);
                     }
                 },
                 onApproved: async (token, data) => {
                     this.btnApprove.rightIcon.visible = false;
                 },
                 onApprovingError: async (token, err) => {
-                    (0, index_6.showResultMessage)(this.txStatusModal, 'error', err);
+                    (0, index_7.showResultMessage)(this.txStatusModal, 'error', err);
                 },
                 onPaying: async (receipt, data) => {
                     if (receipt) {
-                        (0, index_6.showResultMessage)(this.txStatusModal, 'success', receipt);
+                        (0, index_7.showResultMessage)(this.txStatusModal, 'success', receipt);
                         this.btnMint.rightIcon.visible = true;
                         this.btnMint.caption = 'Staking';
                     }
@@ -2310,7 +2292,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     this.renderCards();
                 },
                 onPayingError: async (err) => {
-                    (0, index_6.showResultMessage)(this.txStatusModal, 'error', err);
+                    (0, index_7.showResultMessage)(this.txStatusModal, 'error', err);
                 }
             }, item.address);
         }
@@ -2334,13 +2316,13 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     this.$render("i-panel", { border: { radius: '12px' }, background: { color: "#ffffff33" }, width: "100%", height: "auto" },
                         this.$render("i-vstack", { padding: { top: 30, bottom: 30 }, horizontalAlignment: "center" },
                             this.$render("i-panel", { class: "text-center", width: "100%" },
-                                this.$render("i-image", { url: assets_3.default.fullPath('img/nft/TrollEgg.svg'), width: 200, height: "auto", display: "block", margin: { left: 'auto', right: 'auto' } })),
+                                this.$render("i-image", { url: assets_4.default.fullPath('img/nft/TrollEgg.svg'), width: 200, height: "auto", display: "block", margin: { left: 'auto', right: 'auto' } })),
                             this.$render("i-label", { class: "text-center", width: "100%", margin: { top: 20 }, caption: msg, font: { color: Theme.text.primary, size: '1.5rem' } }))))));
         }
         async renderData() {
             this.updateButtons();
             const currentChainId = this.state.getChainId();
-            const isConnected = (0, index_5.isClientWalletConnected)();
+            const isConnected = (0, index_6.isClientWalletConnected)();
             const { chainId, connected, fetching } = this.initializedState || {};
             if (chainId === currentChainId && connected === isConnected && fetching === true)
                 return;
@@ -2357,7 +2339,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.pnlLoading.visible = true;
             this.cardRow.visible = false;
             const tier = this.tier;
-            const info = await (0, index_7.fetchNftInfoByTier)(this.state, tier);
+            const info = await (0, index_8.fetchNftInfoByTier)(this.state, tier);
             const chainId = this.state.getChainId();
             if (this.initializedState.chainId !== chainId)
                 return;
@@ -2387,8 +2369,8 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                         trollNumber: v.tokenId,
                         stakeToken: token,
                         stakeAmount: v.stakeBalance,
-                        stakeAmountText: `${(0, index_6.formatNumber)(v.stakeBalance)} ${token?.symbol || ''}`,
-                        birthday: components_8.moment.unix(v.birthday).format(index_6.DefaultDateFormat),
+                        stakeAmountText: `${(0, index_7.formatNumber)(v.stakeBalance)} ${token?.symbol || ''}`,
+                        birthday: components_8.moment.unix(v.birthday).format(index_7.DefaultDateFormat),
                         rarity: v.rarity,
                         image: v.image
                     };
@@ -2403,7 +2385,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     slot: item.cap.minus(item.totalSupply).toNumber(),
                     stakeAmount: item.minimumStake.toFixed(),
                     stakeToken: item.token,
-                    stakeAmountText: `${(0, index_6.formatNumber)(item.minimumStake)} ${item.token?.symbol || ''}`,
+                    stakeAmountText: `${(0, index_7.formatNumber)(item.minimumStake)} ${item.token?.symbol || ''}`,
                     protocolFee: item.protocolFee.toFixed(),
                     totalPayAmount,
                     userNFTs: _userNfts
@@ -2415,7 +2397,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 const column = await components_8.VStack.create();
                 column.classList.add('nft-card-column', 'new-card-column');
                 column.stack = { basis: '0%', shrink: '1', grow: '1' };
-                const nftCard = await index_7.NftCard.create();
+                const nftCard = await index_8.NftCard.create();
                 column.appendChild(nftCard);
                 this.cardRow.appendChild(column);
                 nftCard.state = this.state;
@@ -2427,7 +2409,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.cardRow.visible = true;
         }
         async onSubmit(isMint) {
-            if (!(0, index_5.isClientWalletConnected)()) {
+            if (!(0, index_6.isClientWalletConnected)()) {
                 this.switchNetworkByWallet();
                 return;
             }
@@ -2479,7 +2461,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             }
             let tokenBalances = scom_token_list_2.tokenStore.getTokenBalancesByChainId(this.chainId) || {};
             let tokenBalance = tokenBalances[item.stakeToken.address.toLowerCase()];
-            this.lbTokenBalance.caption = (0, index_6.formatNumber)(tokenBalance, 4);
+            this.lbTokenBalance.caption = (0, index_7.formatNumber)(tokenBalance, 4);
             this.ImageMintStakeToken.url = scom_token_list_2.assets.tokenPath(item.stakeToken, this.chainId);
             this.lbMintStakeToken.caption = stakeTokenSymbol;
             this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${item.stakeAmount} of ${stakeTokenSymbol}.`;
@@ -2491,7 +2473,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             await this.approvalModelAction.doPayAction();
         }
         async clickApprove() {
-            if (!(0, index_5.isClientWalletConnected)()) {
+            if (!(0, index_6.isClientWalletConnected)()) {
                 this.switchNetworkByWallet();
                 return;
             }
@@ -2526,13 +2508,13 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         async handleConfirmBurn() {
             var self = this;
-            (0, index_6.showResultMessage)(this.txStatusModal, 'warning', 'Burning');
+            (0, index_7.showResultMessage)(this.txStatusModal, 'warning', 'Burning');
             const txHashCallback = (err, receipt) => {
                 if (err) {
-                    (0, index_6.showResultMessage)(this.txStatusModal, 'error', err);
+                    (0, index_7.showResultMessage)(this.txStatusModal, 'error', err);
                 }
                 else if (receipt) {
-                    (0, index_6.showResultMessage)(this.txStatusModal, 'success', receipt);
+                    (0, index_7.showResultMessage)(this.txStatusModal, 'success', receipt);
                     this.txStatusModal.onCustomClose = function () {
                         self.txStatusModal.closeModal();
                         self.mint.visible = true;
@@ -2549,11 +2531,11 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 this.handleBurnBack();
                 this.renderCards();
             };
-            (0, index_6.registerSendTxEvents)({
+            (0, index_7.registerSendTxEvents)({
                 transactionHash: txHashCallback,
                 confirmation: confirmationCallback
             });
-            await (0, index_7.burnNFT)(this.currentDataMyCard.address, this.currentDataMyCard.trollNumber);
+            await (0, index_8.burnNFT)(this.currentDataMyCard.address, this.currentDataMyCard.trollNumber);
         }
         render() {
             return (this.$render("i-scom-dapp-container", { id: "dappContainer" },
@@ -2562,7 +2544,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                         this.$render("i-panel", { padding: { left: '1rem', right: '1rem' } },
                             this.$render("i-panel", { id: "pnlLoading", minHeight: 300, class: "i-loading-overlay" },
                                 this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
-                                    this.$render("i-icon", { class: "i-loading-spinner_icon", cursor: "default", image: { url: assets_3.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
+                                    this.$render("i-icon", { class: "i-loading-spinner_icon", cursor: "default", image: { url: assets_4.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
                                     this.$render("i-label", { caption: "Loading...", font: { color: Theme.colors.primary.main, size: '1.5em' }, class: "i-loading-spinner_text" }))),
                             this.$render("i-hstack", { gap: "2rem", id: "cardRow", maxWidth: 1280, margin: { left: 'auto', right: 'auto' }, wrap: "wrap" }))),
                     this.$render("i-hstack", { id: "minting", visible: false, gap: "30px", horizontalAlignment: "center" },
@@ -2615,7 +2597,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                             this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "space-between" },
                                                 this.$render("i-label", { id: "lbMintStakeAmount", font: { color: Theme.colors.primary.main, size: '1.2rem' } }),
                                                 this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "end" },
-                                                    this.$render("i-image", { id: "ImageMintStakeToken", width: 20, class: "flex", margin: { right: 4 }, url: assets_3.default.fullPath('img/swap/openswap.png') }),
+                                                    this.$render("i-image", { id: "ImageMintStakeToken", width: 20, class: "flex", margin: { right: 4 }, url: assets_4.default.fullPath('img/swap/openswap.png') }),
                                                     this.$render("i-label", { id: "lbMintStakeToken", caption: "OSWAP" })))),
                                         this.$render("i-panel", { class: "section-2" },
                                             this.$render("i-panel", null,
@@ -2637,9 +2619,9 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                             this.$render("i-panel", null,
                                                 this.$render("i-label", { id: "lbBurnMessage", class: "text-center", caption: "By confirmimg the transaction, you will burn NFT and receive 75,000OSWAP" }))),
                                         this.$render("i-hstack", { horizontalAlignment: "center", margin: { bottom: 20 }, padding: { left: 20, right: 20 } },
-                                            this.$render("i-image", { id: "ImageBurn", class: "text-center", width: "100%", height: "auto" })),
+                                            this.$render("i-image", { id: "ImageBurn", class: "text-center", width: "100%", height: "auto", fallbackUrl: index_6.nftImagePlaceHolder })),
                                         this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "center" },
-                                            this.$render("i-image", { url: assets_3.default.fullPath('img/nft/TrollCry.png'), margin: { right: 4 }, width: 40, height: "auto", class: "flex" }),
+                                            this.$render("i-image", { url: assets_4.default.fullPath('img/nft/TrollCry.png'), margin: { right: 4 }, width: 40, height: "auto", class: "flex" }),
                                             this.$render("i-label", { class: "note-burn", caption: "This is NFT Will Be Gone Forever" })),
                                         this.$render("i-button", { id: "btnBurn", height: 40, class: "btn-stake btn-os", caption: "Burn", rightIcon: { spin: true, visible: false }, onClick: () => this.onSubmit() }))))))),
                 this.$render("i-scom-tx-status-modal", { id: "txStatusModal" }),

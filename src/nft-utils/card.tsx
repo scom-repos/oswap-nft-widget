@@ -28,7 +28,7 @@ declare global {
 @customElements('nft-card')
 export class NftCard extends Module {
   private _cardData: IDataCard;
-  private pnlSlots: Panel;
+  // private pnlSlots: Panel;
   private stakeAmountText: Label;
   private trollImage: Panel;
   private reward: Label;

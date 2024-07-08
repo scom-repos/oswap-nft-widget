@@ -47,8 +47,11 @@ export const myCardStyle = Styles.style({
       top: 0,
       flexDirection: 'column',
       flexWrap: 'nowrap',
-      display: 'flex',
-      justifyContent: 'space-between'
+      justifyContent: 'start',
+      gap: '0.75rem'
+    },
+    '.mycard-img img': {
+      minHeight: 280
     },
     '.mycard-img, .section-my-card': {
       width: '100%',
@@ -61,17 +64,10 @@ export const myCardStyle = Styles.style({
       alignItems: 'flex-start',
       justifyContent: 'space-between',
       padding: '2px 0',
+      textAlign: 'left',
       $nest: {
         '.title-icon': {
           position: 'relative',
-        },
-
-        'i-label': {
-          $nest: {
-            '*': {
-              fontSize: '0.75rem',
-            },
-          },
         },
 
         '.title-icon i-icon': {

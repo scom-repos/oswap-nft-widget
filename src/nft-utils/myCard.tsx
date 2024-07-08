@@ -11,7 +11,7 @@ import {
   Styles
 } from '@ijstech/components';
 import { myCardStyle } from './myCard.css';
-import { IDataMyCard } from '../store/index';
+import { IDataMyCard, nftImagePlaceHolder } from '../store/index';
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -26,11 +26,12 @@ declare global {
 @customElements('nft-my-card')
 export class NftMyCard extends Module {
   private _cardData: IDataMyCard;
+  private nftImage: Image;
   private stakeAmount: Label;
-  private trollImage: Panel;
-  private reward: Label;
-  private monthlyReward: Label;
-  private flashSales: Label;
+  private lbNftID: Label;
+  // private reward: Label;
+  // private monthlyReward: Label;
+  // private flashSales: Label;
   private birthday: Label;
   private rarity: Panel;
   onBurn: () => void;
@@ -48,24 +49,27 @@ export class NftMyCard extends Module {
   }
 
   private async renderStar() {
-    let icon = await Icon.create();
-    icon.name = 'star';
-    icon.fill = Theme.text.primary;
-    icon.width = 20;
-    icon.height = 20;
+    let icon = await Icon.create({
+      name: 'star',
+      width: 20,
+      height: 20,
+      fill: Theme.text.primary
+    });
     this.rarity.appendChild(icon);
   }
 
   private async renderCard() {
     const value = this.cardData;
+    if (!this.lbNftID.isConnected) await this.lbNftID.ready();
+    this.lbNftID.caption = `${value.trollNumber || '-'}`;
     if (!this.stakeAmount.isConnected) await this.stakeAmount.ready();
     this.stakeAmount.caption = value.stakeAmountText;
-    if (this.reward) await this.reward.ready();
-    this.reward.caption = value.rewardsBoost;
-    if (this.monthlyReward) await this.monthlyReward.ready();
-    this.monthlyReward.caption = value.monthlyRewardText;
-    if (this.flashSales) await this.flashSales.ready();
-    this.flashSales.caption = value.flashSales;
+    // if (this.reward) await this.reward.ready();
+    // this.reward.caption = value.rewardsBoost;
+    // if (this.monthlyReward) await this.monthlyReward.ready();
+    // this.monthlyReward.caption = value.monthlyRewardText;
+    // if (this.flashSales) await this.flashSales.ready();
+    // this.flashSales.caption = value.flashSales;
     if (this.birthday) await this.birthday.ready();
     this.birthday.caption = value.birthday;
     if (this.rarity) {
@@ -74,10 +78,8 @@ export class NftMyCard extends Module {
       }
     }
 
-    if (this.trollImage) {
-      const img1 = new Image();
-      img1.url = value.image;
-      this.trollImage.appendChild(img1);
+    if (this.nftImage) {
+      this.nftImage.url = value.image;
     }
   }
 
@@ -99,9 +101,18 @@ export class NftMyCard extends Module {
     return (
       <i-panel class="card-section" id="panel1" onClick={(control, e) => this.handleFlipCard(control, e)}>
         <i-panel class="bg-flip">
-          <i-panel id="trollImage" class="mycard-img" />
-          <i-vstack verticalAlignment='space-between' class="section-my-card">
-            <i-panel margin={{ top: 10 }} class="row-item">
+          <i-panel class="mycard-img">
+            <i-image id="nftImage" fallbackUrl={nftImagePlaceHolder} />
+          </i-panel>
+          <i-vstack verticalAlignment="space-between" class="section-my-card">
+          <i-panel margin={{ top: 10 }} class="row-item">
+              <i-panel class="title-icon">
+                <i-label caption="ID" />
+              </i-panel>
+              <i-label id="lbNftID" class="value" />
+            </i-panel>
+
+            <i-panel class="row-item">
               <i-panel class="title-icon">
                 <i-label caption="Birthday" />
               </i-panel>
@@ -122,7 +133,7 @@ export class NftMyCard extends Module {
               <i-label id="stakeAmount" caption="50,000 OSWAP" class="value" />
             </i-panel>
 
-            <i-panel class="row-item">
+            {/* <i-panel class="row-item">
               <i-panel class="title-icon">
                 <i-label caption="Rewards Boost" />
                 <i-icon
@@ -157,7 +168,7 @@ export class NftMyCard extends Module {
                 <i-label caption="Flash Sales Inclusion" />
               </i-panel>
               <i-label id="flashSales" caption="Periodic" class="value" />
-            </i-panel>
+            </i-panel> */}
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
@@ -173,7 +184,7 @@ export class NftMyCard extends Module {
               <i-label id="fee" caption="-" class="value" />
             </i-panel>
 
-            <i-button id="btnHandleBurn" margin={{ bottom: 10, top: 10 }} height="auto" class="btn-burn btn-os" caption="Burn" />
+            <i-button id="btnHandleBurn" margin={{ bottom: 10, top: 'auto' }} height="auto" class="btn-burn btn-os" caption="Burn" />
           </i-vstack>
         </i-panel>
       </i-panel>
