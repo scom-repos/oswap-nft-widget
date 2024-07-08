@@ -6,6 +6,9 @@ import ConfigData from '../data.json';
 import { Mainnets, Testnets } from './data/core';
 import { ChainNativeTokenByChainId, ITokenObject } from '@scom/scom-token-list';
 import { INetworkConfig } from '@scom/scom-network-picker';
+import Assets from '../assets';
+
+export const nftImagePlaceHolder = Assets.fullPath('img/nft/TrollEgg.svg');
 
 export interface IWalletConnectMetadata {
   name: string;
