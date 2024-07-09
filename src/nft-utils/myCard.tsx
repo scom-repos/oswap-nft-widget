@@ -168,7 +168,7 @@ export class NftMyCard extends Module {
                 <i-label caption="Flash Sales Inclusion" />
               </i-panel>
               <i-label id="flashSales" caption="Periodic" class="value" />
-            </i-panel> */}
+            </i-panel> 
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
@@ -183,7 +183,7 @@ export class NftMyCard extends Module {
               </i-panel>
               <i-label id="fee" caption="-" class="value" />
             </i-panel>
-
+            */}
             <i-button id="btnHandleBurn" margin={{ bottom: 10, top: 'auto' }} height="auto" class="btn-burn btn-os" caption="Burn" />
           </i-vstack>
         </i-panel>

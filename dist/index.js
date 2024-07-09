@@ -874,14 +874,6 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
                             this.$render("i-panel", { class: "title-icon" },
                                 this.$render("i-label", { caption: "Value" })),
                             this.$render("i-label", { id: "stakeAmount", caption: "50,000 OSWAP", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Bridge Transaction Validate" })),
-                            this.$render("i-label", { id: "bridge", caption: "-", class: "value" })),
-                        this.$render("i-panel", { class: "row-item" },
-                            this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Bridge Fee Earn" })),
-                            this.$render("i-label", { id: "fee", caption: "-", class: "value" })),
                         this.$render("i-button", { id: "btnHandleBurn", margin: { bottom: 10, top: 'auto' }, height: "auto", class: "btn-burn btn-os", caption: "Burn" })))));
         }
     };
