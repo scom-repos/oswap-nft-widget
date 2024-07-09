@@ -720,7 +720,8 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
                 height: '50px',
                 border: 'none',
                 padding: '0.375rem 0.5rem',
-                color: Theme.colors.primary.contrastText
+                background: Theme.background.gradient,
+                color: Theme.text.primary,
             },
             '.card-section': {
                 borderRadius: '12px',
@@ -999,8 +1000,8 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
             return (this.$render("i-panel", { class: "card-widget" },
                 this.$render("i-panel", { class: "bg-img" },
                     this.$render("i-hstack", { gap: "0.5rem", horizontalAlignment: "start", verticalAlignment: "center", cursor: "pointer", width: "fit-content", margin: { top: '0.25rem', bottom: '0.5rem' }, onClick: this.openLink },
-                        this.$render("i-label", { id: "lbViewContract", caption: "View contract", font: { transform: 'capitalize', size: '1rem' }, padding: { left: '0.75rem' }, class: "text-yellow" }),
-                        this.$render("i-icon", { name: "external-link-alt", fill: Theme.colors.primary.main, width: 16, height: 16, class: "text-yellow" })),
+                        this.$render("i-label", { id: "lbViewContract", caption: "View contract", font: { color: Theme.colors.primary.main, transform: 'capitalize', size: '1rem' }, padding: { left: '0.75rem' } }),
+                        this.$render("i-icon", { name: "external-link-alt", fill: Theme.colors.primary.main, width: 16, height: 16 })),
                     this.$render("i-panel", { id: "trollImage" }),
                     this.$render("i-panel", { class: "section" },
                         this.$render("i-panel", { class: "row-item" },
@@ -1292,124 +1293,6 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
     exports.getProjectOwnerSchema = exports.getBuilderSchema = void 0;
     const chainIds = (data_json_1.default.supportedNetworks || []).map(v => v.chainId);
     const networks = chainIds.map(v => { return { chainId: v }; });
-    const theme = {
-        type: 'object',
-        properties: {
-            backgroundColor: {
-                type: 'string',
-                format: 'color'
-            },
-            fontColor: {
-                type: 'string',
-                format: 'color'
-            },
-            primaryButtonBackground: {
-                type: 'string',
-                format: 'color'
-            },
-            primaryButtonHoverBackground: {
-                type: 'string',
-                format: 'color'
-            },
-            primaryButtonDisabledBackground: {
-                type: 'string',
-                format: 'color'
-            }
-        }
-    };
-    const themeUISchema = {
-        type: 'Category',
-        label: 'Theme',
-        elements: [
-            {
-                type: 'VerticalLayout',
-                elements: [
-                    {
-                        type: 'Group',
-                        label: 'Dark',
-                        elements: [
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/backgroundColor'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/fontColor'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/primaryButtonBackground'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/primaryButtonHoverBackground'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/dark/properties/primaryButtonDisabledBackground'
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        type: 'Group',
-                        label: 'Light',
-                        elements: [
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/backgroundColor'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/fontColor'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/primaryButtonBackground'
-                                    },
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/primaryButtonHoverBackground'
-                                    }
-                                ]
-                            },
-                            {
-                                type: 'HorizontalLayout',
-                                elements: [
-                                    {
-                                        type: 'Control',
-                                        scope: '#/properties/light/properties/primaryButtonDisabledBackground'
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    };
     function getBuilderSchema() {
         return {
             dataSchema: {
@@ -1425,6 +1308,7 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
                         required: true,
                         items: {
                             type: 'object',
+                            maxItems: chainIds.length,
                             properties: {
                                 chainId: {
                                     type: 'number',
@@ -1433,9 +1317,7 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
                                 }
                             }
                         }
-                    },
-                    dark: theme,
-                    light: theme
+                    }
                 }
             },
             uiSchema: {
@@ -1464,8 +1346,7 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
                                 ]
                             }
                         ]
-                    },
-                    themeUISchema
+                    }
                 ]
             },
             customControls() {
@@ -1560,11 +1441,14 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
                 position: 'relative',
                 flex: '1 1 0%',
                 borderRadius: '15px',
-                background: Theme.background.main,
+                // background: Theme.background.main, //nostr theme
+                background: Theme.background.default,
                 color: Theme.text.primary,
                 $nest: {
                     '.title-icon': {
                         position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center'
                     },
                 }
             },
@@ -1582,8 +1466,9 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
                 marginTop: '1.5rem',
                 width: '100%',
                 height: '50px',
-                background: Theme.colors.primary.main,
-                color: Theme.colors.primary.contrastText,
+                // background: Theme.colors.primary.main, //nostr theme
+                background: Theme.background.gradient,
+                color: Theme.text.primary,
                 border: 'none',
                 padding: '0.375rem 0.5rem',
                 marginBottom: '1rem',
@@ -1593,8 +1478,12 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
                     }
                 }
             },
+            'i-button.disabled': {
+                background: 'transparent linear-gradient(270deg,#351f52,#552a42) 0% 0% no-repeat padding-box !important'
+            },
             '.text-yellow *': {
-                color: Theme.colors.primary.main,
+                // color: Theme.colors.primary.main, //nostr theme
+                color: Theme.text.secondary, //oswap theme
             },
             'i-icon': {
                 display: 'inline-block',
@@ -1624,7 +1513,7 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
             },
             '.line-middle': {
                 margin: '20px 0',
-                borderTop: `1px solid ${Theme.text.hint}`,
+                borderTop: `1px solid ${Theme.text.primary}`,
             },
             '.section-1': {
                 border: `1px solid ${Theme.text.primary}`,
@@ -1644,7 +1533,8 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
             '.note-burn *': {
                 fontSize: '1.25rem',
                 fontWeight: 'bold',
-                color: Theme.colors.primary.main,
+                // color: Theme.colors.primary.main, //nostr theme
+                color: Theme.text.secondary, //oswap theme
             },
         }
     });
@@ -2079,15 +1969,32 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                         this.tag[prop] = newValue[prop];
                 }
             }
-            if (this.dappContainer)
-                this.dappContainer.setTag(this.tag);
-            this.updateTheme();
+            // if (this.dappContainer)
+            //   this.dappContainer.setTag(this.tag);
+            // this.updateTheme();
+            this.initOswapTheme();
             this.resizeUI();
         }
         updateStyle(name, value) {
             value ?
                 this.style.setProperty(name, value) :
                 this.style.removeProperty(name);
+        }
+        initOswapTheme() {
+            const oswapTheme = {
+                fontColor: '#fff',
+                backgroundColor: '#0c1234',
+                buttonBackgroundColor: '#f15e61',
+                buttonFontColor: '#fff',
+                modalColor: '#252a48'
+            };
+            this.tag['light'] = oswapTheme;
+            this.tag['dark'] = oswapTheme;
+            if (this.dappContainer)
+                this.dappContainer.setTag(this.tag);
+            this.dappContainer.style.setProperty('--text-secondary', '#f7d063');
+            this.dappContainer.style.setProperty('--background-default', '#252a48');
+            this.dappContainer.style.setProperty('--background-gradient', 'transparent linear-gradient(90deg, #AC1D78 0%, #E04862 100%) 0% 0% no-repeat padding-box');
         }
         updateTheme() {
             const themeVar = this.dappContainer?.theme || 'light';
@@ -2106,6 +2013,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         async init() {
             super.init();
+            this.initOswapTheme();
             this.state = new index_6.State(data_json_2.default);
             this.chainId = this.state.getChainId();
             const lazyLoad = this.getAttribute('lazyLoad', true, false);
@@ -2370,7 +2278,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.currentDataCard = item;
             this.lbMintTitle.caption = `Mint ${item.tier} Troll`;
             this.lbMintStakeAmountText.caption = item.stakeAmountText;
-            this.lbMintStakeAmount.caption = item.stakeAmount;
+            this.lbMintStakeAmount.caption = (0, index_7.formatNumber)(item.stakeAmount);
             this.lbMintRewardsBoost.caption = item.rewardsBoost;
             this.lbMintMonthlyReward.caption = item.monthlyReward;
             const stakeTokenSymbol = item.stakeToken?.symbol || '';
@@ -2380,10 +2288,10 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             }
             let tokenBalances = scom_token_list_2.tokenStore.getTokenBalancesByChainId(this.chainId) || {};
             let tokenBalance = tokenBalances[item.stakeToken.address.toLowerCase()];
-            this.lbTokenBalance.caption = (0, index_7.formatNumber)(tokenBalance, 4);
+            this.lbTokenBalance.caption = (0, index_7.formatNumber)(tokenBalance);
             this.ImageMintStakeToken.url = scom_token_list_2.assets.tokenPath(item.stakeToken, this.chainId);
             this.lbMintStakeToken.caption = stakeTokenSymbol;
-            this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${item.stakeAmount} of ${stakeTokenSymbol}.`;
+            this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${(0, index_7.formatNumber)(item.stakeAmount)} of ${stakeTokenSymbol}.`;
             this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
             await this.initApprovalModelAction(item);
             this.approvalModelAction.checkAllowance(item.stakeToken, new eth_wallet_5.BigNumber(item.totalPayAmount).toFixed());
@@ -2472,13 +2380,13 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                 this.$render("i-panel", { class: "bg-img" },
                                     this.$render("i-panel", { class: "title-box" },
                                         this.$render("i-icon", { class: "icon-back pointer", height: 20, width: 20, name: "arrow-left", fill: Theme.text.primary, onClick: this.handleBack }),
-                                        this.$render("i-label", { id: "lbMintTitle", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
+                                        this.$render("i-label", { id: "lbMintTitle", font: { color: Theme.text.secondary, size: '1.4rem', bold: true, transform: 'capitalize' } })),
                                     this.$render("i-panel", { class: "line-middle" }),
                                     this.$render("i-panel", { class: "section" },
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
                                                 this.$render("i-label", { caption: "Stake Amount" })),
-                                            this.$render("i-label", { id: "lbMintStakeAmountText", caption: "50,000 OSWAP", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
+                                            this.$render("i-label", { id: "lbMintStakeAmountText", caption: "50,000 OSWAP", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
                                                 this.$render("i-label", { caption: "Rewards Boost" }),
@@ -2486,7 +2394,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                                         content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
                                                         placement: 'right'
                                                     } })),
-                                            this.$render("i-label", { id: "lbMintRewardsBoost", caption: "5%", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
+                                            this.$render("i-label", { id: "lbMintRewardsBoost", caption: "5%", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
                                                 this.$render("i-label", { caption: "Monthly Reward" }),
@@ -2494,11 +2402,11 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                                         content: 'The Monthly Reward will be distributed at the end of each month.',
                                                         placement: 'right'
                                                     } })),
-                                            this.$render("i-label", { id: "lbMintMonthlyReward", caption: "5%", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
+                                            this.$render("i-label", { id: "lbMintMonthlyReward", caption: "5%", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
                                                 this.$render("i-label", { caption: "Flash Sales Inclusion" })),
-                                            this.$render("i-label", { id: "lbMintFlashSales", caption: "Periodic", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
+                                            this.$render("i-label", { id: "lbMintFlashSales", caption: "Periodic", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
                                                 this.$render("i-label", { caption: "Mint Fee" }),
@@ -2506,15 +2414,15 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                                         content: 'The mint fee covers the transaction cost on using Chainlink Verifiable Random Function.',
                                                         placement: 'right'
                                                     } })),
-                                            this.$render("i-label", { id: "lbMintFee", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
+                                            this.$render("i-label", { id: "lbMintFee", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "section-1" },
                                             this.$render("i-hstack", { gap: 4, margin: { bottom: '0.75rem' }, verticalAlignment: "center", horizontalAlignment: "space-between" },
                                                 this.$render("i-label", { caption: "Stake Amount" }),
                                                 this.$render("i-hstack", { gap: 4, verticalAlignment: "center", horizontalAlignment: "end" },
-                                                    this.$render("i-label", { font: { color: Theme.colors.primary.main, size: '1rem' }, caption: "Balance: " }),
-                                                    this.$render("i-label", { id: "lbTokenBalance", font: { color: Theme.colors.primary.main, size: '1rem' } }))),
+                                                    this.$render("i-label", { font: { color: Theme.text.secondary, size: '1rem' }, caption: "Balance: " }),
+                                                    this.$render("i-label", { id: "lbTokenBalance", font: { color: Theme.text.secondary, size: '1rem' } }))),
                                             this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "space-between" },
-                                                this.$render("i-label", { id: "lbMintStakeAmount", font: { color: Theme.colors.primary.main, size: '1.2rem' } }),
+                                                this.$render("i-label", { id: "lbMintStakeAmount", font: { color: Theme.text.secondary, size: '1.2rem' } }),
                                                 this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "end" },
                                                     this.$render("i-image", { id: "ImageMintStakeToken", width: 20, class: "flex", margin: { right: 4 }, url: assets_4.default.fullPath('img/swap/openswap.png') }),
                                                     this.$render("i-label", { id: "lbMintStakeToken", caption: "OSWAP" })))),

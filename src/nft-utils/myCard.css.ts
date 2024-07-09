@@ -18,7 +18,8 @@ export const myCardStyle = Styles.style({
       height: '50px',
       border: 'none',
       padding: '0.375rem 0.5rem',
-      color: Theme.colors.primary.contrastText
+      background: Theme.background.gradient, //oswap theme
+      color: Theme.text.primary,
     },
     '.card-section': {
       borderRadius: '12px',
