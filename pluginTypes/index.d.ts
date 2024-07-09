@@ -406,6 +406,7 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                     required: boolean;
                     items: {
                         type: string;
+                        maxItems: number;
                         properties: {
                             chainId: {
                                 type: string;
@@ -415,78 +416,11 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                         };
                     };
                 };
-                dark: {
-                    type: string;
-                    properties: {
-                        backgroundColor: {
-                            type: string;
-                            format: string;
-                        };
-                        fontColor: {
-                            type: string;
-                            format: string;
-                        };
-                        primaryButtonBackground: {
-                            type: string;
-                            format: string;
-                        };
-                        primaryButtonHoverBackground: {
-                            type: string;
-                            format: string;
-                        };
-                        primaryButtonDisabledBackground: {
-                            type: string;
-                            format: string;
-                        };
-                    };
-                };
-                light: {
-                    type: string;
-                    properties: {
-                        backgroundColor: {
-                            type: string;
-                            format: string;
-                        };
-                        fontColor: {
-                            type: string;
-                            format: string;
-                        };
-                        primaryButtonBackground: {
-                            type: string;
-                            format: string;
-                        };
-                        primaryButtonHoverBackground: {
-                            type: string;
-                            format: string;
-                        };
-                        primaryButtonDisabledBackground: {
-                            type: string;
-                            format: string;
-                        };
-                    };
-                };
             };
         };
         uiSchema: {
             type: string;
-            elements: ({
-                type: string;
-                label: string;
-                elements: {
-                    type: string;
-                    elements: {
-                        type: string;
-                        label: string;
-                        elements: {
-                            type: string;
-                            elements: {
-                                type: string;
-                                scope: string;
-                            }[];
-                        }[];
-                    }[];
-                }[];
-            } | {
+            elements: {
                 type: string;
                 label: string;
                 elements: {
@@ -505,7 +439,7 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
                         };
                     })[];
                 }[];
-            })[];
+            }[];
         };
         customControls(): {
             '#/properties/networks/properties/chainId': {
@@ -667,6 +601,7 @@ declare module "@scom/oswap-nft-widget" {
         private updateTag;
         private setTag;
         private updateStyle;
+        private initOswapTheme;
         private updateTheme;
         private refreshUI;
         private isEmptyData;

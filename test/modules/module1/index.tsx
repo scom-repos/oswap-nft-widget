@@ -4,12 +4,6 @@ import { INetwork } from '@ijstech/eth-wallet';
 import getNetworkList from '@scom/scom-network-list';
 import ScomOswapNftWidget from '@scom/oswap-nft-widget';
 
-const Theme = Styles.Theme.currentTheme;
-Theme.background.main = '#2c2626';
-Theme.background.default = '#0c1234';
-Theme.text.primary = '#d3c0c0 ';
-Theme.input.background = '#272F39';
-Theme.input.fontColor = '#ffffff4d';
 @customModule
 export default class Module1 extends Module {
   private nftWidget: ScomOswapNftWidget;
@@ -55,7 +49,7 @@ export default class Module1 extends Module {
     this.nftWidget.style.width = '100%';
     const dapp: any = this.nftWidget.querySelector('i-scom-dapp-container');
     if (dapp) {
-      dapp.style.setProperty('--background-default', Theme.background.default);
+      dapp.style.setProperty('--background-modal', '#252a48');
     }
   }
 

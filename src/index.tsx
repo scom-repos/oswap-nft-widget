@@ -480,9 +480,10 @@ export default class OswapNftWidget extends Module {
           this.tag[prop] = newValue[prop];
       }
     }
-    if (this.dappContainer)
-      this.dappContainer.setTag(this.tag);
-    this.updateTheme();
+    // if (this.dappContainer)
+    //   this.dappContainer.setTag(this.tag);
+    // this.updateTheme();
+    this.initOswapTheme();
     this.resizeUI();
   }
 
@@ -490,6 +491,22 @@ export default class OswapNftWidget extends Module {
     value ?
       this.style.setProperty(name, value) :
       this.style.removeProperty(name);
+  }
+
+  private initOswapTheme() {
+    const oswapTheme = {
+      fontColor: '#fff',
+      backgroundColor: '#0c1234',
+      buttonBackgroundColor: '#f15e61',
+      buttonFontColor: '#fff',
+      modalColor: '#252a48'
+    }
+    this.tag['light'] = oswapTheme;
+    this.tag['dark'] = oswapTheme;
+    if (this.dappContainer) this.dappContainer.setTag(this.tag);
+    this.dappContainer.style.setProperty('--text-secondary', '#f7d063');
+    this.dappContainer.style.setProperty('--background-default', '#252a48');
+    this.dappContainer.style.setProperty('--background-gradient', 'transparent linear-gradient(90deg, #AC1D78 0%, #E04862 100%) 0% 0% no-repeat padding-box');
   }
 
   private updateTheme() {
@@ -512,6 +529,7 @@ export default class OswapNftWidget extends Module {
 
   async init() {
     super.init();
+    this.initOswapTheme();
     this.state = new State(configData);
     this.chainId = this.state.getChainId();
     const lazyLoad = this.getAttribute('lazyLoad', true, false);
@@ -812,7 +830,7 @@ export default class OswapNftWidget extends Module {
     this.currentDataCard = item;
     this.lbMintTitle.caption = `Mint ${item.tier} Troll`;
     this.lbMintStakeAmountText.caption = item.stakeAmountText;
-    this.lbMintStakeAmount.caption = item.stakeAmount;
+    this.lbMintStakeAmount.caption = formatNumber(item.stakeAmount);
     this.lbMintRewardsBoost.caption = item.rewardsBoost;
     this.lbMintMonthlyReward.caption = item.monthlyReward;
     const stakeTokenSymbol = item.stakeToken?.symbol || '';
@@ -822,10 +840,10 @@ export default class OswapNftWidget extends Module {
     }
     let tokenBalances = tokenStore.getTokenBalancesByChainId(this.chainId) || {};
     let tokenBalance = tokenBalances[item.stakeToken.address.toLowerCase()];
-    this.lbTokenBalance.caption = formatNumber(tokenBalance, 4);
+    this.lbTokenBalance.caption = formatNumber(tokenBalance);
     this.ImageMintStakeToken.url = tokenAssets.tokenPath(item.stakeToken as ITokenObject, this.chainId);
     this.lbMintStakeToken.caption = stakeTokenSymbol;
-    this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${item.stakeAmount} of ${stakeTokenSymbol}.`;
+    this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${formatNumber(item.stakeAmount)} of ${stakeTokenSymbol}.`;
     this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
     await this.initApprovalModelAction(item);
     this.approvalModelAction.checkAllowance(item.stakeToken, new BigNumber(item.totalPayAmount).toFixed());
@@ -934,7 +952,7 @@ export default class OswapNftWidget extends Module {
                 <i-panel class="bg-img">
                   <i-panel class="title-box">
                     <i-icon class="icon-back pointer" height={20} width={20} name="arrow-left" fill={Theme.text.primary} onClick={this.handleBack} />
-                    <i-label id="lbMintTitle" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
+                    <i-label id="lbMintTitle" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true, transform: 'capitalize' }} />
                   </i-panel>
                   <i-panel class="line-middle" />
                   <i-panel class="section">
@@ -942,7 +960,7 @@ export default class OswapNftWidget extends Module {
                       <i-panel class="title-icon">
                         <i-label caption="Stake Amount" />
                       </i-panel>
-                      <i-label id="lbMintStakeAmountText" caption="50,000 OSWAP" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
+                      <i-label id="lbMintStakeAmountText" caption="50,000 OSWAP" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
                     </i-panel>
 
                     <i-panel class="row-line">
@@ -958,7 +976,7 @@ export default class OswapNftWidget extends Module {
                           }}
                         />
                       </i-panel>
-                      <i-label id="lbMintRewardsBoost" caption="5%" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
+                      <i-label id="lbMintRewardsBoost" caption="5%" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
                     </i-panel>
 
                     <i-panel class="row-line">
@@ -974,13 +992,13 @@ export default class OswapNftWidget extends Module {
                           }}
                         />
                       </i-panel>
-                      <i-label id="lbMintMonthlyReward" caption="5%" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
+                      <i-label id="lbMintMonthlyReward" caption="5%" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
                     </i-panel>
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
                         <i-label caption="Flash Sales Inclusion" />
                       </i-panel>
-                      <i-label id="lbMintFlashSales" caption="Periodic" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
+                      <i-label id="lbMintFlashSales" caption="Periodic" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
                     </i-panel>
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
@@ -995,18 +1013,18 @@ export default class OswapNftWidget extends Module {
                           }}
                         />
                       </i-panel>
-                      <i-label id="lbMintFee" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
+                      <i-label id="lbMintFee" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
                     </i-panel>
                     <i-panel class="section-1">
                       <i-hstack gap={4} margin={{ bottom: '0.75rem' }} verticalAlignment="center" horizontalAlignment="space-between">
                         <i-label caption="Stake Amount" />
                         <i-hstack gap={4} verticalAlignment="center" horizontalAlignment="end">
-                          <i-label font={{ color: Theme.colors.primary.main, size: '1rem' }} caption="Balance: " />
-                          <i-label id="lbTokenBalance" font={{ color: Theme.colors.primary.main, size: '1rem' }} />
+                          <i-label font={{ color: Theme.text.secondary, size: '1rem' }} caption="Balance: " />
+                          <i-label id="lbTokenBalance" font={{ color: Theme.text.secondary, size: '1rem' }} />
                         </i-hstack>
                       </i-hstack>
                       <i-hstack verticalAlignment="center" horizontalAlignment="space-between">
-                        <i-label id="lbMintStakeAmount" font={{ color: Theme.colors.primary.main, size: '1.2rem' }} />
+                        <i-label id="lbMintStakeAmount" font={{ color: Theme.text.secondary, size: '1.2rem' }} />
                         <i-hstack verticalAlignment="center" horizontalAlignment="end">
                           <i-image
                             id="ImageMintStakeToken"

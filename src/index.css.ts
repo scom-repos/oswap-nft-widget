@@ -61,11 +61,14 @@ export const nftStyle = Styles.style({
       position: 'relative',
       flex: '1 1 0%',
       borderRadius: '15px',
-      background: Theme.background.main,
+      // background: Theme.background.main, //nostr theme
+      background: Theme.background.default, //oswap theme
       color: Theme.text.primary,
       $nest: {
         '.title-icon': {
           position: 'relative',
+          display: 'flex',
+          alignItems: 'center'
         },
       }
     },
@@ -83,8 +86,9 @@ export const nftStyle = Styles.style({
       marginTop: '1.5rem',
       width: '100%',
       height: '50px',
-      background: Theme.colors.primary.main,
-      color: Theme.colors.primary.contrastText,
+      // background: Theme.colors.primary.main, //nostr theme
+      background: Theme.background.gradient, //oswap theme
+      color: Theme.text.primary,
       border: 'none',
       padding: '0.375rem 0.5rem',
       marginBottom: '1rem',
@@ -94,8 +98,12 @@ export const nftStyle = Styles.style({
         }
       }
     },
+    'i-button.disabled': {
+      background: 'transparent linear-gradient(270deg,#351f52,#552a42) 0% 0% no-repeat padding-box !important'
+    },
     '.text-yellow *': {
-      color: Theme.colors.primary.main,
+      // color: Theme.colors.primary.main, //nostr theme
+      color: Theme.text.secondary, //oswap theme
     },
     'i-icon': {
       display: 'inline-block',
@@ -126,7 +134,7 @@ export const nftStyle = Styles.style({
     },
     '.line-middle': {
       margin: '20px 0',
-      borderTop: `1px solid ${Theme.text.hint}`,
+      borderTop: `1px solid ${Theme.text.primary}`,
     },
     '.section-1': {
       border: `1px solid ${Theme.text.primary}`,
@@ -146,7 +154,8 @@ export const nftStyle = Styles.style({
     '.note-burn *': {
       fontSize: '1.25rem',
       fontWeight: 'bold',
-      color: Theme.colors.primary.main,
+      // color: Theme.colors.primary.main, //nostr theme
+      color: Theme.text.secondary, //oswap theme
     },
   }
 })

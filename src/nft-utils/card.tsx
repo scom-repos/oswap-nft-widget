@@ -167,8 +167,8 @@ export class NftCard extends Module {
             margin={{ top: '0.25rem', bottom: '0.5rem' }}
             onClick={this.openLink}
           >
-            <i-label id="lbViewContract" caption="View contract" font={{ transform: 'capitalize', size: '1rem' }} padding={{ left: '0.75rem' }} class="text-yellow" />
-            <i-icon name="external-link-alt" fill={Theme.colors.primary.main} width={16} height={16} class="text-yellow" />
+            <i-label id="lbViewContract" caption="View contract" font={{ color: Theme.colors.primary.main, transform: 'capitalize', size: '1rem' }} padding={{ left: '0.75rem' }} />
+            <i-icon name="external-link-alt" fill={Theme.colors.primary.main} width={16} height={16} />
           </i-hstack>
           {/* <i-panel id="pnlSlots" class="available-box">
             <i-label caption="Available Slots" class="label" />
