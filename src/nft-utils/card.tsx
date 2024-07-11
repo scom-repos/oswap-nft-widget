@@ -38,6 +38,7 @@ export class NftCard extends Module {
   private lbViewContract: Label;
   private btnHandleStake: Button;
   private carouselSlider: CarouselSlider;
+  onConnectWallet: () => void;
   onStake: () => void;
   onBurn: (item: IDataMyCard) => void;
   private _state: State;
@@ -62,10 +63,6 @@ export class NftCard extends Module {
   set cardData(value: IDataCard) {
     this._cardData = value;
     this.renderCard();
-  }
-
-  private capitalizeFirstLetter(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   private async renderCard() {
@@ -131,8 +128,8 @@ export class NftCard extends Module {
 
   private updateBtn() {
     if (!isClientWalletConnected()) {
-      this.btnHandleStake.caption = 'No Wallet';
-      this.btnHandleStake.enabled = false;
+      this.btnHandleStake.caption = 'Connect Wallet';
+      this.btnHandleStake.enabled = true;
     } else {
       const isSoldedOut = this.cardData?.slot <= 0;
       this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
@@ -141,7 +138,11 @@ export class NftCard extends Module {
   }
 
   private handleStake() {
-    this.onStake();
+    if (!isClientWalletConnected()) {
+      this.onConnectWallet();
+    } else {
+      this.onStake();
+    }
   }
 
   private openLink() {

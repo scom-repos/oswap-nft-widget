@@ -197,6 +197,7 @@ async function fetchUserNft(state: State, nftInfo: NftInfo | NftInfoStore): Prom
   let nftContract = new Contracts.TrollNFT(wallet, nftInfo.address);
   let token = nftInfo.token;
   let userNftCount = (await nftContract.balanceOf(wallet.address)).toNumber();
+  if (!userNftCount) return [];
   let IdCalls: IMulticallContractCall[] = [];
   for (let i = 0; i < userNftCount; i++) {
     IdCalls.push({

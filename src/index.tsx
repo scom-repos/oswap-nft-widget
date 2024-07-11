@@ -23,6 +23,8 @@ import {
   OswapNfts,
   OswapNftsType,
   nftImagePlaceHolder,
+  getChainNativeToken,
+  stakeTokenMap,
 } from './store/index';
 import {
   formatNumber,
@@ -119,7 +121,7 @@ export default class OswapNftWidget extends Module {
   private dataCards: IDataCard[];
   private ImageBurn: Image;
   private currentDataMyCard: IDataMyCard;
-  private initializedState: { chainId: number, connected: boolean, fetching: boolean };
+  private initializedState: { chainId: number, address: string, connected: boolean, fetching: boolean };
 
   private _data: IOswapNftWidgetData = {
     defaultChainId: 0,
@@ -625,7 +627,8 @@ export default class OswapNftWidget extends Module {
       onToBeApproved: async (token: ITokenObject) => {
         this.btnApprove.visible = true;
         this.btnMint.visible = false;
-        this.btnApprove.caption = (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
+        const caption = !isClientWalletConnected() ? 'Connect Wallet' : (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
+        this.btnApprove.caption = caption;
         this.btnApprove.enabled = true;
         this.btnMint.enabled = false;
       },
@@ -669,7 +672,12 @@ export default class OswapNftWidget extends Module {
   }
 
   private async updateBalances() {
-    await tokenStore.updateTokenBalancesByChainId(this.state.getChainId());
+    const nativeToken = getChainNativeToken(this.chainId);
+    const stakeToken: ITokenObject = stakeTokenMap[this.chainId];
+    const tokens: ITokenObject[] = [];
+    if (nativeToken) tokens.push(nativeToken);
+    if (stakeToken) tokens.push(stakeToken);
+    await tokenStore.updateTokenBalancesByChainId(this.state.getChainId(), tokens.length ? tokens : undefined);
   }
 
   private async switchNetworkByWallet() {
@@ -702,12 +710,19 @@ export default class OswapNftWidget extends Module {
     this.updateButtons();
     const currentChainId = this.state.getChainId();
     const isConnected = isClientWalletConnected();
-    const { chainId, connected, fetching } = this.initializedState || {};
-    if (chainId === currentChainId && connected === isConnected && fetching === true) return;
+    const walletAddress = this.state.getRpcWallet()?.address;
+    const { chainId, connected, address, fetching } = this.initializedState || {};
+    if (chainId === currentChainId && connected === isConnected && fetching === true && address === walletAddress) return;
     this.initializedState = {
       chainId: currentChainId,
       connected: isConnected,
+      address: walletAddress,
       fetching: true
+    }
+    if ((!isConnected || (address && address !== walletAddress)) && !this.mint.visible) {
+      this.mint.visible = true;
+      this.minting.visible = false;
+      this.burning.visible = false;
     }
     await this.renderCards();
     this.updateButtons();
@@ -780,6 +795,7 @@ export default class OswapNftWidget extends Module {
       column.appendChild(nftCard);
       this.cardRow.appendChild(column);
       nftCard.state = this.state;
+      nftCard.onConnectWallet = () => this.switchNetworkByWallet();
       nftCard.onStake = () => this.onStake(item);
       nftCard.onBurn = (userNFT: IDataMyCard) => this.handleBurn(userNFT);
       nftCard.cardData = item;
@@ -812,9 +828,10 @@ export default class OswapNftWidget extends Module {
 
   private updateButtons() {
     if (this.targetChainId && this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
-      this.btnApprove.caption = 'Switch Network';
-      this.btnBurn.caption = 'Switch Network';
-      this.btnMint.caption = 'Switch Network';
+      const caption = !isClientWalletConnected() ? 'Connect Wallet' : 'Switch Network';
+      this.btnApprove.caption = caption;
+      this.btnBurn.caption = caption;
+      this.btnMint.caption = caption;
     } else {
       this.btnApprove.caption = `Approve ${this.currentDataCard?.stakeToken?.symbol || ''}`;
       this.btnBurn.caption = 'Burn';
