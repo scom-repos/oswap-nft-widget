@@ -10,12 +10,6 @@ export interface IExtendedNetwork extends INetwork {
   isTestnet?: boolean;
 };
 
-export const enum EventId {
-  IsWalletConnected = 'isWalletConnected',
-  IsWalletDisconnected = 'IsWalletDisconnected',
-  Paid = 'Paid'
-}
-
 export {
   formatNumber,
   formatNumberWithSeparators,

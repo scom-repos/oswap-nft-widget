@@ -130,11 +130,6 @@ declare module "@scom/oswap-nft-widget/global/index.ts" {
         explorerAddressUrl?: string;
         isTestnet?: boolean;
     }
-    export const enum EventId {
-        IsWalletConnected = "isWalletConnected",
-        IsWalletDisconnected = "IsWalletDisconnected",
-        Paid = "Paid"
-    }
     export { formatNumber, formatNumberWithSeparators, DefaultDateTimeFormat, DefaultDateFormat, SITE_ENV, showResultMessage, } from "@scom/oswap-nft-widget/global/helper.ts";
     export { registerSendTxEvents, } from "@scom/oswap-nft-widget/global/common.ts";
 }
@@ -345,6 +340,7 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         private lbViewContract;
         private btnHandleStake;
         private carouselSlider;
+        onConnectWallet: () => void;
         onStake: () => void;
         onBurn: (item: IDataMyCard) => void;
         private _state;
@@ -353,7 +349,6 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.tsx" {
         set state(value: State);
         get cardData(): IDataCard;
         set cardData(value: IDataCard);
-        private capitalizeFirstLetter;
         private renderCard;
         private updateBtn;
         private handleStake;

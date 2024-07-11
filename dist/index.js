@@ -906,9 +906,6 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
             this._cardData = value;
             this.renderCard();
         }
-        capitalizeFirstLetter(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
         async renderCard() {
             const value = this.cardData;
             this.trollImage.clearInnerHTML();
@@ -976,8 +973,8 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
         }
         updateBtn() {
             if (!(0, index_3.isClientWalletConnected)()) {
-                this.btnHandleStake.caption = 'No Wallet';
-                this.btnHandleStake.enabled = false;
+                this.btnHandleStake.caption = 'Connect Wallet';
+                this.btnHandleStake.enabled = true;
             }
             else {
                 const isSoldedOut = this.cardData?.slot <= 0;
@@ -986,7 +983,12 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
             }
         }
         handleStake() {
-            this.onStake();
+            if (!(0, index_3.isClientWalletConnected)()) {
+                this.onConnectWallet();
+            }
+            else {
+                this.onStake();
+            }
         }
         openLink() {
             const chainId = this.state.getChainId();
@@ -1210,6 +1212,8 @@ define("@scom/oswap-nft-widget/nft-utils/nftAPI.ts", ["require", "exports", "@ij
         let nftContract = new oswap_troll_nft_contract_1.Contracts.TrollNFT(wallet, nftInfo.address);
         let token = nftInfo.token;
         let userNftCount = (await nftContract.balanceOf(wallet.address)).toNumber();
+        if (!userNftCount)
+            return [];
         let IdCalls = [];
         for (let i = 0; i < userNftCount; i++) {
             IdCalls.push({
@@ -2081,7 +2085,8 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 onToBeApproved: async (token) => {
                     this.btnApprove.visible = true;
                     this.btnMint.visible = false;
-                    this.btnApprove.caption = (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
+                    const caption = !(0, index_6.isClientWalletConnected)() ? 'Connect Wallet' : (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
+                    this.btnApprove.caption = caption;
                     this.btnApprove.enabled = true;
                     this.btnMint.enabled = false;
                 },
@@ -2124,7 +2129,14 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             }, item.address);
         }
         async updateBalances() {
-            await scom_token_list_2.tokenStore.updateTokenBalancesByChainId(this.state.getChainId());
+            const nativeToken = (0, index_6.getChainNativeToken)(this.chainId);
+            const stakeToken = index_6.stakeTokenMap[this.chainId];
+            const tokens = [];
+            if (nativeToken)
+                tokens.push(nativeToken);
+            if (stakeToken)
+                tokens.push(stakeToken);
+            await scom_token_list_2.tokenStore.updateTokenBalancesByChainId(this.state.getChainId(), tokens.length ? tokens : undefined);
         }
         async switchNetworkByWallet() {
             if (this.mdWallet) {
@@ -2150,14 +2162,21 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.updateButtons();
             const currentChainId = this.state.getChainId();
             const isConnected = (0, index_6.isClientWalletConnected)();
-            const { chainId, connected, fetching } = this.initializedState || {};
-            if (chainId === currentChainId && connected === isConnected && fetching === true)
+            const walletAddress = this.state.getRpcWallet()?.address;
+            const { chainId, connected, address, fetching } = this.initializedState || {};
+            if (chainId === currentChainId && connected === isConnected && fetching === true && address === walletAddress)
                 return;
             this.initializedState = {
                 chainId: currentChainId,
                 connected: isConnected,
+                address: walletAddress,
                 fetching: true
             };
+            if ((!isConnected || (address && address !== walletAddress)) && !this.mint.visible) {
+                this.mint.visible = true;
+                this.minting.visible = false;
+                this.burning.visible = false;
+            }
             await this.renderCards();
             this.updateButtons();
             this.initializedState.fetching = false;
@@ -2228,6 +2247,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 column.appendChild(nftCard);
                 this.cardRow.appendChild(column);
                 nftCard.state = this.state;
+                nftCard.onConnectWallet = () => this.switchNetworkByWallet();
                 nftCard.onStake = () => this.onStake(item);
                 nftCard.onBurn = (userNFT) => this.handleBurn(userNFT);
                 nftCard.cardData = item;
@@ -2260,9 +2280,10 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         updateButtons() {
             if (this.targetChainId && this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
-                this.btnApprove.caption = 'Switch Network';
-                this.btnBurn.caption = 'Switch Network';
-                this.btnMint.caption = 'Switch Network';
+                const caption = !(0, index_6.isClientWalletConnected)() ? 'Connect Wallet' : 'Switch Network';
+                this.btnApprove.caption = caption;
+                this.btnBurn.caption = caption;
+                this.btnMint.caption = caption;
             }
             else {
                 this.btnApprove.caption = `Approve ${this.currentDataCard?.stakeToken?.symbol || ''}`;
