@@ -1384,8 +1384,15 @@ define("@scom/oswap-nft-widget/formSchema.ts", ["require", "exports", "@scom/sco
 define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/components"], function (require, exports, components_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.listMediaStyles = exports.nftStyle_360 = exports.nftStyle_480 = exports.nftStyle_767 = exports.nftStyle_1100 = exports.nftDefaultStyle = exports.nftStyle = void 0;
+    exports.listMediaStyles = exports.nftStyle_360 = exports.nftStyle_480 = exports.nftStyle_767 = exports.nftStyle_1100 = exports.nftDefaultStyle = exports.nftStyle = exports.dappContainerStyle = void 0;
     const Theme = components_7.Styles.Theme.ThemeVars;
+    exports.dappContainerStyle = components_7.Styles.style({
+        $nest: {
+            '#switchTheme': {
+                display: 'none'
+            }
+        }
+    });
     exports.nftStyle = components_7.Styles.style({
         minHeight: '600px',
         paddingTop: '1rem',
@@ -2386,7 +2393,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             await (0, index_8.burnNFT)(this.currentDataMyCard.address, this.currentDataMyCard.trollNumber);
         }
         render() {
-            return (this.$render("i-scom-dapp-container", { id: "dappContainer" },
+            return (this.$render("i-scom-dapp-container", { id: "dappContainer", class: index_css_1.dappContainerStyle },
                 this.$render("i-panel", { class: index_css_1.nftStyle },
                     this.$render("i-panel", { id: "mint", class: "widget" },
                         this.$render("i-panel", { padding: { left: '1rem', right: '1rem' } },

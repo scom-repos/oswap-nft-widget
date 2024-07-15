@@ -2,6 +2,14 @@ import { Styles } from '@ijstech/components';
 import Assets from './assets';
 const Theme = Styles.Theme.ThemeVars;
 
+export const dappContainerStyle = Styles.style({
+  $nest: {
+    '#switchTheme': {
+      display: 'none'
+    }
+  }
+})
+
 export const nftStyle = Styles.style({
   minHeight: '600px',
   paddingTop: '1rem',
