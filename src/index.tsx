@@ -40,7 +40,7 @@ import { tokenStore, assets as tokenAssets, ITokenObject } from '@scom/scom-toke
 import ScomWalletModal, { IWalletPlugin } from '@scom/scom-wallet-modal';
 import { NftCard, fetchNftInfoByTier, mintNFT, burnNFT, getCommissionRate, NftInfo } from './nft-utils/index';
 import { getBuilderSchema, getProjectOwnerSchema } from './formSchema';
-import { nftStyle, listMediaStyles, nftDefaultStyle } from './index.css';
+import { nftStyle, listMediaStyles, nftDefaultStyle, dappContainerStyle } from './index.css';
 import configData from './data.json';
 
 const Theme = Styles.Theme.ThemeVars;
@@ -943,7 +943,7 @@ export default class OswapNftWidget extends Module {
 
   render() {
     return (
-      <i-scom-dapp-container id="dappContainer">
+      <i-scom-dapp-container id="dappContainer" class={dappContainerStyle}>
         <i-panel class={nftStyle}>
           <i-panel id="mint" class="widget">
             <i-panel padding={{ left: '1rem', right: '1rem' }}>

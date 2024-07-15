@@ -448,6 +448,7 @@ declare module "@scom/oswap-nft-widget/formSchema.ts" {
 }
 /// <amd-module name="@scom/oswap-nft-widget/index.css.ts" />
 declare module "@scom/oswap-nft-widget/index.css.ts" {
+    export const dappContainerStyle: string;
     export const nftStyle: string;
     export const nftDefaultStyle: string;
     export const nftStyle_1100: string;
