@@ -1,12 +1,14 @@
-import { Module, customModule, Container, VStack, Styles, application } from '@ijstech/components';
+import { Module, customModule, Container, application } from '@ijstech/components';
 import { getMulticallInfoList } from '@scom/scom-multicall';
 import { INetwork } from '@ijstech/eth-wallet';
 import getNetworkList from '@scom/scom-network-list';
 import ScomOswapNftWidget from '@scom/oswap-nft-widget';
+import ScomWidgetTest from '@scom/scom-widget-test';
 
 @customModule
 export default class Module1 extends Module {
   private nftWidget: ScomOswapNftWidget;
+  private widgetModule: ScomWidgetTest;
 
   constructor(parent?: Container, options?: any) {
     super(parent, options);
@@ -44,24 +46,41 @@ export default class Module1 extends Module {
     return networkMap;
   }
 
+  private async onShowConfig() {
+    const editor = this.nftWidget.getConfigurators().find(v => v.target === 'Editor');
+    const widgetData = await editor.getData();
+    if (!this.widgetModule) {
+      this.widgetModule = await ScomWidgetTest.create({
+        widgetName: 'oswap-nft-widget',
+        onConfirm: (data: any, tag: any) => {
+          editor.setData(data);
+          editor.setTag(tag);
+          this.widgetModule.closeModal();
+        }
+      });
+    }
+    this.widgetModule.openModal({
+      width: '90%',
+      maxWidth: '90rem',
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+      closeOnBackdropClick: true,
+      closeIcon: null
+    });
+    this.widgetModule.show(widgetData);
+  }
+
   async init() {
     super.init();
-    this.nftWidget.style.width = '100%';
-    const dapp: any = this.nftWidget.querySelector('i-scom-dapp-container');
-    if (dapp) {
-      dapp.style.setProperty('--background-modal', '#252a48');
-    }
   }
 
   render() {
     return (
       <i-panel>
-        <i-hstack
-          id="mainStack"
-          margin={{ top: '1rem', left: '1rem' }}
-          justifyContent="center"
-          width="100%"
+        <i-vstack
+          margin={{ top: '1rem', left: '1rem', right: '1rem' }}
+          gap="1rem"
         >
+          <i-button caption="Config" onClick={this.onShowConfig} width={160} padding={{ top: 5, bottom: 5 }} margin={{ left: 'auto', right: 20 }} font={{ color: '#fff' }} />
           <i-oswap-nft-widget
             id="nftWidget"
             tier="hungry"
@@ -77,7 +96,7 @@ export default class Module1 extends Module {
               }
             ]}
           />
-        </i-hstack>
+        </i-vstack>
       </i-panel>
     )
   }
