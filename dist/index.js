@@ -1613,11 +1613,12 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
         1100: exports.nftStyle_1100
     };
 });
-define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts"], function (require, exports, components_8, eth_wallet_5, index_6, index_7, assets_4, scom_commission_fee_setup_1, scom_token_list_2, index_8, formSchema_1, index_css_1, data_json_2) {
+define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts", "@scom/scom-blocknote-sdk"], function (require, exports, components_8, eth_wallet_5, index_6, index_7, assets_4, scom_commission_fee_setup_1, scom_token_list_2, index_8, formSchema_1, index_css_1, data_json_2, scom_blocknote_sdk_1) {
     "use strict";
+    var OswapNftWidget_1;
     Object.defineProperty(exports, "__esModule", { value: true });
     const Theme = components_8.Styles.Theme.ThemeVars;
-    let OswapNftWidget = class OswapNftWidget extends components_8.Module {
+    let OswapNftWidget = OswapNftWidget_1 = class OswapNftWidget extends components_8.Module {
         constructor(parent, options) {
             super(parent, options);
             this._data = {
@@ -1650,7 +1651,117 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 scom_token_list_2.tokenStore.updateTokenMapData(this.chainId);
                 this.initializeWidgetConfig();
             };
-            this.deferReadyCallback = true;
+            // this.deferReadyCallback = true;
+        }
+        addBlock(blocknote, executeFn, callbackFn) {
+            const blockType = 'oswapNft';
+            const moduleData = {
+                name: '@scom/oswap-nft-widget',
+                localPath: 'oswap-nft-widget'
+            };
+            function getData(href) {
+                const widgetData = (0, scom_blocknote_sdk_1.parseUrl)(href);
+                if (widgetData) {
+                    const { module, properties } = widgetData;
+                    if (module.localPath === moduleData.localPath)
+                        return { ...properties };
+                }
+                return false;
+            }
+            const OswapNftBlock = blocknote.createBlockSpec({
+                type: blockType,
+                propSchema: {
+                    ...blocknote.defaultProps,
+                    tier: { default: 'hungry' },
+                    defaultChainId: { default: 0 },
+                    networks: { default: [] },
+                    wallets: { default: [] },
+                    commissions: { default: [] },
+                },
+                content: "none"
+            }, {
+                render: (block) => {
+                    const wrapper = new components_8.Panel();
+                    const props = JSON.parse(JSON.stringify(block.props));
+                    const customElm = new OswapNftWidget_1(wrapper, { ...props });
+                    if (typeof callbackFn === "function")
+                        callbackFn(customElm, block);
+                    wrapper.appendChild(customElm);
+                    return {
+                        dom: wrapper
+                    };
+                },
+                parseFn: () => {
+                    return [
+                        {
+                            tag: `div[data-content-type=${blockType}]`,
+                            node: blockType
+                        },
+                        {
+                            tag: "a",
+                            getAttrs: (element) => {
+                                if (typeof element === "string") {
+                                    return false;
+                                }
+                                const href = element.getAttribute('href');
+                                if (href)
+                                    return getData(href);
+                                return false;
+                            },
+                            priority: 402,
+                            node: blockType
+                        },
+                        {
+                            tag: "p",
+                            getAttrs: (element) => {
+                                if (typeof element === "string") {
+                                    return false;
+                                }
+                                const child = element.firstChild;
+                                if (child?.nodeName === 'A' && child.getAttribute('href')) {
+                                    const href = child.getAttribute('href');
+                                    return getData(href);
+                                }
+                                return false;
+                            },
+                            priority: 403,
+                            node: blockType
+                        },
+                    ];
+                },
+                toExternalHTML: (block, editor) => {
+                    const link = document.createElement("a");
+                    const url = (0, scom_blocknote_sdk_1.getWidgetEmbedUrl)({
+                        type: blockType,
+                        props: { ...(block.props || {}) }
+                    }, moduleData);
+                    link.setAttribute("href", url);
+                    link.textContent = blockType;
+                    const wrapper = document.createElement("p");
+                    wrapper.appendChild(link);
+                    return { dom: wrapper };
+                }
+            });
+            const OswapNftSlashItem = {
+                name: "Oswap NFT",
+                execute: (editor) => {
+                    const block = {
+                        type: blockType,
+                        props: data_json_2.default.defaultBuilderData
+                    };
+                    if (typeof executeFn === "function")
+                        executeFn(editor, block);
+                },
+                aliases: [blockType, "widget"],
+                group: "Widget",
+                icon: { name: 'campground' },
+                hint: "Insert an Oswap NFT widget"
+            };
+            return {
+                block: OswapNftBlock,
+                slashItem: OswapNftSlashItem,
+                moduleData
+            };
         }
         removeRpcWalletEvents() {
             const rpcWallet = this.state.getRpcWallet();
@@ -2483,7 +2594,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 this.$render("i-scom-wallet-modal", { id: "mdWallet", wallets: [] })));
         }
     };
-    OswapNftWidget = __decorate([
+    OswapNftWidget = OswapNftWidget_1 = __decorate([
         components_8.customModule,
         (0, components_8.customElements)('i-oswap-nft-widget')
     ], OswapNftWidget);
