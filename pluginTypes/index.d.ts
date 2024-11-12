@@ -468,6 +468,7 @@ declare module "@scom/oswap-nft-widget" {
     import { OswapNftsType } from "@scom/oswap-nft-widget/store/index.ts";
     import ScomCommissionFeeSetup from '@scom/scom-commission-fee-setup';
     import { IWalletPlugin } from '@scom/scom-wallet-modal';
+    import { BlockNoteEditor, BlockNoteSpecs, callbackFnType, executeFnType } from '@scom/scom-blocknote-sdk';
     interface ICommissionInfo {
         chainId: number;
         walletAddress: string;
@@ -502,7 +503,7 @@ declare module "@scom/oswap-nft-widget" {
             }
         }
     }
-    export default class OswapNftWidget extends Module {
+    export default class OswapNftWidget extends Module implements BlockNoteSpecs {
         private dappContainer;
         private mdWallet;
         private state;
@@ -539,6 +540,23 @@ declare module "@scom/oswap-nft-widget" {
         private _data;
         tag: any;
         constructor(parent?: Container, options?: any);
+        addBlock(blocknote: any, executeFn: executeFnType, callbackFn?: callbackFnType): {
+            block: any;
+            slashItem: {
+                name: string;
+                execute: (editor: BlockNoteEditor) => void;
+                aliases: string[];
+                group: string;
+                icon: {
+                    name: string;
+                };
+                hint: string;
+            };
+            moduleData: {
+                name: string;
+                localPath: string;
+            };
+        };
         removeRpcWalletEvents(): void;
         onHide(): void;
         get defaultChainId(): number;

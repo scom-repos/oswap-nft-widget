@@ -42,6 +42,7 @@ import { NftCard, fetchNftInfoByTier, mintNFT, burnNFT, getCommissionRate, NftIn
 import { getBuilderSchema, getProjectOwnerSchema } from './formSchema';
 import { nftStyle, listMediaStyles, nftDefaultStyle, dappContainerStyle } from './index.css';
 import configData from './data.json';
+import { Block, BlockNoteEditor, BlockNoteSpecs, callbackFnType, executeFnType, getWidgetEmbedUrl, parseUrl } from '@scom/scom-blocknote-sdk';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -87,7 +88,7 @@ declare const window: any;
 
 @customModule
 @customElements('i-oswap-nft-widget')
-export default class OswapNftWidget extends Module {
+export default class OswapNftWidget extends Module implements BlockNoteSpecs {
   private dappContainer: ScomDappContainer;
   private mdWallet: ScomWalletModal;
   private state: State;
@@ -133,7 +134,121 @@ export default class OswapNftWidget extends Module {
 
   constructor(parent?: Container, options?: any) {
     super(parent, options);
-    this.deferReadyCallback = true;
+    // this.deferReadyCallback = true;
+  }
+
+  addBlock(blocknote: any, executeFn: executeFnType, callbackFn?: callbackFnType) {
+    const blockType = 'oswapNft';
+    const moduleData = {
+      name: '@scom/oswap-nft-widget',
+      localPath: 'oswap-nft-widget'
+    }
+
+    function getData(href: string) {
+      const widgetData = parseUrl(href);
+      if (widgetData) {
+        const { module, properties } = widgetData;
+        if (module.localPath === moduleData.localPath) return { ...properties };
+      }
+      return false;
+    }
+
+    const OswapNftBlock = blocknote.createBlockSpec({
+      type: blockType,
+      propSchema: {
+        ...blocknote.defaultProps,
+        tier: { default: 'hungry' },
+        defaultChainId: { default: 0 },
+        networks: { default: [] },
+        wallets: { default: [] },
+        commissions: { default: [] },
+      },
+      content: "none"
+    },
+      {
+        render: (block: Block) => {
+          const wrapper = new Panel();
+          const props = JSON.parse(JSON.stringify(block.props));
+          const customElm = new OswapNftWidget(wrapper, {...props});
+          if (typeof callbackFn === "function") callbackFn(customElm, block);
+          wrapper.appendChild(customElm);
+          return {
+            dom: wrapper
+          };
+        },
+        parseFn: () => {
+          return [
+            {
+              tag: `div[data-content-type=${blockType}]`,
+              node: blockType
+            },
+            {
+              tag: "a",
+              getAttrs: (element: string | HTMLElement) => {
+                if (typeof element === "string") {
+                  return false;
+                }
+                const href = element.getAttribute('href');
+                if (href) return getData(href);
+                return false;
+              },
+              priority: 402,
+              node: blockType
+            },
+            {
+              tag: "p",
+              getAttrs: (element: string | HTMLElement) => {
+                if (typeof element === "string") {
+                  return false;
+                }
+                const child = element.firstChild as HTMLElement;
+                if (child?.nodeName === 'A' && child.getAttribute('href')) {
+                  const href = child.getAttribute('href');
+                  return getData(href);
+                }
+                return false;
+              },
+              priority: 403,
+              node: blockType
+            },
+          ]
+        },
+        toExternalHTML: (block: any, editor: any) => {
+          const link = document.createElement("a");
+          const url = getWidgetEmbedUrl(
+            {
+              type: blockType,
+              props: { ...(block.props || {}) }
+            },
+            moduleData
+          );
+          link.setAttribute("href", url);
+          link.textContent = blockType;
+          const wrapper = document.createElement("p");
+          wrapper.appendChild(link);
+          return { dom: wrapper };
+        }
+      });
+    const OswapNftSlashItem = {
+      name: "Oswap NFT",
+      execute: (editor: BlockNoteEditor) => {
+        const block: any = {
+          type: blockType,
+          props: configData.defaultBuilderData
+        };
+        if (typeof executeFn === "function") executeFn(editor, block);
+      },
+      aliases: [blockType, "widget"],
+      group: "Widget",
+      icon: { name: 'campground' },
+      hint: "Insert an Oswap NFT widget"
+    }
+
+    return {
+      block: OswapNftBlock,
+      slashItem: OswapNftSlashItem,
+      moduleData
+    }
   }
 
   removeRpcWalletEvents() {
