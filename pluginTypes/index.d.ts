@@ -289,6 +289,95 @@ declare module "@scom/oswap-nft-widget/nft-utils/card.css.ts" {
 declare module "@scom/oswap-nft-widget/nft-utils/myCard.css.ts" {
     export const myCardStyle: string;
 }
+/// <amd-module name="@scom/oswap-nft-widget/translations.json.ts" />
+declare module "@scom/oswap-nft-widget/translations.json.ts" {
+    const _default_2: {
+        en: {
+            minting: string;
+            connect_wallet: string;
+            approving: string;
+            staking: string;
+            stake: string;
+            chain_id_is_not_supported: string;
+            chain_name_is_not_supported: string;
+            your_very_own_nft_is_getting_ready: string;
+            switch_network: string;
+            burn: string;
+            mint_troll: string;
+            please_confirm_you_would_like_to_mint_a_nft_by_staking: string;
+            you_can_unstake_by_the_burning_the_nft: string;
+            by_confirmimg_the_transaction_you_will_burn_nft_and_receive: string;
+            burning: string;
+            loading: string;
+            stake_amount: string;
+            rewards_boost: string;
+            the_reward_boost_is_only_applicable_to_oswap_staking_rewards: string;
+            monthly_reward: string;
+            the_monthly_reward_will_be_distributed_at_the_end_of_each_month: string;
+            flash_sales_inclusion: string;
+            periodic: string;
+            priority: string;
+            guaranteed: string;
+            mint_fee: string;
+            the_mint_fee_covers_the_transaction_cost_on_using_chainlink_verifiable_random_function: string;
+            balance: string;
+            please_confirm_you_would_like_to_mint_a_nft_by_staking_of_50000_of_oswap: string;
+            you_can_unstake_oswap_by_the_burning_the_nft: string;
+            confirm_burn: string;
+            by_confirmimg_the_transaction_you_will_burn_nft_and_receive_75000oswap: string;
+            this_is_nft_will_be_gone_forever: string;
+            view_contract: string;
+            owned: string;
+            sold_out: string;
+            rarity: string;
+            value: string;
+            birthday: string;
+        };
+        "zh-hant": {};
+        vi: {
+            minting: string;
+            connect_wallet: string;
+            approving: string;
+            staking: string;
+            stake: string;
+            chain_id_is_not_supported: string;
+            chain_name_is_not_supported: string;
+            your_very_own_nft_is_getting_ready: string;
+            switch_network: string;
+            burn: string;
+            mint_troll: string;
+            please_confirm_you_would_like_to_mint_a_nft_by_staking: string;
+            you_can_unstake_by_the_burning_the_nft: string;
+            by_confirmimg_the_transaction_you_will_burn_nft_and_receive: string;
+            burning: string;
+            loading: string;
+            stake_amount: string;
+            rewards_boost: string;
+            the_reward_boost_is_only_applicable_to_oswap_staking_rewards: string;
+            monthly_reward: string;
+            the_monthly_reward_will_be_distributed_at_the_end_of_each_month: string;
+            flash_sales_inclusion: string;
+            periodic: string;
+            priority: string;
+            guaranteed: string;
+            mint_fee: string;
+            the_mint_fee_covers_the_transaction_cost_on_using_chainlink_verifiable_random_function: string;
+            balance: string;
+            please_confirm_you_would_like_to_mint_a_nft_by_staking_of_50000_of_oswap: string;
+            you_can_unstake_oswap_by_the_burning_the_nft: string;
+            confirm_burn: string;
+            by_confirmimg_the_transaction_you_will_burn_nft_and_receive_75000oswap: string;
+            this_is_nft_will_be_gone_forever: string;
+            view_contract: string;
+            owned: string;
+            sold_out: string;
+            rarity: string;
+            value: string;
+            birthday: string;
+        };
+    };
+    export default _default_2;
+}
 /// <amd-module name="@scom/oswap-nft-widget/nft-utils/myCard.tsx" />
 declare module "@scom/oswap-nft-widget/nft-utils/myCard.tsx" {
     import { ControlElement, Module, Container } from '@ijstech/components';

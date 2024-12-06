@@ -112,7 +112,7 @@ export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInf
       token: stakeTokenMap[56],
       rewards: 5,
       apr: 2,
-      flashSales: 'Periodic',
+      flashSales: '$periodic',
       attributes: attributeDistribution
     },
     [OswapNfts.tier2]:{
@@ -123,7 +123,7 @@ export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInf
       token: stakeTokenMap[56],
       rewards: 15,
       apr: 4,
-      flashSales: 'Priority',
+      flashSales: '$priority',
       attributes: attributeDistribution
     },
     [OswapNfts.tier3]:{
@@ -134,7 +134,7 @@ export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInf
       token: stakeTokenMap[56],
       rewards: 40,
       apr: 6,
-      flashSales: 'Guaranteed',
+      flashSales: '$guaranteed',
       attributes: attributeDistribution
     },
   },
@@ -147,7 +147,7 @@ export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInf
       token: stakeTokenMap[97],
       rewards: 5,
       apr: 2,
-      flashSales: 'Periodic',
+      flashSales: '$periodic',
       attributes: attributeDistribution
     },
     [OswapNfts.tier2]:{
@@ -158,7 +158,7 @@ export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInf
       token: stakeTokenMap[97],
       rewards: 15,
       apr: 4,
-      flashSales: 'Priority',
+      flashSales: '$priority',
       attributes: attributeDistribution
     },
     [OswapNfts.tier3]:{
@@ -169,7 +169,7 @@ export const nftInfoStoreMap: Record<SupportedNetworkId,Record<OswapNfts, NftInf
       token: stakeTokenMap[97],
       rewards: 40,
       apr: 6,
-      flashSales: 'Guaranteed',
+      flashSales: '$guaranteed',
       attributes: attributeDistribution
     },
   },
