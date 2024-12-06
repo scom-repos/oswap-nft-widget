@@ -43,6 +43,7 @@ import { getBuilderSchema, getProjectOwnerSchema } from './formSchema';
 import { nftStyle, listMediaStyles, nftDefaultStyle, dappContainerStyle } from './index.css';
 import configData from './data.json';
 import { Block, BlockNoteEditor, BlockNoteSpecs, callbackFnType, executeFnType, getWidgetEmbedUrl, parseUrl } from '@scom/scom-blocknote-sdk';
+import translations from './translations.json';
 
 const Theme = Styles.Theme.ThemeVars;
 
@@ -645,6 +646,7 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
   }
 
   async init() {
+    this.i18n.init({...translations});
     super.init();
     this.initOswapTheme();
     this.state = new State(configData);
@@ -736,13 +738,13 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
     this.approvalModelAction = await this.state.setApprovalModelAction({
       sender: this,
       payAction: async () => {
-        showResultMessage(this.txStatusModal, 'warning', 'Minting...');
+        showResultMessage(this.txStatusModal, 'warning', this.i18n.get('$minting'));
         mintNFT(item.address, item.stakeToken, item.totalPayAmount);
       },
       onToBeApproved: async (token: ITokenObject) => {
         this.btnApprove.visible = true;
         this.btnMint.visible = false;
-        const caption = !isClientWalletConnected() ? 'Connect Wallet' : (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
+        const caption = !isClientWalletConnected() ? '$connect_wallet' : (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? '$switch_network' : `${this.i18n.get('$approve')} ${token.symbol}`;
         this.btnApprove.caption = caption;
         this.btnApprove.enabled = true;
         this.btnMint.enabled = false;
@@ -755,7 +757,7 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
       onApproving: async (token: ITokenObject, receipt?: string, data?: any) => {
         this.btnApprove.rightIcon.visible = true;
         this.btnApprove.enabled = false;
-        this.btnApprove.caption = `Approving ${token.symbol}`;
+        this.btnApprove.caption = `${this.i18n.get('$approving')} ${token.symbol}`;
         if (receipt) {
           showResultMessage(this.txStatusModal, 'success', receipt);
         }
@@ -770,13 +772,13 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
         if (receipt) {
           showResultMessage(this.txStatusModal, 'success', receipt);
           this.btnMint.rightIcon.visible = true;
-          this.btnMint.caption = 'Staking';
+          this.btnMint.caption = '$staking';
         }
       },
       onPaid: async (data?: any) => {
         await this.updateBalances();
         this.btnMint.rightIcon.visible = false;
-        this.btnMint.caption = 'Stake';
+        this.btnMint.caption = '$stake';
         this.handleBack();
         this.renderCards();
       },
@@ -852,8 +854,8 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
     const chainId = this.state.getChainId();
     if (this.initializedState.chainId !== chainId) return;
     if (!info) {
-      const network = this.state.getNetworkInfo(chainId);
-      const msg = info === false ? `${network ? `${network.chainName} (${chainId})` : `Chain ID ${chainId}`} is not supported!` : 'Your very own NFT is getting ready!';
+      const network = this.state.getNetworkInfo(chainId); 
+      const msg = info === false ? `${network ? this.i18n.get('$chain_name_is_not_supported', {chainName: `${network.chainName} (${chainId})`}) : this.i18n.get('$chain_id_is_not_supported', {chainId: `${chainId}`})}}` : '$your_very_own_nft_is_getting_ready';
       this.renderEmpty(this.cardRow, msg);
       this.pnlLoading.visible = false;
       this.cardRow.visible = true;
@@ -943,14 +945,14 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
 
   private updateButtons() {
     if (this.targetChainId && this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
-      const caption = !isClientWalletConnected() ? 'Connect Wallet' : 'Switch Network';
+      const caption = !isClientWalletConnected() ? '$connect_wallet' : '$switch_network';
       this.btnApprove.caption = caption;
       this.btnBurn.caption = caption;
       this.btnMint.caption = caption;
     } else {
-      this.btnApprove.caption = `Approve ${this.currentDataCard?.stakeToken?.symbol || ''}`;
-      this.btnBurn.caption = 'Burn';
-      this.btnMint.caption = 'Stake';
+      this.btnApprove.caption = `${this.i18n.get('$approve')} ${this.currentDataCard?.stakeToken?.symbol || ''}`;
+      this.btnBurn.caption = '$burn';
+      this.btnMint.caption = '$stake';
     }
   }
 
@@ -960,7 +962,7 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
     this.mint.visible = false;
     this.minting.visible = true;
     this.currentDataCard = item;
-    this.lbMintTitle.caption = `Mint ${item.tier} Troll`;
+    this.lbMintTitle.caption = this.i18n.get('$mint_troll', {tier: item.tier});
     this.lbMintStakeAmountText.caption = item.stakeAmountText;
     this.lbMintStakeAmount.caption = formatNumber(item.stakeAmount);
     this.lbMintRewardsBoost.caption = item.rewardsBoost;
@@ -975,8 +977,11 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
     this.lbTokenBalance.caption = formatNumber(tokenBalance);
     this.ImageMintStakeToken.url = tokenAssets.tokenPath(item.stakeToken as ITokenObject, this.chainId);
     this.lbMintStakeToken.caption = stakeTokenSymbol;
-    this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${formatNumber(item.stakeAmount)} of ${stakeTokenSymbol}.`;
-    this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
+    this.lbMintMessage1.caption = this.i18n.get('$please_confirm_you_would_like_to_mint_a_nft_by_staking', {
+      amount: formatNumber(item.stakeAmount),
+      symbol: stakeTokenSymbol
+    });
+    this.lbMintMessage2.caption = this.i18n.get('$you_can_unstake_by_the_burning_the_nft', {symbol: stakeTokenSymbol});
     await this.initApprovalModelAction(item);
     this.approvalModelAction.checkAllowance(item.stakeToken, new BigNumber(item.totalPayAmount).toFixed());
   }
@@ -1016,7 +1021,7 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
   private handleBurn(item: IDataMyCard) {
     this.targetChainId = Number(this.state.getChainId());
     this.currentDataMyCard = item;
-    this.lbBurnMessage.caption = `By confirmimg the transaction, you will burn NFT and receive ${item.stakeAmountText}`;
+    this.lbBurnMessage.caption = this.i18n.get('$by_confirmimg_the_transaction_you_will_burn_nft_and_receive', {amount: item.stakeAmountText});
     this.ImageBurn.url = item.image;
     this.mint.visible = false;
     this.burning.visible = true;
@@ -1024,7 +1029,7 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
 
   private async handleConfirmBurn() {
     var self = this;
-    showResultMessage(this.txStatusModal, 'warning', 'Burning');
+    showResultMessage(this.txStatusModal, 'warning', this.i18n.get('$burning'));
 
     const txHashCallback = (err: Error, receipt?: string) => {
       if (err) {
@@ -1039,12 +1044,12 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
           self.txStatusModal.onCustomClose = null;
         }
         this.btnBurn.rightIcon.visible = true;
-        this.btnBurn.caption = 'Burning';
+        this.btnBurn.caption = '$burning';
       }
     }
     const confirmationCallback = (receipt: any) => {
       this.btnBurn.rightIcon.visible = false;
-      this.btnBurn.caption = 'Burn';
+      this.btnBurn.caption = '$burn';
       this.handleBurnBack();
       this.renderCards();
     }
@@ -1070,7 +1075,7 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                     image={{ url: Assets.fullPath('img/loading.svg'), width: 36, height: 36 }}
                   />
                   <i-label
-                    caption="Loading..." font={{ color: Theme.colors.primary.main, size: '1.5em' }}
+                    caption="$loading" font={{ color: Theme.colors.primary.main, size: '1.5em' }}
                     class="i-loading-spinner_text"
                   />
                 </i-vstack>
@@ -1090,20 +1095,20 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                   <i-panel class="section">
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Stake Amount" />
+                        <i-label caption="$stake_amount" />
                       </i-panel>
                       <i-label id="lbMintStakeAmountText" caption="50,000 OSWAP" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
                     </i-panel>
 
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Rewards Boost" />
+                        <i-label caption="$reward_boost" />
                         <i-icon
                           name="question-circle"
                           fill={Theme.text.primary}
                           height={15} width={15}
                           tooltip={{
-                            content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
+                            content: '$the_reward_boost_is_only_applicable_to_oswap_staking_rewards',
                             placement: 'right'
                           }}
                         />
@@ -1113,13 +1118,13 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
 
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Monthly Reward" />
+                        <i-label caption="$monthly_reward" />
                         <i-icon
                           name="question-circle"
                           fill={Theme.text.primary}
                           height={15} width={15}
                           tooltip={{
-                            content: 'The Monthly Reward will be distributed at the end of each month.',
+                            content: '$the_monthly_reward_will_be_distributed_at_the_end_of_each_month',
                             placement: 'right'
                           }}
                         />
@@ -1128,19 +1133,19 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                     </i-panel>
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Flash Sales Inclusion" />
+                        <i-label caption="$flash_sales_inclusion" />
                       </i-panel>
-                      <i-label id="lbMintFlashSales" caption="Periodic" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
+                      <i-label id="lbMintFlashSales" caption="$periodic" font={{ color: Theme.text.secondary, size: '1.4rem', bold: true }} />
                     </i-panel>
                     <i-panel class="row-line">
                       <i-panel class="title-icon">
-                        <i-label caption="Mint Fee" />
+                        <i-label caption="$mint_fee" />
                         <i-icon
                           name="question-circle"
                           fill={Theme.text.primary}
                           height={15} width={15}
                           tooltip={{
-                            content: 'The mint fee covers the transaction cost on using Chainlink Verifiable Random Function.',
+                            content: '$the_mint_fee_covers_the_transaction_cost_on_using_chainlink_verifiable_random_function',
                             placement: 'right'
                           }}
                         />
@@ -1149,9 +1154,9 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                     </i-panel>
                     <i-panel class="section-1">
                       <i-hstack gap={4} margin={{ bottom: '0.75rem' }} verticalAlignment="center" horizontalAlignment="space-between">
-                        <i-label caption="Stake Amount" />
+                        <i-label caption="$stake_amount" />
                         <i-hstack gap={4} verticalAlignment="center" horizontalAlignment="end">
-                          <i-label font={{ color: Theme.text.secondary, size: '1rem' }} caption="Balance: " />
+                          <i-label font={{ color: Theme.text.secondary, size: '1rem' }} caption="$balance" />
                           <i-label id="lbTokenBalance" font={{ color: Theme.text.secondary, size: '1rem' }} />
                         </i-hstack>
                       </i-hstack>
@@ -1171,10 +1176,10 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                     </i-panel>
                     <i-panel class="section-2">
                       <i-panel>
-                        <i-label id="lbMintMessage1" caption="Please confirm you would like to mint a NFT by staking of 50000 of OSWAP." />
+                        <i-label id="lbMintMessage1" caption="$please_confirm_you_would_like_to_mint_a_nft_by_staking" />
                       </i-panel>
                       <i-panel>
-                        <i-label id="lbMintMessage2" caption="You can unstake OSWAP by the burning the NFT." />
+                        <i-label id="lbMintMessage2" caption="$you_can_unstake_by_the_burning_the_nft" />
                       </i-panel>
                     </i-panel>
                     <i-button
@@ -1183,12 +1188,12 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                       class="btn-stake"
                       height={40}
                       enabled={false}
-                      caption="Approve"
+                      caption="$approve"
                       rightIcon={{ spin: true, visible: false }}
                       onClick={this.clickApprove}
                     />
                     <i-button
-                      id="btnMint" height={40} class="btn-stake" caption="Stake"
+                      id="btnMint" height={40} class="btn-stake" caption="$stake"
                       rightIcon={{ spin: true, visible: false }}
                       onClick={() => this.onSubmit(true)}
                     />
@@ -1203,13 +1208,13 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                 <i-panel class="bg-img">
                   <i-panel class="title-box">
                     <i-icon class="icon-back pointer" height={20} width={20} name="arrow-left" fill={Theme.text.primary} onClick={this.handleBurnBack} />
-                    <i-label caption="Confim Burn" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
+                    <i-label caption="$confirm_burn" font={{ color: Theme.colors.primary.main, size: '1.4rem', bold: true }} />
                   </i-panel>
                   <i-panel class="line-middle" />
                   <i-panel class="section">
                     <i-panel class="section-2" margin={{ bottom: 30 }}>
                       <i-panel>
-                        <i-label id="lbBurnMessage" class="text-center" caption="By confirmimg the transaction, you will burn NFT and receive 75,000OSWAP" />
+                        <i-label id="lbBurnMessage" class="text-center" caption="$by_confirmimg_the_transaction_you_will_burn_nft_and_receive_75000oswap" />
                       </i-panel>
                     </i-panel>
                     <i-hstack horizontalAlignment="center" margin={{ bottom: 20 }} padding={{ left: 20, right: 20 }}>
@@ -1217,10 +1222,10 @@ export default class OswapNftWidget extends Module implements BlockNoteSpecs {
                     </i-hstack>
                     <i-hstack verticalAlignment="center" horizontalAlignment="center">
                       <i-image url={Assets.fullPath('img/nft/TrollCry.png')} margin={{ right: 4 }} width={40} height="auto" class="flex" />
-                      <i-label class="note-burn" caption="This is NFT Will Be Gone Forever" />
+                      <i-label class="note-burn" caption="$this_is_nft_will_be_gone_forever" />
                     </i-hstack>
                     <i-button
-                      id="btnBurn" height={40} class="btn-stake btn-os" caption="Burn"
+                      id="btnBurn" height={40} class="btn-stake btn-os" caption="$burn"
                       rightIcon={{ spin: true, visible: false }}
                       onClick={() => this.onSubmit()}
                     />

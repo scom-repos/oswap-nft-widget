@@ -76,7 +76,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
                 token: exports.stakeTokenMap[56],
                 rewards: 5,
                 apr: 2,
-                flashSales: 'Periodic',
+                flashSales: '$periodic',
                 attributes: exports.attributeDistribution
             },
             [OswapNfts.tier2]: {
@@ -87,7 +87,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
                 token: exports.stakeTokenMap[56],
                 rewards: 15,
                 apr: 4,
-                flashSales: 'Priority',
+                flashSales: '$priority',
                 attributes: exports.attributeDistribution
             },
             [OswapNfts.tier3]: {
@@ -98,7 +98,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
                 token: exports.stakeTokenMap[56],
                 rewards: 40,
                 apr: 6,
-                flashSales: 'Guaranteed',
+                flashSales: '$guaranteed',
                 attributes: exports.attributeDistribution
             },
         },
@@ -111,7 +111,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
                 token: exports.stakeTokenMap[97],
                 rewards: 5,
                 apr: 2,
-                flashSales: 'Periodic',
+                flashSales: '$periodic',
                 attributes: exports.attributeDistribution
             },
             [OswapNfts.tier2]: {
@@ -122,7 +122,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
                 token: exports.stakeTokenMap[97],
                 rewards: 15,
                 apr: 4,
-                flashSales: 'Priority',
+                flashSales: '$priority',
                 attributes: exports.attributeDistribution
             },
             [OswapNfts.tier3]: {
@@ -133,7 +133,7 @@ define("@scom/oswap-nft-widget/store/data/nft.ts", ["require", "exports"], funct
                 token: exports.stakeTokenMap[97],
                 rewards: 40,
                 apr: 6,
-                flashSales: 'Guaranteed',
+                flashSales: '$guaranteed',
                 attributes: exports.attributeDistribution
             },
         },
@@ -789,7 +789,97 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.css.ts", ["require", "exports", 
         },
     });
 });
-define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts", "@scom/oswap-nft-widget/store/index.ts"], function (require, exports, components_5, myCard_css_1, index_2) {
+define("@scom/oswap-nft-widget/translations.json.ts", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    ///<amd-module name='@scom/oswap-nft-widget/translations.json.ts'/> 
+    exports.default = {
+        "en": {
+            "minting": "Minting...",
+            "connect_wallet": "Connect Wallet",
+            "approving": "Approving",
+            "staking": "Staking",
+            "stake": "Stake",
+            "chain_id_is_not_supported": "Chain ID {{chainId}} is not supported!",
+            "chain_name_is_not_supported": "{{chainName}} is not supported!",
+            "your_very_own_nft_is_getting_ready": "Your very own NFT is getting ready!",
+            "switch_network": "Switch Network",
+            "burn": "Burn",
+            "mint_troll": "Mint {{tier}} Troll",
+            "please_confirm_you_would_like_to_mint_a_nft_by_staking": "Please confirm you would like to mint a NFT by staking of {{amount}} of {{symbol}}.",
+            "you_can_unstake_by_the_burning_the_nft": "You can unstake {{symbol}} by the burning the NFT.",
+            "by_confirmimg_the_transaction_you_will_burn_nft_and_receive": "By confirming the transaction, you will burn NFT and receive {{amount}}",
+            "burning": "Burning",
+            "loading": "Loading...",
+            "stake_amount": "Stake Amount",
+            "rewards_boost": "Rewards Boost",
+            "the_reward_boost_is_only_applicable_to_oswap_staking_rewards": "The Reward Boost is only applicable to OSWAP staking rewards.",
+            "monthly_reward": "Monthly Reward",
+            "the_monthly_reward_will_be_distributed_at_the_end_of_each_month": "The Monthly Reward will be distributed at the end of each month.",
+            "flash_sales_inclusion": "Flash Sales Inclusion",
+            "periodic": "Periodic",
+            "priority": "Priority",
+            "guaranteed": "Guaranteed",
+            "mint_fee": "Mint Fee",
+            "the_mint_fee_covers_the_transaction_cost_on_using_chainlink_verifiable_random_function": "The mint fee covers the transaction cost on using Chainlink Verifiable Random Function.",
+            "balance": "Balance: ",
+            "please_confirm_you_would_like_to_mint_a_nft_by_staking_of_50000_of_oswap": "Please confirm you would like to mint a NFT by staking of 50000 of OSWAP.",
+            "you_can_unstake_oswap_by_the_burning_the_nft": "You can unstake OSWAP by the burning the NFT.",
+            "confirm_burn": "Confirm Burn",
+            "by_confirmimg_the_transaction_you_will_burn_nft_and_receive_75000oswap": "By confirming the transaction, you will burn NFT and receive 75,000OSWAP",
+            "this_is_nft_will_be_gone_forever": "This NFT will be gone forever",
+            "view_contract": "View contract",
+            "owned": "Owned",
+            "sold_out": "Sold Out",
+            "rarity": "Rarity",
+            "value": "Value",
+            "birthday": "Birthday"
+        },
+        "zh-hant": {},
+        "vi": {
+            "minting": "Đang đúc...",
+            "connect_wallet": "Kết nối ví",
+            "approving": "Đang phê duyệt",
+            "staking": "Đang đặt cọc",
+            "stake": "Đặt cọc",
+            "chain_id_is_not_supported": "ID {{chainId}} không được hỗ trợ!",
+            "chain_name_is_not_supported": "{{chainName}} không được hỗ trợ!",
+            "your_very_own_nft_is_getting_ready": "NFT của bạn đang được chuẩn bị!",
+            "switch_network": "Chuyển mạng",
+            "burn": "Đốt",
+            "mint_troll": "Mint {{tier}} Troll",
+            "please_confirm_you_would_like_to_mint_a_nft_by_staking": "Vui lòng xác nhận bạn muốn đúc một NFT bằng cách đặt cọc {{amount}} {{symbol}}.",
+            "you_can_unstake_by_the_burning_the_nft": "Bạn có thể hủy cọc {{symbol}} bằng cách đốt NFT.",
+            "by_confirmimg_the_transaction_you_will_burn_nft_and_receive": "Bằng cách xác nhận giao dịch, bạn sẽ đốt NFT và nhận {{amount}}",
+            "burning": "Đang đốt",
+            "loading": "Đang tải...",
+            "stake_amount": "Số lượng Đặt cọc",
+            "rewards_boost": "Tăng thưởng",
+            "the_reward_boost_is_only_applicable_to_oswap_staking_rewards": "Tăng thưởng chỉ áp dụng cho phần thưởng đang đặt cọc OSWAP.",
+            "monthly_reward": "Phần thưởng hàng tháng",
+            "the_monthly_reward_will_be_distributed_at_the_end_of_each_month": "Phần thưởng hàng tháng sẽ được phân phối vào cuối mỗi tháng.",
+            "flash_sales_inclusion": "Bao gồm trong flash sale",
+            "periodic": "Định kỳ",
+            "priority": "Ưu tiên",
+            "guaranteed": "Bảo mật",
+            "mint_fee": "Phí đúc",
+            "the_mint_fee_covers_the_transaction_cost_on_using_chainlink_verifiable_random_function": "Phí đúc bao gồm chi phí giao dịch khi sử dụng Chainlink Verifiable Random Function.",
+            "balance": "Số dư: ",
+            "please_confirm_you_would_like_to_mint_a_nft_by_staking_of_50000_of_oswap": "Vui lòng xác nhận bạn muốn đúc một NFT bằng cách đặt cọc 50.000 OSWAP.",
+            "you_can_unstake_oswap_by_the_burning_the_nft": "Bạn có thể hủy cọc OSWAP bằng cách đốt NFT.",
+            "confirm_burn": "Xác nhận đốt",
+            "by_confirmimg_the_transaction_you_will_burn_nft_and_receive_75000oswap": "Bằng cách xác nhận giao dịch, bạn sẽ đốt NFT và nhận 75.000OSWAP",
+            "this_is_nft_will_be_gone_forever": "NFT này sẽ biến mất mãi mãi",
+            "view_contract": "Xem hợp đồng",
+            "owned": "Đã sở hữu",
+            "sold_out": "Đã bán hết",
+            "rarity": "Giới hạn",
+            "value": "Giá trị",
+            "birthday": "Sinh nhật"
+        }
+    };
+});
+define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/nft-utils/myCard.css.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/translations.json.ts"], function (require, exports, components_5, myCard_css_1, index_2, translations_json_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NftMyCard = void 0;
@@ -850,6 +940,7 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
             }
         }
         async init() {
+            this.i18n.init({ ...translations_json_1.default });
             this.classList.add(myCard_css_1.myCardStyle);
             super.init();
         }
@@ -865,17 +956,17 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
                             this.$render("i-label", { id: "lbNftID", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Birthday" })),
+                                this.$render("i-label", { caption: "$birthday" })),
                             this.$render("i-label", { id: "birthday", caption: "50,000 OSWAP", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Rarity" })),
+                                this.$render("i-label", { caption: "$rarity" })),
                             this.$render("i-panel", { id: "rarity" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Value" })),
+                                this.$render("i-label", { caption: "$value" })),
                             this.$render("i-label", { id: "stakeAmount", caption: "50,000 OSWAP", class: "value" })),
-                        this.$render("i-button", { id: "btnHandleBurn", margin: { bottom: 10, top: 'auto' }, height: "auto", class: "btn-burn btn-os", caption: "Burn" })))));
+                        this.$render("i-button", { id: "btnHandleBurn", margin: { bottom: 10, top: 'auto' }, height: "auto", class: "btn-burn btn-os", caption: "$burn" })))));
         }
     };
     NftMyCard = __decorate([
@@ -883,7 +974,7 @@ define("@scom/oswap-nft-widget/nft-utils/myCard.tsx", ["require", "exports", "@i
     ], NftMyCard);
     exports.NftMyCard = NftMyCard;
 });
-define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts", "@scom/oswap-nft-widget/nft-utils/myCard.tsx"], function (require, exports, components_6, assets_3, index_3, card_css_1, myCard_1) {
+define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijstech/components", "@scom/oswap-nft-widget/assets.ts", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/nft-utils/card.css.ts", "@scom/oswap-nft-widget/nft-utils/myCard.tsx", "@scom/oswap-nft-widget/translations.json.ts"], function (require, exports, components_6, assets_3, index_3, card_css_1, myCard_1, translations_json_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NftCard = void 0;
@@ -918,7 +1009,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
             // }
             const count = value.userNFTs?.length || 0;
             if (this.lbViewContract)
-                this.lbViewContract.caption = value.fullName || 'View contract';
+                this.lbViewContract.caption = value.fullName || '$view_contract';
             if (this.stakeAmountText)
                 this.stakeAmountText.caption = value.stakeAmountText;
             if (this.reward)
@@ -973,12 +1064,12 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
         }
         updateBtn() {
             if (!(0, index_3.isClientWalletConnected)()) {
-                this.btnHandleStake.caption = 'Connect Wallet';
+                this.btnHandleStake.caption = '$connect_wallet';
                 this.btnHandleStake.enabled = true;
             }
             else {
                 const isSoldedOut = this.cardData?.slot <= 0;
-                this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
+                this.btnHandleStake.caption = isSoldedOut ? '$sold_out' : '$stake';
                 this.btnHandleStake.enabled = !isSoldedOut;
             }
         }
@@ -995,6 +1086,7 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
             this.state.viewOnExplorerByAddress(chainId, this._cardData.address);
         }
         async init() {
+            this.i18n.init({ ...translations_json_2.default });
             this.classList.add(card_css_1.cardStyle);
             super.init();
         }
@@ -1002,36 +1094,36 @@ define("@scom/oswap-nft-widget/nft-utils/card.tsx", ["require", "exports", "@ijs
             return (this.$render("i-panel", { class: "card-widget" },
                 this.$render("i-panel", { class: "bg-img" },
                     this.$render("i-hstack", { gap: "0.5rem", horizontalAlignment: "start", verticalAlignment: "center", cursor: "pointer", width: "fit-content", margin: { top: '0.25rem', bottom: '0.5rem' }, onClick: this.openLink },
-                        this.$render("i-label", { id: "lbViewContract", caption: "View contract", font: { color: Theme.colors.primary.main, transform: 'capitalize', size: '1rem' }, padding: { left: '0.75rem' } }),
+                        this.$render("i-label", { id: "lbViewContract", caption: "$view_contract", font: { color: Theme.colors.primary.main, transform: 'capitalize', size: '1rem' }, padding: { left: '0.75rem' } }),
                         this.$render("i-icon", { name: "external-link-alt", fill: Theme.colors.primary.main, width: 16, height: 16 })),
                     this.$render("i-panel", { id: "trollImage" }),
                     this.$render("i-panel", { class: "section" },
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Stake Amount" })),
+                                this.$render("i-label", { caption: "$stake_amount" })),
                             this.$render("i-label", { id: "stakeAmountText", caption: "50,000 OSWAP", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Rewards Boost" }),
+                                this.$render("i-label", { caption: "$rewards_boost" }),
                                 this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, tooltip: {
-                                        content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
+                                        content: '$the_reward_boost_is_only_applicable_to_oswap_staking_rewards',
                                         placement: 'right'
                                     } })),
                             this.$render("i-label", { id: "reward", caption: "5%", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Monthly Reward" }),
-                                this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, tooltip: { content: 'The Monthly Reward will be distributed at the end of each month.', placement: 'right' } })),
+                                this.$render("i-label", { caption: "$monthly_reward" }),
+                                this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, tooltip: { content: '$the_monthly_reward_will_be_distributed_at_the_end_of_each_month', placement: 'right' } })),
                             this.$render("i-label", { id: "monthlyReward", caption: "5%", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Flash Sales Inclusion" })),
-                            this.$render("i-label", { id: "flashSales", caption: "Periodic", class: "value" })),
+                                this.$render("i-label", { caption: "$flash_sales_inclusion" })),
+                            this.$render("i-label", { id: "flashSales", caption: "$periodic", class: "value" })),
                         this.$render("i-panel", { class: "row-item" },
                             this.$render("i-panel", { class: "title-icon" },
-                                this.$render("i-label", { caption: "Owned" })),
+                                this.$render("i-label", { caption: "$owned" })),
                             this.$render("i-label", { id: "lbCount", caption: "0", class: "value" })),
-                        this.$render("i-button", { id: "btnHandleStake", height: "auto", class: "btn-stake btn-os", caption: "Stake", onClick: this.handleStake })))));
+                        this.$render("i-button", { id: "btnHandleStake", height: "auto", class: "btn-stake btn-os", caption: "$stake", onClick: this.handleStake })))));
         }
     };
     NftCard = __decorate([
@@ -1613,7 +1705,7 @@ define("@scom/oswap-nft-widget/index.css.ts", ["require", "exports", "@ijstech/c
         1100: exports.nftStyle_1100
     };
 });
-define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts", "@scom/scom-blocknote-sdk"], function (require, exports, components_8, eth_wallet_5, index_6, index_7, assets_4, scom_commission_fee_setup_1, scom_token_list_2, index_8, formSchema_1, index_css_1, data_json_2, scom_blocknote_sdk_1) {
+define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-nft-widget/store/index.ts", "@scom/oswap-nft-widget/global/index.ts", "@scom/oswap-nft-widget/assets.ts", "@scom/scom-commission-fee-setup", "@scom/scom-token-list", "@scom/oswap-nft-widget/nft-utils/index.ts", "@scom/oswap-nft-widget/formSchema.ts", "@scom/oswap-nft-widget/index.css.ts", "@scom/oswap-nft-widget/data.json.ts", "@scom/scom-blocknote-sdk", "@scom/oswap-nft-widget/translations.json.ts"], function (require, exports, components_8, eth_wallet_5, index_6, index_7, assets_4, scom_commission_fee_setup_1, scom_token_list_2, index_8, formSchema_1, index_css_1, data_json_2, scom_blocknote_sdk_1, translations_json_3) {
     "use strict";
     var OswapNftWidget_1;
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -2134,6 +2226,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             return !value || !value.networks || value.networks.length === 0;
         }
         async init() {
+            this.i18n.init({ ...translations_json_3.default });
             super.init();
             this.initOswapTheme();
             this.state = new index_6.State(data_json_2.default);
@@ -2197,13 +2290,13 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.approvalModelAction = await this.state.setApprovalModelAction({
                 sender: this,
                 payAction: async () => {
-                    (0, index_7.showResultMessage)(this.txStatusModal, 'warning', 'Minting...');
+                    (0, index_7.showResultMessage)(this.txStatusModal, 'warning', this.i18n.get('$minting'));
                     (0, index_8.mintNFT)(item.address, item.stakeToken, item.totalPayAmount);
                 },
                 onToBeApproved: async (token) => {
                     this.btnApprove.visible = true;
                     this.btnMint.visible = false;
-                    const caption = !(0, index_6.isClientWalletConnected)() ? 'Connect Wallet' : (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? 'Switch Network' : `Approve ${token.symbol}`;
+                    const caption = !(0, index_6.isClientWalletConnected)() ? '$connect_wallet' : (this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) ? '$switch_network' : `${this.i18n.get('$approve')} ${token.symbol}`;
                     this.btnApprove.caption = caption;
                     this.btnApprove.enabled = true;
                     this.btnMint.enabled = false;
@@ -2216,7 +2309,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 onApproving: async (token, receipt, data) => {
                     this.btnApprove.rightIcon.visible = true;
                     this.btnApprove.enabled = false;
-                    this.btnApprove.caption = `Approving ${token.symbol}`;
+                    this.btnApprove.caption = `${this.i18n.get('$approving')} ${token.symbol}`;
                     if (receipt) {
                         (0, index_7.showResultMessage)(this.txStatusModal, 'success', receipt);
                     }
@@ -2231,13 +2324,13 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                     if (receipt) {
                         (0, index_7.showResultMessage)(this.txStatusModal, 'success', receipt);
                         this.btnMint.rightIcon.visible = true;
-                        this.btnMint.caption = 'Staking';
+                        this.btnMint.caption = '$staking';
                     }
                 },
                 onPaid: async (data) => {
                     await this.updateBalances();
                     this.btnMint.rightIcon.visible = false;
-                    this.btnMint.caption = 'Stake';
+                    this.btnMint.caption = '$stake';
                     this.handleBack();
                     this.renderCards();
                 },
@@ -2309,7 +2402,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                 return;
             if (!info) {
                 const network = this.state.getNetworkInfo(chainId);
-                const msg = info === false ? `${network ? `${network.chainName} (${chainId})` : `Chain ID ${chainId}`} is not supported!` : 'Your very own NFT is getting ready!';
+                const msg = info === false ? `${network ? this.i18n.get('$chain_name_is_not_supported', { chainName: `${network.chainName} (${chainId})` }) : this.i18n.get('$chain_id_is_not_supported', { chainId: `${chainId}` })}}` : '$your_very_own_nft_is_getting_ready';
                 this.renderEmpty(this.cardRow, msg);
                 this.pnlLoading.visible = false;
                 this.cardRow.visible = true;
@@ -2398,15 +2491,15 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         }
         updateButtons() {
             if (this.targetChainId && this.state.getChainId() !== this.targetChainId || !this.state.isRpcWalletConnected()) {
-                const caption = !(0, index_6.isClientWalletConnected)() ? 'Connect Wallet' : 'Switch Network';
+                const caption = !(0, index_6.isClientWalletConnected)() ? '$connect_wallet' : '$switch_network';
                 this.btnApprove.caption = caption;
                 this.btnBurn.caption = caption;
                 this.btnMint.caption = caption;
             }
             else {
-                this.btnApprove.caption = `Approve ${this.currentDataCard?.stakeToken?.symbol || ''}`;
-                this.btnBurn.caption = 'Burn';
-                this.btnMint.caption = 'Stake';
+                this.btnApprove.caption = `${this.i18n.get('$approve')} ${this.currentDataCard?.stakeToken?.symbol || ''}`;
+                this.btnBurn.caption = '$burn';
+                this.btnMint.caption = '$stake';
             }
         }
         async onStake(item) {
@@ -2415,7 +2508,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.mint.visible = false;
             this.minting.visible = true;
             this.currentDataCard = item;
-            this.lbMintTitle.caption = `Mint ${item.tier} Troll`;
+            this.lbMintTitle.caption = this.i18n.get('$mint_troll', { tier: item.tier });
             this.lbMintStakeAmountText.caption = item.stakeAmountText;
             this.lbMintStakeAmount.caption = (0, index_7.formatNumber)(item.stakeAmount);
             this.lbMintRewardsBoost.caption = item.rewardsBoost;
@@ -2430,8 +2523,11 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
             this.lbTokenBalance.caption = (0, index_7.formatNumber)(tokenBalance);
             this.ImageMintStakeToken.url = scom_token_list_2.assets.tokenPath(item.stakeToken, this.chainId);
             this.lbMintStakeToken.caption = stakeTokenSymbol;
-            this.lbMintMessage1.caption = `Please confirm you would like to mint a NFT by staking of ${(0, index_7.formatNumber)(item.stakeAmount)} of ${stakeTokenSymbol}.`;
-            this.lbMintMessage2.caption = `You can unstake ${stakeTokenSymbol} by the burning the NFT.`;
+            this.lbMintMessage1.caption = this.i18n.get('$please_confirm_you_would_like_to_mint_a_nft_by_staking', {
+                amount: (0, index_7.formatNumber)(item.stakeAmount),
+                symbol: stakeTokenSymbol
+            });
+            this.lbMintMessage2.caption = this.i18n.get('$you_can_unstake_by_the_burning_the_nft', { symbol: stakeTokenSymbol });
             await this.initApprovalModelAction(item);
             this.approvalModelAction.checkAllowance(item.stakeToken, new eth_wallet_5.BigNumber(item.totalPayAmount).toFixed());
         }
@@ -2467,14 +2563,14 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
         handleBurn(item) {
             this.targetChainId = Number(this.state.getChainId());
             this.currentDataMyCard = item;
-            this.lbBurnMessage.caption = `By confirmimg the transaction, you will burn NFT and receive ${item.stakeAmountText}`;
+            this.lbBurnMessage.caption = this.i18n.get('$by_confirmimg_the_transaction_you_will_burn_nft_and_receive', { amount: item.stakeAmountText });
             this.ImageBurn.url = item.image;
             this.mint.visible = false;
             this.burning.visible = true;
         }
         async handleConfirmBurn() {
             var self = this;
-            (0, index_7.showResultMessage)(this.txStatusModal, 'warning', 'Burning');
+            (0, index_7.showResultMessage)(this.txStatusModal, 'warning', this.i18n.get('$burning'));
             const txHashCallback = (err, receipt) => {
                 if (err) {
                     (0, index_7.showResultMessage)(this.txStatusModal, 'error', err);
@@ -2488,12 +2584,12 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                         self.txStatusModal.onCustomClose = null;
                     };
                     this.btnBurn.rightIcon.visible = true;
-                    this.btnBurn.caption = 'Burning';
+                    this.btnBurn.caption = '$burning';
                 }
             };
             const confirmationCallback = (receipt) => {
                 this.btnBurn.rightIcon.visible = false;
-                this.btnBurn.caption = 'Burn';
+                this.btnBurn.caption = '$burn';
                 this.handleBurnBack();
                 this.renderCards();
             };
@@ -2511,7 +2607,7 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                             this.$render("i-panel", { id: "pnlLoading", minHeight: 300, class: "i-loading-overlay" },
                                 this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
                                     this.$render("i-icon", { class: "i-loading-spinner_icon", cursor: "default", image: { url: assets_4.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
-                                    this.$render("i-label", { caption: "Loading...", font: { color: Theme.colors.primary.main, size: '1.5em' }, class: "i-loading-spinner_text" }))),
+                                    this.$render("i-label", { caption: "$loading", font: { color: Theme.colors.primary.main, size: '1.5em' }, class: "i-loading-spinner_text" }))),
                             this.$render("i-hstack", { gap: "2rem", id: "cardRow", maxWidth: 1280, margin: { left: 'auto', right: 'auto' }, wrap: "wrap" }))),
                     this.$render("i-hstack", { id: "minting", visible: false, gap: "30px", horizontalAlignment: "center" },
                         this.$render("i-vstack", { class: "nft-card-stake" },
@@ -2524,41 +2620,41 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                     this.$render("i-panel", { class: "section" },
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
-                                                this.$render("i-label", { caption: "Stake Amount" })),
+                                                this.$render("i-label", { caption: "$stake_amount" })),
                                             this.$render("i-label", { id: "lbMintStakeAmountText", caption: "50,000 OSWAP", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
-                                                this.$render("i-label", { caption: "Rewards Boost" }),
+                                                this.$render("i-label", { caption: "$reward_boost" }),
                                                 this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, height: 15, width: 15, tooltip: {
-                                                        content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
+                                                        content: '$the_reward_boost_is_only_applicable_to_oswap_staking_rewards',
                                                         placement: 'right'
                                                     } })),
                                             this.$render("i-label", { id: "lbMintRewardsBoost", caption: "5%", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
-                                                this.$render("i-label", { caption: "Monthly Reward" }),
+                                                this.$render("i-label", { caption: "$monthly_reward" }),
                                                 this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, height: 15, width: 15, tooltip: {
-                                                        content: 'The Monthly Reward will be distributed at the end of each month.',
+                                                        content: '$the_monthly_reward_will_be_distributed_at_the_end_of_each_month',
                                                         placement: 'right'
                                                     } })),
                                             this.$render("i-label", { id: "lbMintMonthlyReward", caption: "5%", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
-                                                this.$render("i-label", { caption: "Flash Sales Inclusion" })),
-                                            this.$render("i-label", { id: "lbMintFlashSales", caption: "Periodic", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
+                                                this.$render("i-label", { caption: "$flash_sales_inclusion" })),
+                                            this.$render("i-label", { id: "lbMintFlashSales", caption: "$periodic", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "row-line" },
                                             this.$render("i-panel", { class: "title-icon" },
-                                                this.$render("i-label", { caption: "Mint Fee" }),
+                                                this.$render("i-label", { caption: "$mint_fee" }),
                                                 this.$render("i-icon", { name: "question-circle", fill: Theme.text.primary, height: 15, width: 15, tooltip: {
-                                                        content: 'The mint fee covers the transaction cost on using Chainlink Verifiable Random Function.',
+                                                        content: '$the_mint_fee_covers_the_transaction_cost_on_using_chainlink_verifiable_random_function',
                                                         placement: 'right'
                                                     } })),
                                             this.$render("i-label", { id: "lbMintFee", font: { color: Theme.text.secondary, size: '1.4rem', bold: true } })),
                                         this.$render("i-panel", { class: "section-1" },
                                             this.$render("i-hstack", { gap: 4, margin: { bottom: '0.75rem' }, verticalAlignment: "center", horizontalAlignment: "space-between" },
-                                                this.$render("i-label", { caption: "Stake Amount" }),
+                                                this.$render("i-label", { caption: "$stake_amount" }),
                                                 this.$render("i-hstack", { gap: 4, verticalAlignment: "center", horizontalAlignment: "end" },
-                                                    this.$render("i-label", { font: { color: Theme.text.secondary, size: '1rem' }, caption: "Balance: " }),
+                                                    this.$render("i-label", { font: { color: Theme.text.secondary, size: '1rem' }, caption: "$balance" }),
                                                     this.$render("i-label", { id: "lbTokenBalance", font: { color: Theme.text.secondary, size: '1rem' } }))),
                                             this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "space-between" },
                                                 this.$render("i-label", { id: "lbMintStakeAmount", font: { color: Theme.text.secondary, size: '1.2rem' } }),
@@ -2567,29 +2663,29 @@ define("@scom/oswap-nft-widget", ["require", "exports", "@ijstech/components", "
                                                     this.$render("i-label", { id: "lbMintStakeToken", caption: "OSWAP" })))),
                                         this.$render("i-panel", { class: "section-2" },
                                             this.$render("i-panel", null,
-                                                this.$render("i-label", { id: "lbMintMessage1", caption: "Please confirm you would like to mint a NFT by staking of 50000 of OSWAP." })),
+                                                this.$render("i-label", { id: "lbMintMessage1", caption: "$please_confirm_you_would_like_to_mint_a_nft_by_staking" })),
                                             this.$render("i-panel", null,
-                                                this.$render("i-label", { id: "lbMintMessage2", caption: "You can unstake OSWAP by the burning the NFT." }))),
-                                        this.$render("i-button", { id: "btnApprove", visible: false, class: "btn-stake", height: 40, enabled: false, caption: "Approve", rightIcon: { spin: true, visible: false }, onClick: this.clickApprove }),
-                                        this.$render("i-button", { id: "btnMint", height: 40, class: "btn-stake", caption: "Stake", rightIcon: { spin: true, visible: false }, onClick: () => this.onSubmit(true) })))))),
+                                                this.$render("i-label", { id: "lbMintMessage2", caption: "$you_can_unstake_by_the_burning_the_nft" }))),
+                                        this.$render("i-button", { id: "btnApprove", visible: false, class: "btn-stake", height: 40, enabled: false, caption: "$approve", rightIcon: { spin: true, visible: false }, onClick: this.clickApprove }),
+                                        this.$render("i-button", { id: "btnMint", height: 40, class: "btn-stake", caption: "$stake", rightIcon: { spin: true, visible: false }, onClick: () => this.onSubmit(true) })))))),
                     this.$render("i-hstack", { id: "burning", visible: false, gap: "30px", horizontalAlignment: "center" },
                         this.$render("i-vstack", { class: "nft-burn-stake", width: 500, maxWidth: '100%', padding: { left: 15, right: 15 }, margin: { bottom: 30 } },
                             this.$render("i-panel", { class: "card-widget" },
                                 this.$render("i-panel", { class: "bg-img" },
                                     this.$render("i-panel", { class: "title-box" },
                                         this.$render("i-icon", { class: "icon-back pointer", height: 20, width: 20, name: "arrow-left", fill: Theme.text.primary, onClick: this.handleBurnBack }),
-                                        this.$render("i-label", { caption: "Confim Burn", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
+                                        this.$render("i-label", { caption: "$confirm_burn", font: { color: Theme.colors.primary.main, size: '1.4rem', bold: true } })),
                                     this.$render("i-panel", { class: "line-middle" }),
                                     this.$render("i-panel", { class: "section" },
                                         this.$render("i-panel", { class: "section-2", margin: { bottom: 30 } },
                                             this.$render("i-panel", null,
-                                                this.$render("i-label", { id: "lbBurnMessage", class: "text-center", caption: "By confirmimg the transaction, you will burn NFT and receive 75,000OSWAP" }))),
+                                                this.$render("i-label", { id: "lbBurnMessage", class: "text-center", caption: "$by_confirmimg_the_transaction_you_will_burn_nft_and_receive_75000oswap" }))),
                                         this.$render("i-hstack", { horizontalAlignment: "center", margin: { bottom: 20 }, padding: { left: 20, right: 20 } },
                                             this.$render("i-image", { id: "ImageBurn", class: "text-center", width: "100%", height: "auto", fallbackUrl: index_6.nftImagePlaceHolder })),
                                         this.$render("i-hstack", { verticalAlignment: "center", horizontalAlignment: "center" },
                                             this.$render("i-image", { url: assets_4.default.fullPath('img/nft/TrollCry.png'), margin: { right: 4 }, width: 40, height: "auto", class: "flex" }),
-                                            this.$render("i-label", { class: "note-burn", caption: "This is NFT Will Be Gone Forever" })),
-                                        this.$render("i-button", { id: "btnBurn", height: 40, class: "btn-stake btn-os", caption: "Burn", rightIcon: { spin: true, visible: false }, onClick: () => this.onSubmit() }))))))),
+                                            this.$render("i-label", { class: "note-burn", caption: "$this_is_nft_will_be_gone_forever" })),
+                                        this.$render("i-button", { id: "btnBurn", height: 40, class: "btn-stake btn-os", caption: "$burn", rightIcon: { spin: true, visible: false }, onClick: () => this.onSubmit() }))))))),
                 this.$render("i-scom-tx-status-modal", { id: "txStatusModal" }),
                 this.$render("i-scom-wallet-modal", { id: "mdWallet", wallets: [] })));
         }

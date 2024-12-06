@@ -10,11 +10,11 @@ import {
   CarouselSlider,
   Styles
 } from '@ijstech/components'
-import { BigNumber } from '@ijstech/eth-wallet';
 import Assets from '../assets';
 import { IDataCard, IDataMyCard, isClientWalletConnected, State } from '../store/index';
 import { cardStyle } from './card.css';
 import { NftMyCard } from './myCard';
+import translations from '../translations.json';
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -76,7 +76,7 @@ export class NftCard extends Module {
     //   this.pnlSlots.append(<i-label caption={text} class="box box-left" />);
     // }
     const count = value.userNFTs?.length || 0;
-    if (this.lbViewContract) this.lbViewContract.caption = value.fullName || 'View contract';
+    if (this.lbViewContract) this.lbViewContract.caption = value.fullName || '$view_contract';
     if (this.stakeAmountText) this.stakeAmountText.caption = value.stakeAmountText;
     if (this.reward) this.reward.caption = value.rewardsBoost;
     if (this.monthlyReward) this.monthlyReward.caption = value.monthlyReward;
@@ -128,11 +128,11 @@ export class NftCard extends Module {
 
   private updateBtn() {
     if (!isClientWalletConnected()) {
-      this.btnHandleStake.caption = 'Connect Wallet';
+      this.btnHandleStake.caption = '$connect_wallet';
       this.btnHandleStake.enabled = true;
     } else {
       const isSoldedOut = this.cardData?.slot <= 0;
-      this.btnHandleStake.caption = isSoldedOut ? 'Sold Out' : 'Stake';
+      this.btnHandleStake.caption = isSoldedOut ? '$sold_out' : '$stake';
       this.btnHandleStake.enabled = !isSoldedOut;
     }
   }
@@ -151,6 +151,7 @@ export class NftCard extends Module {
   }
 
   async init() {
+    this.i18n.init({...translations});
     this.classList.add(cardStyle);
     super.init();
   }
@@ -168,7 +169,7 @@ export class NftCard extends Module {
             margin={{ top: '0.25rem', bottom: '0.5rem' }}
             onClick={this.openLink}
           >
-            <i-label id="lbViewContract" caption="View contract" font={{ color: Theme.colors.primary.main, transform: 'capitalize', size: '1rem' }} padding={{ left: '0.75rem' }} />
+            <i-label id="lbViewContract" caption="$view_contract" font={{ color: Theme.colors.primary.main, transform: 'capitalize', size: '1rem' }} padding={{ left: '0.75rem' }} />
             <i-icon name="external-link-alt" fill={Theme.colors.primary.main} width={16} height={16} />
           </i-hstack>
           {/* <i-panel id="pnlSlots" class="available-box">
@@ -181,19 +182,19 @@ export class NftCard extends Module {
           <i-panel class="section">
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Stake Amount" />
+                <i-label caption="$stake_amount" />
               </i-panel>
               <i-label id="stakeAmountText" caption="50,000 OSWAP" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Rewards Boost" />
+                <i-label caption="$rewards_boost" />
                 <i-icon
                   name="question-circle"
                   fill={Theme.text.primary}
                   tooltip={{
-                    content: 'The Reward Boost is only applicable to OSWAP staking rewards.',
+                    content: '$the_reward_boost_is_only_applicable_to_oswap_staking_rewards',
                     placement: 'right'
                   }}
                 />
@@ -203,11 +204,11 @@ export class NftCard extends Module {
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Monthly Reward" />
+                <i-label caption="$monthly_reward" />
                 <i-icon
                   name="question-circle"
                   fill={Theme.text.primary}
-                  tooltip={{ content: 'The Monthly Reward will be distributed at the end of each month.', placement: 'right' }}
+                  tooltip={{ content: '$the_monthly_reward_will_be_distributed_at_the_end_of_each_month', placement: 'right' }}
                 />
               </i-panel>
               <i-label id="monthlyReward" caption="5%" class="value" />
@@ -215,19 +216,19 @@ export class NftCard extends Module {
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Flash Sales Inclusion" />
+                <i-label caption="$flash_sales_inclusion" />
               </i-panel>
-              <i-label id="flashSales" caption="Periodic" class="value" />
+              <i-label id="flashSales" caption="$periodic" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Owned" />
+                <i-label caption="$owned" />
               </i-panel>
               <i-label id="lbCount" caption="0" class="value" />
             </i-panel>
 
-            <i-button id="btnHandleStake" height="auto" class="btn-stake btn-os" caption="Stake" onClick={this.handleStake} />
+            <i-button id="btnHandleStake" height="auto" class="btn-stake btn-os" caption="$stake" onClick={this.handleStake} />
           </i-panel>
 
         </i-panel>

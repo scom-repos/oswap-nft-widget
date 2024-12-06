@@ -12,6 +12,7 @@ import {
 } from '@ijstech/components';
 import { myCardStyle } from './myCard.css';
 import { IDataMyCard, nftImagePlaceHolder } from '../store/index';
+import translations from '../translations.json';
 const Theme = Styles.Theme.ThemeVars;
 
 declare global {
@@ -93,6 +94,7 @@ export class NftMyCard extends Module {
   }
 
   async init() {
+    this.i18n.init({...translations});
     this.classList.add(myCardStyle);
     super.init();
   }
@@ -114,21 +116,21 @@ export class NftMyCard extends Module {
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Birthday" />
+                <i-label caption="$birthday" />
               </i-panel>
               <i-label id="birthday" caption="50,000 OSWAP" class="value" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Rarity" />
+                <i-label caption="$rarity" />
               </i-panel>
               <i-panel id="rarity" />
             </i-panel>
 
             <i-panel class="row-item">
               <i-panel class="title-icon">
-                <i-label caption="Value" />
+                <i-label caption="$value" />
               </i-panel>
               <i-label id="stakeAmount" caption="50,000 OSWAP" class="value" />
             </i-panel>
@@ -184,7 +186,7 @@ export class NftMyCard extends Module {
               <i-label id="fee" caption="-" class="value" />
             </i-panel>
             */}
-            <i-button id="btnHandleBurn" margin={{ bottom: 10, top: 'auto' }} height="auto" class="btn-burn btn-os" caption="Burn" />
+            <i-button id="btnHandleBurn" margin={{ bottom: 10, top: 'auto' }} height="auto" class="btn-burn btn-os" caption="$burn" />
           </i-vstack>
         </i-panel>
       </i-panel>
